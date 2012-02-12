@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!--
+* test_services.html
+* 
+* Test example services included in package.
+* 
+* @package	Comodojo Spare Parts
+* @author	comodojo.org
+* @copyright	2012 comodojo.org (info@comodojo.org)
+* @version	1.0
+* 
+* LICENSE:
+* 
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*
+-->
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Comodojo simpleDataRestDispatcher test scripts</title>
+	<link rel="stylesheet" type="text/css" href="test.css" />
+	
+	<script type="text/javascript" src="../others/dojo.js"></script>
+	
+	<script type="text/javascript">
+	require(["dojo/_base/xhr","dojo/dom"], function(xhr,dom){
+		xhr.get({
+			url:"../services/example_service.php?hello_to=test",
+			handleAs:"json",
+			failOk: true,
+			load: function(data){
+				document.getElementById('example_service_box').innerHTML = data.result
+				document.getElementById('example_service_box').className = data.success ? "note" : 'important';
+			},
+			error: function(error) {
+				document.getElementById('example_service_box').innerHTML = error
+				document.getElementById('example_service_box').className = "warning";
+			}
+		});
+		xhr.get({
+			url:"../services/example_database_based_service.php",
+			handleAs:"json",
+			failOk: true,
+			load: function(data){
+				if (data.success) {
+					document.getElementById('example_database_based_service_box').className = "note";
+					for (var i in data.result) {
+						document.getElementById('example_database_based_service_box').innerHTML += "ID="+data.result[i].id+
+						" TIMESTAMP="+data.result[i].timestamp+
+						" TOP="+data.result[i].top+
+						" MIDDLE="+data.result[i].middle+
+						" BOTTOM="+data.result[i].bottom+"<br />";
+					}
+				}
+				else {
+					document.getElementById('example_database_based_service_box').className = 'important';
+					document.getElementById('example_database_based_service_box').innerHTML = data.result;
+				}
+			},
+			error: function(error) {
+				document.getElementById('example_database_based_service_box').innerHTML = error;
+				document.getElementById('example_database_based_service_box').className = "warning";
+			}
+		});
+		
+		xhr.get({
+			url:"../services/example_external_service.php?p=4",
+			handleAs:"json",
+			failOk: true,
+			load: function(data){
+				document.getElementById('example_external_service_box').innerHTML = data.result;
+				document.getElementById('example_external_service_box').className = data.success ? "note" : 'important';
+			},
+			error: function(error) {
+				document.getElementById('example_external_service_box').innerHTML = error;
+				document.getElementById('example_external_service_box').className = "warning";
+			}
+		});
+		xhr.get({
+			url:"../services/example_internal_service.php?text=1",
+			handleAs:"json",
+			failOk: true,
+			load: function(data){
+				document.getElementById('example_internal_service_1_box').innerHTML = data.result;
+				document.getElementById('example_internal_service_1_box').className = data.success ? "note" : 'important';
+			},
+			error: function(error) {
+				document.getElementById('example_internal_service_1_box').innerHTML = error;
+				document.getElementById('example_internal_service_1_box').className = "warning";
+			}
+		});
+		xhr.get({
+			url:"../services/example_internal_service.php?text=2",
+			handleAs:"json",
+			failOk: true,
+			load: function(data){
+				document.getElementById('example_internal_service_2_box').innerHTML = data.result;
+				document.getElementById('example_internal_service_2_box').className = data.success ? "note" : 'important';
+			},
+			error: function(error) {
+				document.getElementById('example_internal_service_2_box').innerHTML = error;
+				document.getElementById('example_internal_service_2_box').className = "warning";
+			}
+		});
+		xhr.get({
+			url:"../services/example_internal_service.php?text=3",
+			handleAs:"json",
+			failOk: true,
+			load: function(data){
+				document.getElementById('example_internal_service_3_box').innerHTML = data.result;
+				document.getElementById('example_internal_service_3_box').className = data.success ? "note" : 'important';
+			},
+			error: function(error) {
+				document.getElementById('example_internal_service_3_box').innerHTML = error;
+				document.getElementById('example_internal_service_3_box').className = "warning";
+			}
+		});
+	});
+		
+	</script>
+</head>
+
+<body>
+
+	<div id="testContainer">
+	
+		<div id="testHeader">
+	
+			<img src="../others/logo.png" alt="The Comodojo Logo"/>
+	
+		</div>
+	
+		<div id="testContent">
+			<h2>Example service</h2>
+			<div id="example_service_box">...</div>
+			<h2>Example database based service (works only if dispatcher is fully installed - and example table created.</h2>
+			<div id="example_database_based_service_box"></div>
+			<h2>Example external service</h2>
+			<div id="example_external_service_box">...</div>
+			<h2>Example internal service (text_1)</h2>
+			<div id="example_internal_service_1_box">...</div>
+			<h2>Example internal service (text_2)</h2>
+			<div id="example_internal_service_2_box">...</div>
+			<h2>Example internal service (File not found!)</h2>
+			<div id="example_internal_service_3_box">...</div>
+		</div>
+		
+		<div id="testFooter">
+		
+			<p>© 2011 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
+		
+		</div>
+	
+	</div>
+
+</div>
+</body>
+</html>

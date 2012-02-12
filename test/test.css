@@ -1,0 +1,123 @@
+/**
+ * test.css
+ * 
+ * CSS sheet for dispatcher tests.
+ * 
+ * @package	Comodojo Spare Parts
+ * @author	comodojo.org
+ * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @version	1.0
+ * 
+ * LICENSE:
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+* {
+	margin: 0;
+	padding: 0;
+	font-size:110%;
+}
+   
+body {
+	font-family: "trebuchet MS", Arial, Helvetica, sans-serif;
+	text-align:center;
+	background-color: #4c4c4c;
+}
+
+#testContainer {
+	width: 66em;
+	margin: 1em auto;
+	background-color: #FFFFFF;
+	font-size: .8em;
+	border: 1px solid #75778E;
+	text-align:left;
+	padding: 1em;
+}
+
+#testHeader {
+	margin-bottom: 0.2em;
+	padding: 10px;
+	text-align: center;
+	border: 1px solid #EFEFEF;
+	background-color: #FEFDFD;
+}
+
+#testContent {
+	padding: 0.3em;
+	border: 1px solid #CCCCCC;
+	margin-top: 0.5em;
+	margin-bottom: 1em;
+	background-color: #FCFCFC;
+}
+
+#testFooter {
+	clear: both;
+	padding: 0.1em;
+	background-color: #fff;
+	color: #646675;
+	text-align: center;
+	border: 1px solid #CCCCCC;
+	margin-top: 0.5em;
+}
+
+.info { background:#f8f8f8; color:#666; padding:10px; border:2px #FF9900 solid; margin-bottom:0.5em;}
+.note { background:#efe url(../others/note.png) left no-repeat; color:#040; border:2px #484 solid; padding:15px 15px 15px 40px; margin-bottom:1em; }
+.important { background:#ffe url(../others/important.png) left no-repeat; color:#440; border:2px #884 solid; padding:15px 15px 15px 40px; margin-bottom:1em; }
+.warning { background:#fee url(../others/warning.png) left no-repeat; color:#400; border:2px #844 solid; padding:15px 15px 15px 40px; margin-bottom:1em; }
+
+p {
+	margin-top: 1em;
+	margin-bottom: 1em;
+	padding: .5em;
+}
+
+h1 {
+	font-size: 1em;
+	padding: .5em;
+	color: #7E0000;
+	border: 1px dotted #CCCCCC;
+	background-color: #F3F3F3;
+}
+
+h2 {
+	font-size: 1em;
+	padding: 0.5em;
+	margin-bottom: 1em;
+	color: #798196;
+	border: 1px solid #EEEEEE;
+}
+
+a:link {color: #676D79;}
+a:visited {color: #676D79}
+a:hover {color: #820606}
+a:active {color: #890000}
+
+   
+dl{
+	margin-bottom: 1.5em;
+	margin-left: 2em;
+}
+
+dt{
+	font-style: italic;
+	color: #7E0000;
+	font-weight: bold;
+}
+
+dd{
+	margin-bottom: .3em;
+	text-indent: .5em;
+}

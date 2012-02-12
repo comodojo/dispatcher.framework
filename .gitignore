@@ -1,0 +1,7 @@
+.DS_Store
+logs/example_database_based_service.log
+logs/example_internal_service.log
+logs/example_external_service.log
+logs/example_service.log
+simpleDataRestDispatcher.komodoproject
+.komodotools

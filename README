@@ -1,0 +1,162 @@
+ ====================================
+| Comodojo simpleDataRestDispatcher  |
+ ====================================
+
+@package	Comodojo Spare Parts
+@author         comodojo.org
+@copyright	2012 comodojo.org (info@comodojo.org)
+@version	1.0
+
+ABOUT
+=====
+
+Comodojo simpleDataRestDispatcher is a small framework designed to make it easy
+to publish simple REST services starting from generic data sources (local files,
+remote files, database, ...). Framework currently support only services via GET
+method.
+
+The core is derived from Comodojo Core framework, and use the same structure of
+comodojo kernel. Also XML and JSON encoder/decoder are the same.
+
+Main framework configuration is contained in configs/main-config.php file.
+
+Each service consists of two different files: the first (located in configs
+folder) contains basic configuration parameters (i.e. service name, debug, ...);
+second is the real service logic (in services folder). Files could be merged.
+
+In addition, framework comes with a small URL router (index.php located in root
+folder) that can centralize requests to different services redirecting to them
+or masquerading results in agreement to what declared in routing table
+(contained in configs/router-config.php). It can also route/cloak requests to
+services not declared in routing table (autoroute) if present in services
+folder.
+
+Comodojo simpleDataRestDispatcher is distributed in two flavours:
+ - package version: complete version, needs installation
+ - base class version: single file (self-contained service), doesn't needs
+   installation
+
+VERSION FEATURES
+================
+
+-----------------------------------------------
+ FEATURE                 PACKAGE     BASE_CLASS
+-----------------------------------------------
+XML encode/decode           Y            Y
+JSON encode/decode          Y            Y
+Multiple DB support         Y            Y
+serverside httpGET          Y            Y
+Single service/file         N            Y
+Multiple services           Y            N
+Debug support               Y            Y
+Trace support               Y            N
+Log/statistics support      Y            N
+URL routing/cloaking        Y            N
+
+INSTALLATION
+============
+
+Package version needs installation, that takes less than 10 minutes and
+consists of:
+ - (optional) create a database and user with grant on it
+ - create comodojo_statistics table, where logs will be stored (you can find
+   prebuilt mysql query in others/base_db.sql)
+ - configure parameters in main-config.php and router-config.php located in
+   configs folder (see next section for parameter explanation)
+ - (optional) create example database tables and fill it with example values
+   (you can find prebuilt mysql query in others/base_db.sql)
+ - (optional) run tests in test folder to check requirements and see that
+   everything works :)
+
+
+CONFIGURATION PARAMETERS
+========================
+
+Please refer to single files for parameters explanation:
+ - main-config.php
+ - router-config.php
+
+USAGE
+=====
+
+Defining a service is quite easy. First, you should create a service config file
+that should include:
+
+$service_config = Array(
+
+        /*Name of the service*/
+	"serviceName"   =>	"example_service",
+        
+        /*Service on/off selector*/
+	"serviceActive"	=>	true,
+        
+        /*Should service print debug information in error.log?*/
+	"isDebug"	=>	true,
+        
+        /*Should service print trace information in trace file?*/
+	"isTrace"	=>	true,
+        
+        /*Local trace file*/
+	"logFile"	=>	"example_service.log"
+        
+);
+
+/*Array of parameters that dispatcher will check on each requests
+  Uncomplete requests will receive a "conversation error" response.*/
+$service_required_parameters = Array("p");
+
+Then, you should create service file (in services folder) that contains the
+service logic. You can copy the file structure from examples and:
+
+ - include right service configuration file
+ - change class name according to service name
+ - write the service logic in logic() function (that's the most important part)
+ - change the class init at the end of the file
+ 
+Service logic func, will be executed after checks, should not return any value
+BUT HAVE TO POPULATE two class variables:
+
+ - $this->success  (bool)                           service end status
+ - $this->result   (string|array|numeric|bool|...)  service result 
+
+EXAMPLE SERVICES
+================
+
+All example service are located in services folder.
+
+ - example_service.php: simple hello-to service; it expects in input "hello_to"
+   parameter and replies greeting it.
+ - example_database_based_service.php: output values from example table in
+   database; no input parameter expected.
+ - example_internal_service.php: output local file (text_1 or text_2 located in
+   others folder) according to numeric input parameter "text".
+ - example_external_service.php: output lorem ipsum text from loripsum.net;
+   expects "p" input parameters used to set number of patagraphs to generate.
+
+TESTS
+=====
+
+All tests are located in test folder.
+
+ - test_php_functions.php: tells you if your php installation are compliant
+   to functions and extensions required by framework.
+ - test_services.html: test single services directly with http xhr requests (use
+   dojotoolkit).
+ - test_router.html: test single services via url router and with http xhr
+   requests (use dojotookit)
+
+LICENSE
+=======
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
