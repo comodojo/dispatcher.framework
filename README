@@ -5,7 +5,7 @@
 @package	Comodojo Spare Parts
 @author         comodojo.org
 @copyright	2012 comodojo.org (info@comodojo.org)
-@version	1.0
+@version	1.1
 
 ABOUT
 =====
@@ -36,6 +36,12 @@ Comodojo simpleDataRestDispatcher is distributed in two flavours:
  - base class version: single file (self-contained service), doesn't needs
    installation
 
+NEW IN 1.1
+==========
+
+- Bugfixing
+- Router requests cache support
+
 VERSION FEATURES
 ================
 
@@ -52,6 +58,7 @@ Debug support               Y            Y
 Trace support               Y            N
 Log/statistics support      Y            N
 URL routing/cloaking        Y            N
+Requests caching            Y            N
 
 INSTALLATION
 ============
@@ -140,10 +147,11 @@ All tests are located in test folder.
 
  - test_php_functions.php: tells you if your php installation are compliant
    to functions and extensions required by framework.
- - test_services.html: test single services directly with http xhr requests (use
+ - test_services.html: tests single services directly with http xhr requests (use
    dojotoolkit).
- - test_router.html: test single services via url router and with http xhr
+ - test_router.html: tests single services via url router and with http xhr
    requests (use dojotookit)
+ - test_performance.html: router performance and caching test (use dojotookit)
 
 LICENSE
 =======

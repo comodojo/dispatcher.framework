@@ -8,7 +8,7 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
- * @version	1.0
+ * @version	1.1
  * 
  * LICENSE:
  * 
@@ -39,9 +39,10 @@ function goRoute($location) {
     header("Location: ".$location,true,302);
 }
 
-function goCloak($location) {
+function goCloak($location, $cache=AUTO_CACHE, $ttl=DEFAULT_TTL) {
     header('Cache-Control: no-cache, must-revalidate');
     header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+    
     if (isset($_GET['transport'])) {
 	if (strtoupper($_GET['transport']) == "XML") {
 	    header('Content-type: application/xml');
@@ -56,15 +57,48 @@ function goCloak($location) {
     else {
 	header('Content-type: application/json');
     }
+    
+    if ($cache) {
+	$result = getCache($location,$ttl);
+	if ($result === false) {
+	    $result = _goCurl($location);
+	    setCache($location,$result);
+	}
+    }
+    else {
+	$result = _goCurl($location);
+    }
+    echo $result;
+}
+
+function _goCurl($location) {
     $ch = curl_init();
     if (!$ch) die ("router error");
     curl_setopt($ch, CURLOPT_URL, $location);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch,CURLOPT_USERAGENT,$_SERVER['HTTP_USER_AGENT']);
+    curl_setopt($ch, CURLOPT_USERAGENT,$_SERVER['HTTP_USER_AGENT']);
     curl_setopt($ch, CURLOPT_PORT, $_SERVER['SERVER_PORT']);
-    echo curl_exec($ch);
+    return curl_exec($ch);
 }
+
+function getCache($request, $ttl) {
+    $currentTime = strtotime('now');
+    $bestBefore = $currentTime-$ttl;
+    $requestTag = md5($request);
+    if (is_readable(getcwd()."/cache/".$requestTag) AND @filemtime(getcwd()."/cache/".$requestTag) >= $bestBefore) return file_get_contents(getcwd()."/cache/".$requestTag);
+    else return false;
+}
+
+function setCache($request, $data) {
+    $requestTag = md5($request);
+    $fh = fopen(getcwd()."/cache/".$requestTag, 'w');
+    if (!$fh) return false;
+    if (fwrite($fh, $data)) return false;
+    fclose($fh);
+    return true;
+}
+
 
 function cleanQueryString() {
     $qstring = false;
@@ -86,10 +120,21 @@ elseif (!isset($registered_services[$_GET['service']]) AND AUTO_ROUTE) {
     }
     else die ("unknown service");
 }
-else {
+else{
+    
+    if (!isset($registered_services[$_GET['service']]["target"]) OR !isset($registered_services[$_GET['service']]["policy"])) die ("malformed service");
+    
     $location = $currentUrl."/services/".$registered_services[$_GET['service']]["target"].cleanQueryString();
-    if ((!$registered_services[$_GET['service']]["policy"] ? DEFAULT_POLICY : $registered_services[$_GET['service']]["policy"]) == 'CLOAK') goCloak($location);
+    
+    if ((!$registered_services[$_GET['service']]["policy"] ? DEFAULT_POLICY : $registered_services[$_GET['service']]["policy"]) == 'CLOAK') {
+	goCloak(
+	    $location,
+	    isset($registered_services[$_GET['service']]['cache']) ? $registered_services[$_GET['service']]['cache'] : AUTO_CACHE,
+	    isset($registered_services[$_GET['service']]['ttl']) ? $registered_services[$_GET['service']]['ttl'] : DEFAULT_TTL
+	);
+    }
     else goRoute($location);
+    
 }
 
 exit;

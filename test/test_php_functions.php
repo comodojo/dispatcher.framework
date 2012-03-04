@@ -9,7 +9,7 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
- * @version	1.0
+ * @version	1.1
  * 
  * LICENSE:
  * 
@@ -64,8 +64,12 @@ function check_db_dblib_pdo() {
 	return (in_array('pdo_dblib',get_loaded_extensions()));
 }
 
-function check_folder_permissions() {
+function check_folder_logs_permissions() {
 	return is_readable(getcwd().'/../logs');
+}
+
+function check_folder_cache_permissions() {
+	return is_readable(getcwd().'/../cache');
 }
 
 ?>
@@ -123,8 +127,11 @@ function check_folder_permissions() {
 			if (check_db_dblib_pdo()) echo '<div class="note">Dblib PDO extension loaded!</div>';
 			else echo '<div class="important">No Dblib PDO installed: it will not be possible to connect to MsSQL or Sybase database with PDO libs.</div>';
 			
-			if (check_folder_permissions()) echo '<div class="note">Logs folder writable!</div>';
+			if (check_folder_logs_permissions()) echo '<div class="note">Logs folder writable!</div>';
 			else echo '<div class="warning">Logs folder is not writable: services that use traces will procude errors!</div>';
+			
+			if (check_folder_logs_permissions()) echo '<div class="note">Cache folder writable!</div>';
+			else echo '<div class="warning">Cache folder is not writable: router will not support caching and will produce errors on each cached request!</div>';
 			?>
 			<!--</div>-->
 			

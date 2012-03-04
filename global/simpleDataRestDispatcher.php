@@ -8,7 +8,7 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
- * @version	1.0
+ * @version	1.1
  * 
  * @example		Following usage example:
  * 
@@ -178,7 +178,7 @@ class simpleDataRestDispatcher {
 	private function debug($message) {
 		if ($this->isDebug || GLOBAL_DEBUG_ENABLED) {
 			if (is_array($message)) {
-				foreach ($message as $key->$value) {
+				foreach ($message as $key=>$value) {
 					if (is_array($value)) {
 						error_log("(DEBUG): ".$key." = Array(");
 						$this->debug($value);
