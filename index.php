@@ -29,114 +29,216 @@
 
 @(include('configs/router-config.php')) OR die ("system error");
 
-$http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
-$uri = $_SERVER['REQUEST_URI'];
-$uri = strpos($uri,'index.php') !== false ? preg_replace("/\/index.php(.*?)$/i","",$uri) : preg_replace("/\/\?.*/","",$uri);
-$currentUrl = $http . $_SERVER['HTTP_HOST'] . $uri;
-$currentUrl = str_replace('%20',' ',$currentUrl);
-
-function goRoute($location) {
-    header("Location: ".$location,true,302);
-}
-
-function goCloak($location, $cache=AUTO_CACHE, $ttl=DEFAULT_TTL) {
-    header('Cache-Control: no-cache, must-revalidate');
-    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+/**
+ * The router.
+ *
+ * It receive requests and redirect them to services; it don't use Apache
+ * .htaccess expressions in order to maintain better compatibility and keep
+ * routing table clean.
+ */
+class router {
     
-    if (isset($_GET['transport'])) {
-	if (strtoupper($_GET['transport']) == "XML") {
-	    header('Content-type: application/xml');
+    private $currentUrl = false;
+    private $currentPath = false;
+    private $bestBefore = 'Mon, 26 Jul 1997 05:00:00 GMT';
+    private $maxAge = false;
+    private $contentType = false;
+    private $ch = false;
+    
+    private $error_patterns = Array(
+	'JSON'	=>	"{success: false, result: '{0}'}",
+	'XML'	=>	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<content><success></success><result>{0}</result></content>"
+    );
+    
+    /**
+     * Route request with a 302 message back
+     *
+     * @param	STRING	$location	The location to route request to
+     */
+    private function go_route($location) {
+	header("Location: ".$location,true,302);
+    }
+    
+    /**
+     * Cloak request, with or without cache
+     *
+     * @param	STRING	$location	The location to route request to
+     * @param	STRING	$cache		The cache type
+     * @param	INT	$ttl		The cache time to live
+     */
+     private function go_cloak($location, $cache=AUTO_CACHE, $ttl=DEFAULT_TTL) {
+	if (!$cache) {
+	    $result = $this->go_curl($location);
+	}
+	elseif (strtoupper($cache) == "BOTH") {
+	    $result = $this->get_cache($location,$ttl,true);
+	    if ($result === false) {
+		$result = $this->go_curl($location);
+		$this->set_cache($location,$result);
+	    }
+	}
+	elseif (strtoupper($cache) == "SERVER") {
+	    $result = $this->get_cache($location,$ttl,false);
+	    if ($result === false) {
+		$result = $this->go_curl($location);
+		$this->set_cache($location,$result);
+	    }
 	}
 	else {
-	    header('Content-type: application/json');
+	    $this->maxAge = $ttl;
+	    //$this->bestBefore = http_date(strtotime('now') + $ttl);
+	    $this->bestBefore = gmdate("D, d M Y H:i:s", time() + $ttl) . " GMT";
+	    $result = $this->go_curl($location);
 	}
-    }
-    elseif (strtoupper(DEFAULT_TRANSPORT) == "XML") {
-	header('Content-type: application/xml');
-    }
-    else {
-	header('Content-type: application/json');
+	return $result;
     }
     
-    if ($cache) {
-	$result = getCache($location,$ttl);
-	if ($result === false) {
-	    $result = _goCurl($location);
-	    setCache($location,$result);
+    /**
+     * Cloak request using internal curl.
+     *
+     * @param	STRING	$location	The location to cloak
+     */
+    private function go_curl($location) {
+	$this->ch = curl_init();
+	if (!$this->ch) die ($this->go_error('router error'));
+	curl_setopt($this->ch, CURLOPT_URL, $location);
+	curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
+	curl_setopt($this->ch, CURLOPT_USERAGENT,$_SERVER['HTTP_USER_AGENT']);
+	curl_setopt($this->ch, CURLOPT_PORT, $_SERVER['SERVER_PORT']);
+	return curl_exec($this->ch);
+    }
+    
+    /**
+     * Get error message according to current transport
+     */
+    private function go_error($message) {
+	return str_replace('{0}',$message, $this->error_patterns[strtoupper($this->contentType)]);
+    }
+    
+    /**
+     * Get server cache and, if valid cache, compute client cache params
+     *
+     * @param	STRING	$request	The request to tag
+     * @param	INT	$ttl		The cache time to live
+     * @param	BOOL	$client		If true, compute client cache params
+     */
+    private function get_cache($request, $ttl, $client) {
+	$currentTime = strtotime('now');
+	$last_time_limit = $currentTime-$ttl;
+	$requestTag = md5($request);
+	if (is_readable($this->currentPath."/cache/".$requestTag) AND @filemtime($this->currentPath."/cache/".$requestTag) >= $last_time_limit) {
+	    if ($client) {
+		$cache_time = filemtime($this->currentPath."/cache/".$requestTag);
+		$this->maxAge = $cache_time + $ttl - $currentTime;
+		//$this->bestBefore = http_date($cache_time + $ttl);
+		$this->bestBefore = gmdate("D, d M Y H:i:s", $cache_time + $ttl) . " GMT";
+	    }
+	    return file_get_contents($this->currentPath."/cache/".$requestTag);
 	}
+	else return false;
     }
-    else {
-	$result = _goCurl($location);
+
+    /**
+     * Set server cache
+     *
+     * @param	STRING	$request	The request to tag
+     * @param	STRING	$data		The data to return
+     */
+    function set_cache($request, $data) {
+	$requestTag = md5($request);
+	$fh = fopen($this->currentPath."/cache/".$requestTag, 'w');
+	if (!$fh) return false;
+	if (fwrite($fh, $data)) return false;
+	fclose($fh);
+	return true;
     }
-    echo $result;
-}
-
-function _goCurl($location) {
-    $ch = curl_init();
-    if (!$ch) die ("router error");
-    curl_setopt($ch, CURLOPT_URL, $location);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_USERAGENT,$_SERVER['HTTP_USER_AGENT']);
-    curl_setopt($ch, CURLOPT_PORT, $_SERVER['SERVER_PORT']);
-    return curl_exec($ch);
-}
-
-function getCache($request, $ttl) {
-    $currentTime = strtotime('now');
-    $bestBefore = $currentTime-$ttl;
-    $requestTag = md5($request);
-    if (is_readable(getcwd()."/cache/".$requestTag) AND @filemtime(getcwd()."/cache/".$requestTag) >= $bestBefore) return file_get_contents(getcwd()."/cache/".$requestTag);
-    else return false;
-}
-
-function setCache($request, $data) {
-    $requestTag = md5($request);
-    $fh = fopen(getcwd()."/cache/".$requestTag, 'w');
-    if (!$fh) return false;
-    if (fwrite($fh, $data)) return false;
-    fclose($fh);
-    return true;
-}
-
-
-function cleanQueryString() {
-    $qstring = false;
-    foreach ($_GET as $key=>$value) {
-        if (strtolower($key) == 'service') continue;
-        elseif (!$qstring) $qstring='?'.$key.'='.$value;
-        else $qstring.='&'.$key.'='.$value;
+      
+    /**
+     * Set header content type and cache
+     */
+    private function set_header() {
+	header('Cache-Control: ' . (!$this->maxAge ? 'no-cache, must-revalidate' : 'max-age='.$this->maxAge.', must-revalidate') );
+	header('Expires: '.$this->bestBefore);
+	header('Content-type: application/'.$this->contentType);
     }
-    return $qstring;
-}
-
-if (!isset($_GET['service'])) die ("unspecified service");
-elseif (!isset($registered_services[$_GET['service']]) AND !AUTO_ROUTE) die ("unknown service");
-elseif (!isset($registered_services[$_GET['service']]) AND AUTO_ROUTE) {
-    if (is_readable("services/".$_GET['service'].".php")) {
-	$location = $currentUrl."/services/".$_GET['service'].".php".cleanQueryString();
-	if (DEFAULT_POLICY == 'CLOAK') goCloak($location);
-	else goRoute($location);
-    }
-    else die ("unknown service");
-}
-else{
     
-    if (!isset($registered_services[$_GET['service']]["target"]) OR !isset($registered_services[$_GET['service']]["policy"])) die ("malformed service");
-    
-    $location = $currentUrl."/services/".$registered_services[$_GET['service']]["target"].cleanQueryString();
-    
-    if ((!$registered_services[$_GET['service']]["policy"] ? DEFAULT_POLICY : $registered_services[$_GET['service']]["policy"]) == 'CLOAK') {
-	goCloak(
-	    $location,
-	    isset($registered_services[$_GET['service']]['cache']) ? $registered_services[$_GET['service']]['cache'] : AUTO_CACHE,
-	    isset($registered_services[$_GET['service']]['ttl']) ? $registered_services[$_GET['service']]['ttl'] : DEFAULT_TTL
-	);
+    /**
+     * Clean query string from service tag and return it.
+     */
+    private function clean_query_string() {
+	$qstring = false;
+	foreach ($_GET as $key=>$value) {
+	    if (strtolower($key) == 'service') continue;
+	    elseif (!$qstring) $qstring='?'.$key.'='.$value;
+	    else $qstring.='&'.$key.'='.$value;
+	}
+	return $qstring;
     }
-    else goRoute($location);
+    
+    /**
+     * Constructor: setup basic variables then apply routing logic.
+     */
+    public function __construct() {
+	
+	global $registered_services;
+	
+	//setup basic variables
+	$http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
+	$uri = $_SERVER['REQUEST_URI'];
+	$uri = strpos($uri,'index.php') !== false ? preg_replace("/\/index.php(.*?)$/i","",$uri) : preg_replace("/\/\?.*/","",$uri);
+	$currentUrl = $http . $_SERVER['HTTP_HOST'] . $uri;
+	$this->currentUrl = str_replace('%20',' ',$currentUrl);
+	$this->currentPath = getcwd();
+	$toReturn = false;
+	
+	//setup transport
+	if (isset($_GET['transport']) AND (@strtoupper($_GET['transport']) == "XML" OR @strtoupper($_GET['transport']) == "JSON") ) $this->contentType = strtolower($_GET['transport']);
+	else $this->contentType = strtolower(DEFAULT_TRANSPORT);
+	
+	/***routing logic***/
+	//if no service, die immediately
+	if (!isset($_GET['service'])) die ($this->go_error('unspecified service'));
+	//if service not in routing table and autoroute disabled, die immediately
+	elseif (!isset($registered_services[$_GET['service']]) AND !AUTO_ROUTE) die ($this->go_error("unknown service"));
+	//if service not in routing table and autoroute enabled, process request
+	//with default cache params
+	elseif (
+	    (!isset($registered_services[$_GET['service']]) AND AUTO_ROUTE)
+		OR
+	    (isset($registered_services[$_GET['service']])
+		AND (!isset($registered_services[$_GET['service']]["target"]) OR !isset($registered_services[$_GET['service']]["policy"]))
+	    )
+	){
+	    if (is_readable("services/".$_GET['service'].".php")) {
+		$location = $currentUrl."/services/".$_GET['service'].".php".$this->clean_query_string();
+		if (strtoupper(DEFAULT_POLICY) == 'CLOAK') $toReturn = $this->go_cloak($location);
+		else $this->go_route($location);
+	    }
+	    else die ($this->go_error("unknown service"));
+	}
+	else{
+	    $location = $currentUrl."/services/".$registered_services[$_GET['service']]["target"].$this->clean_query_string();
+	    if ($registered_services[$_GET['service']]["policy"] == 'CLOAK') {
+		$toReturn = $this->go_cloak(
+		    $location,
+		    isset($registered_services[$_GET['service']]['cache']) ? $registered_services[$_GET['service']]['cache'] : AUTO_CACHE,
+		    isset($registered_services[$_GET['service']]['ttl']) ? $registered_services[$_GET['service']]['ttl'] : DEFAULT_TTL
+		);
+	    }
+	    else $this->go_route($location);
+	}
+	$this->set_header();
+	echo $toReturn;
+	exit;
+    }
+    
+    public function __destruct() {
+	if ($this->ch !== false) curl_close($this->ch);
+    }
     
 }
 
-exit;
+$router = new router();
 
 ?>

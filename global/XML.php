@@ -59,7 +59,7 @@ class XML {
 	 * @var 	string
 	 * @default	UTF-8	
 	 */
-	public $xmlEncoding = "UTF-8";
+	public $xmlEncoding = DEFAULT_ENCODING;
 	
 	/**
 	 * XML parent element (XML body)
@@ -91,7 +91,7 @@ class XML {
 	 * @var 	string
 	 * @default	UTF-8	
 	 */
-	public $sourceEncoding = 'UTF-8';
+	public $sourceEncoding = DEFAULT_ENCODING;
 	
 	/**
 	 * XML destination encoding 
@@ -99,7 +99,7 @@ class XML {
 	 * @var 	string
 	 * @default	UTF-8	
 	 */
-	public $destinationEncoding = 'UTF-8';
+	public $destinationEncoding = DEFAULT_ENCODING;
 	
 	private $_xmlobj;
 	private $_parser;

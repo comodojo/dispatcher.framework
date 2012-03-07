@@ -30,20 +30,6 @@
  *  
  *  	}
  *  
- *  	//__construct() method
- *  	//
- *  	// *** PUT HERE THE SERVICE INITS
- *  	// *** --------------------------
- *  	public function __construct() {
- *  		$this->isDebug = true;
- *  		$this->isTrace = true;
- *  		$this->logFile = "myService.log";
- *  		$this->DB_HOST = "localhost";
- *  		$this->DB_NAME = "myService_services";
- *  		$this->DB_USER = "root";
- *  		$this->DB_PASSWORD = "root";
- *  		$this->DB_PREFIX = "myService_";
- *  	}
  *   }
  *   
  *   // Setup a new service
@@ -73,20 +59,6 @@ ob_start();
 
 @(include('../configs/main-config.php')) OR die ("system error");
 
-header('Cache-Control: no-cache, must-revalidate');
-header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-if (isset($_GET['transport'])) {
-	if (strtoupper($_GET['transport']) == "XML") {
-		header('Content-type: application/xml');
-	}
-	else {
-		header('Content-type: application/json');
-	}
-}
-else {
-	header('Content-type: application/json');
-}
-
 class simpleDataRestDispatcher {
 	
 	/********************** PRIVATE VARS **********************/
@@ -113,37 +85,38 @@ class simpleDataRestDispatcher {
 	/**
 	 * Single service debug enable
 	 * @var		bool
-	 * @default	false
 	 */
-	protected $isDebug = false;
+	protected $isDebug = GLOBAL_DEBUG_ENABLED;
 	
 	/**
 	 * Single service tracing enable
 	 * @var		bool
-	 * @default	false
 	 */
-	protected $isTrace = false;
+	protected $isTrace = GLOBAL_TRANSACTION_TRACING_ENABLED;
 	
 	/**
 	 * Trace transaction to file (single service)
 	 * @var		string (resource pointer)
-	 * @default	"log/global.log"
 	 */
-	protected $logFile = "global.log";
+	protected $logFile = DEFAULT_LOG_FILE;
 	
 	/**
 	 * Metadata transport method
 	 * @var		string
-	 * @default	"JSON"
 	 */
-	protected $transport = "JSON";
+	protected $transport = DEFAULT_TRANSPORT;
+	
+	/**
+	 * Client cache ttl
+	 * @var		INT
+	 */
+	protected $ttl = DEFAULT_TTL;
 	
 	/**
 	 * Service name (for stats only)
 	 * @var		string
-	 * @default	"undefined"
 	 */
-	protected $service = "undefined";
+	protected $service = DEFAULT_SERVICE_NAME;
 	
 	/**
 	 * Define here required parameter that will be checked in each service call
@@ -200,38 +173,23 @@ class simpleDataRestDispatcher {
 	}
         
         /**
-	 * Generate random alphanumerical string
-	 * 
-	 * @param	int		$length	The random string length
-	 * @return	string	$locale	Serverside active locale
+	 * Trace request/response in the specified log file
 	 */
 	private function trace() {
 		if ($this->isTrace || GLOBAL_TRANSACTION_TRACING_ENABLED) {
 			$myMessage = "****** REQUEST FROM " . $_SERVER["REMOTE_ADDR"] . " AT " . date("d-m-Y (D) H:i:s",time()) . " ******\n";
 			$myMessage .= "- Client sent: \n";
-			$transport = isset($_GET['transport']) ? strtoupper($_GET['transport']) : $this->transport;
 			foreach ($_GET as $parameter=>$value) {
 				if (in_array($parameter,$this->requiredParameters)) $myMessage .= "[".$parameter."]* => ".$value."\n"; 
 				else $myMessage .= "[".$parameter."] => ".$value."\n";
 			}
-			$myMessage .= "- Server returns (".$transport."): \n";
-			switch ($transport) {
-				case "JSON":
-					$toReturn = $this->array2json(Array("success"=>$this->success, "result"=>$this->result));
-				break;
-				case "XML":
-					$toReturn = $this->array2xml(Array("success"=>$this->success, "result"=>$this->result));
-				break;
-				//fallback to json...
-				default:
-					$toReturn = $this->array2json(Array("success"=>$this->success, "result"=>$this->result));
-				break;
-			}
+			$myMessage .= "- Server returns (".$this->transport."): \n";
+			if (strtoupper($this->transport) == "XML") $toReturn = $this->array2xml(Array("success"=>$this->success, "result"=>$this->result));
+			else $toReturn = $this->array2json(Array("success"=>$this->success, "result"=>$this->result));
 			$myMessage .= $toReturn;
 			$myMessage .= "\n****** REQUEST END ******\n";
 			try {
-				//if (!$fh = fopen(getcwd()."/../log/".$this->logFile, 'a')) {
-                                if (!$fh = fopen(getcwd()."/../".TRANSACTION_TRACES_PATH.$this->logFile, 'a')) {
+				if (!$fh = fopen(getcwd()."/../".TRANSACTION_TRACES_PATH.$this->logFile, 'a')) {
 					throw new Exception('Could not open log file!');
 				}
 				if (!$fw = fwrite($fh, $myMessage)) {
@@ -413,6 +371,31 @@ class simpleDataRestDispatcher {
 		);
         }
         
+	/**
+	 * Set transport according to request and default transport
+	 */
+	private function setTransport() {
+		if (isset($_GET['transport']) AND (@strtoupper($_GET['transport']) == "XML" OR @strtoupper($_GET['transport']) == "JSON") ) $this->transport = strtolower($_GET['transport']);
+	}
+	
+	/**
+	 * Set header content type and cache control
+	 */
+	private function setHeader () {
+		if ($this->ttl > 0) {
+			header('Content-type: application/'.strtolower($this->transport));
+			header('Cache-Control: max-age='.$this->ttl.', must-revalidate');
+			header('Expires: '.gmdate("D, d M Y H:i:s", time() + $this->ttl)." GMT");
+		}
+		elseif ($this->ttl == 0) {
+			header('Content-type: application/'.strtolower($this->transport));
+			header('Cache-Control: no-cache, must-revalidate');
+			header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+		}
+		else {
+			header('Content-type: application/'.strtolower($this->transport));
+		}
+	}
         
         /******************** PPRIVATE METHODS ********************/
         
@@ -705,20 +688,8 @@ class simpleDataRestDispatcher {
 	 * @return	bool	Push status
 	 */
 	protected function returnData($success, $result) {
-		$transport = isset($_GET['transport']) ? strtoupper($_GET['transport']) : $this->transport;
-		switch ($transport) {
-			case "JSON":
-				$toReturn = $this->array2json(Array("success"=>$success, "result"=>$result));
-			break;
-			case "XML":
-				$toReturn = $this->array2xml(Array("success"=>$success, "result"=>$result));
-			break;
-			//fallback to json...
-			default:
-				$toReturn = $this->array2json(Array("success"=>$success, "result"=>$result));
-			break;
-		}
-		return $toReturn;
+		if (strtoupper($this->transport) == "XML") return $this->array2xml(Array("success"=>$success, "result"=>$result));
+		else return $this->array2json(Array("success"=>$success, "result"=>$result));
 	}
 	
 	/**
@@ -746,7 +717,12 @@ class simpleDataRestDispatcher {
 		return false;
 	}
 		
+	/**
+	 * Dispatch request
+	 */
 	public function dispatch() {
+		
+		$this->setTransport();
 		
 		//eval if service is active or closed
 		if (!$this->isServiceActive) {
@@ -757,6 +733,7 @@ class simpleDataRestDispatcher {
 			$this->toReturn = $this->returnData(false,"conversation error");
 		}
 		else {
+			$this->setHeader();
 			$this->logic();
 			$this->toReturn = $this->returnData($this->success, $this->result);
 		}
@@ -767,6 +744,30 @@ class simpleDataRestDispatcher {
                 ob_end_clean();
                 
 		die($this->toReturn);
+	}
+	
+	/**
+	 * Constructor
+	 *
+	 * PLEASE REMEMBER to set $service_config and
+	 * $service_required_parameters in your service configuration file!
+	 */
+	public function __construct() {
+		global $service_config, $service_required_parameters;
+		//set service name
+		if (isset($service_config["serviceName"])) $this->service = $service_config["serviceName"];
+		//put service online/offline
+		if (isset($service_config["serviceActive"])) $this->isServiceActive = $service_config["serviceActive"];
+		//set debug/trace
+		if (isset($service_config["isDebug"])) $this->isDebug = $service_config["isDebug"];
+		if (isset($service_config["isTrace"])) $this->isTrace = $service_config["isTrace"];
+		if (isset($service_config["logFile"])) $this->logFile = $service_config["logFile"];
+		//set cache ttl
+		if (isset($service_config["ttl"])) $this->ttl = $service_config["ttl"];
+		//add required parameters
+		foreach ($service_required_parameters as $parameter) {
+			$this->addRequire($parameter);
+		}
 	}
 	/********************* PUBLIC METHODS *********************/
         

@@ -39,8 +39,10 @@ Comodojo simpleDataRestDispatcher is distributed in two flavours:
 NEW IN 1.1
 ==========
 
-- Bugfixing
-- Router requests cache support
+- Bugfixing & optimization
+- Server and client cache support in router
+- Correct encoding in XML output (via constant DEFAULT_ENCODING)
+- Client cache support in services
 
 VERSION FEATURES
 ================
@@ -58,7 +60,8 @@ Debug support               Y            Y
 Trace support               Y            N
 Log/statistics support      Y            N
 URL routing/cloaking        Y            N
-Requests caching            Y            N
+Server caching              Y            N
+Client caching              Y            Y
 
 INSTALLATION
 ============
@@ -104,13 +107,36 @@ $service_config = Array(
 	"isTrace"	=>	true,
         
         /*Local trace file*/
-	"logFile"	=>	"example_service.log"
+	"logFile"	=>	"example_service.log",
+	
+	/*Cache time to live*/
+	"ttl"		=>	-1
         
 );
 
 /*Array of parameters that dispatcher will check on each requests
   Uncomplete requests will receive a "conversation error" response.*/
 $service_required_parameters = Array("p");
+
+Service_config parameters explanation:
+
+- serviceName (TEXT): It's the full service name
+
+- serviceActive (BOOL): if true, service will process requests, if false will return
+  a "service closed" message (formatted according to current transport)
+
+- isDebug (BOOL): if true, service will debug directly in php error.log
+
+- isTrace (BOOL): if true, service requests/response will be traced in specified log
+  file (see below)
+
+- logFile (TEXT): name of the relative log file. If false and trace enabled, service
+  will log in default $logFile="global.log"
+
+- ttl (INT): control client-side caching; valid parameters are:
+  * -1 : no cache, no header sent to client
+  *  0 : no cache, header sent to client (cache control, expires, max-age)
+  * INT: cache on for (INT) seconds via header sent to clients
 
 Then, you should create service file (in services folder) that contains the
 service logic. You can copy the file structure from examples and:
@@ -125,6 +151,25 @@ BUT HAVE TO POPULATE two class variables:
 
  - $this->success  (bool)                           service end status
  - $this->result   (string|array|numeric|bool|...)  service result 
+
+A NOTE ON CACHING
+=================
+
+SimpleDataRestDispatcher support two levels caching.
+ - services-side: single service can, if specified, send cache header info to
+   clients
+ - router-side: router can cache requests in temp files, send cache header info
+   to clients or both
+
+Having said this, router can ensure best performances but first request can be
+heavy to process and in addition embedded curl http call is real slow.
+In the other hand, client caching is free but lots client in short unit of time
+will produce heavy traffic and lots service processing cicle.
+
+That's mean that, if you need this feature, server caching (with or without
+client cache) is recomended for services with lot requests or few changes
+during day (long ttl); client cache is suggested in any condition but for
+services with lots of changes in short unit of time.
 
 EXAMPLE SERVICES
 ================

@@ -6,7 +6,8 @@ $service_config = Array(
 	"serviceActive"	=>	true,
 	"isDebug"	=>	true,
 	"isTrace"	=>	true,
-	"logFile"	=>	"example_database_based_service.log"
+	"logFile"	=>	"example_database_based_service.log",
+        "ttl"           =>      -1
 
 );
 

@@ -18,7 +18,7 @@ USE comodojo_services;
 
 -- If you want also to create user comodojo and grant all privileges on comodojo database:
 CREATE USER 'comodojo'@'localhost' IDENTIFIED BY 'password';
-GRANT USAGE ON comodojo_services.* to 'comodojo'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL ON comodojo_services.* to 'comodojo'@'localhost' IDENTIFIED BY 'password';
 
 --
 -- Statistics table

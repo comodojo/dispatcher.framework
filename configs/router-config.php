@@ -53,9 +53,22 @@ define('DEFAULT_TRANSPORT', 'JSON');
 define('AUTO_ROUTE', true);
 
 /**
-* Enable/disable the autocache function. If true, index.php will cache each
-* cloaked request, unless explicitely declared in routing table
-* ($registered_services)
+* Enable/disable the autocache function. Possible values:
+* 
+* - SERVER: means that server will cache request in local file, but "no-cache"
+*   cache control header + Expires 1970 will be sent to clients.
+*   
+* - CLIENT: means that server will not cache request but will send a max-age +
+*   Expires headers as specified in TTL field
+*
+* - BOTH: means that both server and client will receive a cache directive;
+*   server will cache request in a local file, client will receive a max-age +
+*   Expires header equal to local cache expire time as
+*                       best-before = [ (local+ttl) - now ]
+*
+* - FALSE: disable autocache.
+*
+* PLEASE NOTE: CACHE DON'T WORK WITH ROUTE POLICY
 * 
 * @static	bool
 * @default	false
@@ -71,6 +84,13 @@ define('AUTO_CACHE', false);
 define('DEFAULT_TTL', 600);
 
 /**
+ * Default encoding, currently used only in xml transformations.
+ *
+ * Should be the same of simpleDataRestDispatcher
+ */
+define('DEFAULT_ENCODING', 'UTF-8');
+
+/**
 * Registered services (a.k.a. the routing table).
 * Declare here services that router will understand. You can use also aliases
 * to same service (for example with different service name).
@@ -79,9 +99,14 @@ define('DEFAULT_TTL', 600);
 * - target: target service script
 * - policy: routing policy (route/cloak)
 *
+* If they are not specified, router will route request according to AUTO_ROUTE
+* policies.
+*
 * OTHER VALUES:
-* - cache:  if true, router will cache request
-* - ttl:    cache time to live
+* - cache:      SERVER, CLIENT, BOTH. If false, don't use cache.
+* - ttl:        cache time to live
+*
+* PLEASE NOTE: CACHE DON'T WORK WITH ROUTE POLICY
 *
 * WARNING: caching will speedup your service, but you will loose statistics, traces and debug info!
 * 
@@ -92,14 +117,14 @@ $registered_services = Array(
     
     'example_service'                               =>  Array("target"=>'example_service.php', "policy"=>'ROUTE'),
     'example_service_alias'                         =>  Array("target"=>'example_service.php', "policy"=>'CLOAK'),
-    'example_service_alias_cached'                  =>  Array("target"=>'example_service.php', "policy"=>'CLOAK', "cache"=>true, "ttl"=>600),
+    'example_service_alias_cached'                  =>  Array("target"=>'example_service.php', "policy"=>'CLOAK', "cache"=>'BOTH', "ttl"=>600),
     
     'example_database_based_service'                =>  Array("target"=>'example_database_based_service.php', "policy"=>'ROUTE'),
     'example_database_based_service_alias'          =>  Array("target"=>'example_database_based_service.php', "policy"=>'CLOAK'),
-    'example_database_based_service_alias_cached'   =>  Array("target"=>'example_database_based_service.php', "policy"=>'CLOAK', "cache"=>true, "ttl"=>30),
+    'example_database_based_service_alias_cached'   =>  Array("target"=>'example_database_based_service.php', "policy"=>'CLOAK', "cache"=>'SERVER', "ttl"=>30),
     
     'example_external_service'                      =>  Array("target"=>'example_external_service.php', "policy"=>'CLOAK'),
-    'example_external_service_cached'               =>  Array("target"=>'example_external_service.php', "policy"=>'CLOAK', "cache"=>true, "ttl"=>600)
+    'example_external_service_cached'               =>  Array("target"=>'example_external_service.php', "policy"=>'CLOAK', "cache"=>'CLIENT', "ttl"=>600)
 );
 
 ?>

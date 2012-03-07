@@ -40,6 +40,37 @@ define('TRANSACTION_TRACES_PATH', 'logs/');
 //***********************************************//
 
 /**
+ * Default encoding, currently used only in xml transformations
+ */
+define('DEFAULT_ENCODING', 'UTF-8');
+
+/**
+ * Default transport, used if not specified in query string
+ */
+define('DEFAULT_TRANSPORT', 'JSON');
+
+/**
+ * Default cache ttl.
+ *
+ * INT represent seconds, 0 will disable cache, -1 will prevent to send header
+ */
+define('DEFAULT_TTL', -1);
+
+/**
+ * Default log file.
+ *
+ */
+define('DEFAULT_LOG_FILE', "global.log");
+
+/**
+ * Default log file.
+ *
+ */
+define('DEFAULT_SERVICE_NAME', "undefined");
+
+//***********************************************//
+
+/**
  * Statistics database host
  */
 define('STATISTICS_DB_HOST', 'localhost');
@@ -62,12 +93,12 @@ define('STATISTICS_DB_NAME', 'comodojo_services');
 /**
  * Statistics database user
  */
-define('STATISTICS_DB_USER', 'root');
+define('STATISTICS_DB_USER', 'comodojo');
 
 /**
  * Statistics database password
  */
-define('STATISTICS_DB_PASSWORD', 'root');
+define('STATISTICS_DB_PASSWORD', 'password');
 
 //***********************************************//
 
@@ -94,12 +125,12 @@ define('DEFAULT_DB_NAME', 'comodojo_services');
 /**
  * DEFAULT database user
  */
-define('DEFAULT_DB_USER', 'root');
+define('DEFAULT_DB_USER', 'comodojo');
 
 /**
  * DEFAULT database password
  */
-define('DEFAULT_DB_PASSWORD', 'root');
+define('DEFAULT_DB_PASSWORD', 'password');
 
 //***********************************************//
 
