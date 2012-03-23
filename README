@@ -5,7 +5,7 @@
 @package	Comodojo Spare Parts
 @author         comodojo.org
 @copyright	2012 comodojo.org (info@comodojo.org)
-@version	1.1
+@version	{*_CURRENT_VERSION_*}
 
 ABOUT
 =====
@@ -35,6 +35,15 @@ Comodojo simpleDataRestDispatcher is distributed in two flavours:
  - package version: complete version, needs installation
  - base class version: single file (self-contained service), doesn't needs
    installation
+
+NEW IN 2.0
+==========
+
+- Bugfixing & optimization
+- GET,PUT,POST,DELETE Methods support
+- HTTP status codes support
+- HTTP Active Access-Control-Allow-Origin support
+- HTTP Allowed/Implemented method active check
 
 NEW IN 1.1
 ==========

@@ -9,7 +9,7 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
- * @version	1.1
+ * @version	{*_CURRENT_VERSION_*}
  * 
  */
 
@@ -33,11 +33,42 @@ define('GLOBAL_STATISTICS_ENABLED', true);
 //***********************************************//
 
 /**
+ * Default service name (if null passed).
+ */
+define('DEFAULT_SERVICE_NAME', "undefined");
+
+/**
  * Path for traces .log files
  */
 define('TRANSACTION_TRACES_PATH', 'logs/');
 
+/**
+ * Default log file.
+ */
+define('DEFAULT_LOG_FILE', "global.log");
+
 //***********************************************//
+
+/**
+ * Supported methods (GET, PUT, POST, or DELETE).
+ *
+ * You should not modify this value, because each service can implement one or
+ * more HTTP methods indipendently. This value only changes the Allow Response
+ * Header in case of 405 response
+ * 
+ * The one and only reason you may have to modify this value is to limit access
+ * at your services to a subset of HTTP methods (i.e. if you don't want PUT
+ * requests, you can omit it from definition; method will be ignored even though
+ * service implements it - or implements global logic...).
+ *
+ * PLEASE NOTE: a service that not implements one of those methods, in case of
+ * unsupported method request, will reply with a 501-not-implemented response;
+ * this behaviour is managed automatically.
+ *
+ * WARNING: this constant should be in plain, uppercased, comma separated,
+ * not spaced text to work as designed.
+ */
+define('SUPPORTED_METHODS', 'GET,PUT,POST,DELETE');
 
 /**
  * Default encoding, currently used only in xml transformations
@@ -57,16 +88,13 @@ define('DEFAULT_TRANSPORT', 'JSON');
 define('DEFAULT_TTL', -1);
 
 /**
- * Default log file.
+ * Default access control origin, according to W3C Access Control specification.
  *
- */
-define('DEFAULT_LOG_FILE', "global.log");
-
-/**
- * Default log file.
+ * For more information, please visit following link.
  *
+ * @link http://dev.w3.org/2006/waf/access-control/
  */
-define('DEFAULT_SERVICE_NAME', "undefined");
+define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', '*');
 
 //***********************************************//
 

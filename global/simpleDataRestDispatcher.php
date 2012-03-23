@@ -8,7 +8,7 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
- * @version	1.1
+ * @version	{*_CURRENT_VERSION_*}
  * 
  * @example		Following usage example:
  * 
@@ -72,6 +72,11 @@ class simpleDataRestDispatcher {
 	 */
         private $toReturn = false;
 	
+	/**
+	 * Comma separated service implemented methods (or SUPPORTED_METHODS if
+	 * global logic)
+	 */
+        private $serviceImplementedMethods = false;
         /********************** PRIVATE VARS **********************/
 	
 	/********************* PROTECTED VARS *********************/
@@ -111,6 +116,12 @@ class simpleDataRestDispatcher {
 	 * @var		INT
 	 */
 	protected $ttl = DEFAULT_TTL;
+
+	/**
+	 * Allow origin header; see main-config for more information.
+	 * @var		STRING
+	 */	
+	protected $accessControlAllowOrigin = DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN;
 	
 	/**
 	 * Service name (for stats only)
@@ -134,11 +145,45 @@ class simpleDataRestDispatcher {
 	public $success = false;
 	
 	/**
-	 * Fill return data
-	 * @var		bool/string/array
+	 * Fill return data.
+	 *
+	 * PLEASE NOTE: a NULL result will throw a 204 (OK - no_content) status
+	 * code, unless different one is explicitly defined.
+	 * 
+	 * @var		NULL/bool/string/array
+	 * @default	NULL
+	 */
+	public $result = NULL;
+	
+	/**
+	 * Status code, computed automatically unless explicitly defined.
+	 * 
+	 * @var		INT
+	 * @default	false	will automatically select response status code.
+	 */
+	public $statusCode = false;
+	
+	/**
+	 * Location to redirect client to, in case of 201,301,302,303,307
+	 * responses
+	 * 
+	 * @var		STRING
 	 * @default	false
 	 */
-	public $result = false;
+	public $statusCode_location = false;
+	
+	/**
+	 * Resource "last modified" date, in unix time, in case of 304 response
+	 * to a GET request.
+	 *
+	 * PLEASE NOTE: in case of NOT MODIFIED RESPONSE, nothing will be sent
+	 * to client except HTTP header!
+	 * 
+	 * @var		STRING
+	 * @default	false
+	 */
+	public $statusCode_resourceLastModified = false;
+
 	/********************** PUBLIC VARS ***********************/
 	
         /******************** PPRIVATE METHODS ********************/
@@ -381,22 +426,117 @@ class simpleDataRestDispatcher {
 	/**
 	 * Set header content type and cache control
 	 */
-	private function setHeader () {
-		if ($this->ttl > 0) {
-			header('Content-type: application/'.strtolower($this->transport));
-			header('Cache-Control: max-age='.$this->ttl.', must-revalidate');
-			header('Expires: '.gmdate("D, d M Y H:i:s", time() + $this->ttl)." GMT");
+	private function setHeader ($statusCode, $contentLength) {
+		
+		header('Access-Control-Allow-Origin: '.$this->accessControlAllowOrigin);
+		
+		switch ($statusCode) {
+			case 200: //OK
+				if ($this->ttl > 0) {
+					header('Content-type: application/'.strtolower($this->transport));
+					header('Cache-Control: max-age='.$this->ttl.', must-revalidate');
+					header('Expires: '.gmdate("D, d M Y H:i:s", time() + $this->ttl)." GMT");
+				}
+				elseif ($this->ttl == 0) {
+					header('Content-type: application/'.strtolower($this->transport),true);
+					header('Cache-Control: no-cache, must-revalidate');
+					header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+				}
+				else {
+					header('Content-type: application/'.strtolower($this->transport),true);
+				}
+				header('Content-Length: '.$contentLength,true);
+			break;
+			case 202: //Accepted
+				//PLEASE NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description in body... just in case
+				header($_SERVER["SERVER_PROTOCOL"].' 202 Accepted');
+				header('Status: 202 Accepted');
+				header('Content-Length: '.$contentLength,true);
+			break;
+			case 204: //OK - No Content
+				header($_SERVER["SERVER_PROTOCOL"].' 204 No Content');
+				header('Status: 204 No Content');
+				header('Content-Length: 0',true);
+				header('Content-type: application/'.strtolower($this->transport),true);
+			break;
+			case 201: //Created
+			case 301: //Moved Permanent
+			case 302: //Found
+			case 303: //See Other
+			case 307: //Temporary Redirect
+				header("Location: ".$this->statusCodeLocation,true,$statusCode);
+				header('Content-Length: '.$contentLength,true); //is it needed?
+			break;
+			case 304: //Not Modified
+				if (!$this->statusCode_resourceLastModified) header($_SERVER["SERVER_PROTOCOL"].' 304 Not Modified');
+				else header('Last-Modified: '.gmdate('D, d M Y H:i:s', $statusCode_resourceLastModified).' GMT', true, 304);
+				header('Content-Length: '.$contentLength,true);
+			break;
+			case 400: //Bad Request
+				header($_SERVER["SERVER_PROTOCOL"].' 400 Bad Request', true, 400);
+				header('Content-Length: '.$contentLength,true); //is it needed?
+			break;
+			case 403:
+				header('Origin not allowed', true, 403); //Not originated from allowed source
+			break;
+			case 404: //Not Found
+				header($_SERVER["SERVER_PROTOCOL"].' 404 Not Found');
+				header('Status: 404 Not Found');
+			break;
+			case 405:
+				header('Allow: ' . SUPPORTED_METHODS, true, 405); //Not allowed
+			break;
+			case 501:
+				header('Allow: ' . $this->serviceImplementedMethods, true, 501);
+			break;
 		}
-		elseif ($this->ttl == 0) {
-			header('Content-type: application/'.strtolower($this->transport));
-			header('Cache-Control: no-cache, must-revalidate');
-			header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+		
+	}
+	
+	/**
+	 * Match supported methods and currently implented methods.
+	 *
+	 * In case of global logic, return supported methods.
+	 */
+	private function getServiceImplementedMethods() {
+		if (method_exists($this, 'logic')) {
+			$this->serviceImplementedMethods = SUPPORTED_METHODS;
+			$_supportedMethods = SUPPORTED_METHODS;
 		}
 		else {
-			header('Content-type: application/'.strtolower($this->transport));
+			$supportedMethods = explode(',',strtoupper(SUPPORTED_METHODS));
+			$_supportedMethods = Array();
+			foreach ($supportedMethods as $method) {
+				if (method_exists($this, strtolower($method))) array_push($_supportedMethods,$method);
+			}
+			$this->serviceImplementedMethods = implode(',',$_supportedMethods);
 		}
+		return $_supportedMethods;
 	}
-        
+	
+	/**
+	 * Takes attributes (or parameters) passed wia [METHOD] and return an
+	 * array of them.
+	 *
+	 * Computed attributes may be used in single method implementation but
+	 * also to keep $this::logic($arguments) methods-independent.
+	 */
+	private function getAttributes() {
+		switch($_SERVER['REQUEST_METHOD']) {
+			case 'GET':
+			case 'HEAD':
+				$attributes = $_GET;
+			break;
+			case 'POST':
+				$attributes = $_POST;
+			break;
+			case 'PUT':
+			case 'DELETE':
+				parse_str(file_get_contents('php://input'), $attributes);
+			break;
+		}
+		return $attributes;
+	}
         /******************** PPRIVATE METHODS ********************/
         
 	/******************* PROTECTED METHODS ********************/
@@ -712,47 +852,52 @@ class simpleDataRestDispatcher {
 	}
 	/******************* PROTECTED METHODS ********************/
 	
-	/********************* PUBLIC METHODS *********************/
-	public function logic() {
-		return false;
-	}
-		
-	/**
-	 * Dispatch request
-	 */
-	public function dispatch() {
-		
-		$this->setTransport();
-		
-		//eval if service is active or closed
-		if (!$this->isServiceActive) {
-			$this->toReturn = $this->returnData(false,"service closed");
-		}
-		//eval required parameters and, in case, process request (logic)
-		elseif (!$this->evalRequiredParameters()) {
-			$this->toReturn = $this->returnData(false,"conversation error");
-		}
-		else {
-			$this->setHeader();
-			$this->logic();
-			$this->toReturn = $this->returnData($this->success, $this->result);
-		}
-		
-		$this->trace();
-		$this->recordStat();
-		
-                ob_end_clean();
-                
-		die($this->toReturn);
-	}
+	/************** HTTP METHODS IMPLEMENTATIONS **************/
 	
 	/**
-	 * Constructor
-	 *
-	 * PLEASE REMEMBER to set $service_config and
-	 * $service_required_parameters in your service configuration file!
+	 * Uncomment and fill this method if your service should support
+	 * HTTP-GET requests
 	 */
-	public function __construct() {
+	//public function get($attributes) {}
+	
+	/**
+	 * Uncomment and fill this method if your service should support
+	 * HTTP-POST requests
+	 */
+	// public function post($attributes) {}
+	
+	/**
+	 * Uncomment and fill this method if your service should support
+	 * HTTP-PUT requests
+	 */
+	// public function put($attributes) {}
+	
+	/**
+	 * Uncomment and fill this method if your service should support
+	 * HTTP-DELETE requests
+	 */
+	// public function delete($attributes) {}
+	
+	/**
+	 * Uncomment and fill this method if your service should support
+	 * any HTTP requests (it's quite a wildcard, please be careful...)
+	 */
+	// public function logic($attributes) {}
+	
+	/************** HTTP METHODS IMPLEMENTATIONS **************/
+	
+	/********************* PUBLIC METHODS *********************/
+		
+	/**
+	 * Constructor and dispatcher (new in 2.0).
+	 *
+	 * PLEASE NOTE: REMEMBER TO SET $service_config and
+	 * $service_required_parameters in your service or in your service's
+	 * configuration file!
+	 */
+	public final function __construct() {
+		
+		/****** SERVICE CONFIGURATION ******/
 		global $service_config, $service_required_parameters;
 		//set service name
 		if (isset($service_config["serviceName"])) $this->service = $service_config["serviceName"];
@@ -764,10 +909,64 @@ class simpleDataRestDispatcher {
 		if (isset($service_config["logFile"])) $this->logFile = $service_config["logFile"];
 		//set cache ttl
 		if (isset($service_config["ttl"])) $this->ttl = $service_config["ttl"];
+		//set allow origin header
+		if (isset($service_config["accessControlAllowOrigin"])) $this->accessControlAllowOrigin = $service_config["accessControlAllowOrigin"];
 		//add required parameters
 		foreach ($service_required_parameters as $parameter) {
 			$this->addRequire($parameter);
 		}
+		
+		/****** DIRECT DISPATCHING ******/
+		$this->setTransport();
+		$methods = $this->getServiceImplementedMethods();
+		
+		//eval if service is active or closed
+		if (!$this->isServiceActive) {
+			$this->statusCode = 200;
+			$this->toReturn = $this->returnData(false,"service closed");
+		}
+		//eval if service is limited to some origind AND client send header orign information
+		elseif ($this->accessControlAllowOrigin != '*' AND $_SERVER['HTTP_ORIGIN'] != $this->accessControlAllowOrigin) {
+			$this->statusCode = 403;
+			$this->toReturn = $this->returnData(false,"Origin not allowed");
+		}
+		//eval if service request method is allowed from framework
+		elseif (!in_array($_SERVER['REQUEST_METHOD'], explode(',',SUPPORTED_METHODS))) {
+			$this->statusCode = 400;
+			$this->toReturn = NULL;
+		}
+		//eval if service request method match one of service implemented methods
+		elseif (!in_array($_SERVER['REQUEST_METHOD'], $methods)) {
+			$this->statusCode = 400;
+			$this->toReturn = NULL;
+		}
+		//eval required parameters and, in case, process request
+		elseif (!$this->evalRequiredParameters()) {
+			$this->statusCode = 501;
+			$this->toReturn = $this->returnData(false,"conversation error");
+		}
+		else {
+			$exec = strtolower($_SERVER['REQUEST_METHOD']);
+			if (method_exists($this, $exec)) $this::$exec($this->getAttributes());
+			else $this->logic($this->getAttributes());
+			if (is_null($this->result)) {
+				$this->statusCode = !$this->statusCode ? 204 : $this->statusCode;
+				$this->toReturn = NULL;
+			}
+			else {
+				$this->statusCode = !$this->statusCode ? 200 : $this->statusCode;
+				$this->toReturn = $this->returnData($this->success, $this->result);
+			}
+		}
+		
+		$this->trace();
+		$this->recordStat();
+		
+		$this->setHeader($header, strlen($this->toReturn));
+		
+		ob_end_clean();
+                
+		die($this->toReturn);
 	}
 	/********************* PUBLIC METHODS *********************/
         
