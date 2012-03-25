@@ -45,13 +45,17 @@ class router {
     private $contentType = false;
     private $ch = false;
     
+    private $responseStatus = Array();
+    private $responseHeader = Array();
+    private $headersToThrow = Array();
+    
     private $error_patterns = Array(
 	'JSON'	=>	"{success: false, result: '{0}'}",
 	'XML'	=>	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<content><success></success><result>{0}</result></content>"
     );
     
     /**
-     * Route request with a 302 message back
+     * Route request with a 302 message back.
      *
      * @param	STRING	$location	The location to route request to
      */
@@ -90,6 +94,7 @@ class router {
 	    $this->bestBefore = gmdate("D, d M Y H:i:s", time() + $ttl) . " GMT";
 	    $result = $this->go_curl($location);
 	}
+	//print_r($this->responseHeader);
 	return $result;
     }
     
@@ -101,13 +106,33 @@ class router {
     private function go_curl($location) {
 	$this->ch = curl_init();
 	if (!$this->ch) die ($this->go_error('router error'));
-	curl_setopt($this->ch, CURLOPT_URL, $location);
-	curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
-	curl_setopt($this->ch, CURLOPT_USERAGENT,$_SERVER['HTTP_USER_AGENT']);
-	curl_setopt($this->ch, CURLOPT_PORT, $_SERVER['SERVER_PORT']);
-	return curl_exec($this->ch);
+	curl_setopt_array($this->ch,Array(
+	    CURLOPT_URL			=>	$location,
+	    CURLOPT_RETURNTRANSFER	=>	1,
+	    CURLOPT_HEADER 		=>	0,
+	    CURLOPT_HEADERFUNCTION	=>	array(&$this,'read_curl_header'),
+	    CURLOPT_HTTPHEADER		=>	array("Expect:"),
+	    CURLOPT_TIMEOUT		=>	30,
+	    CURLOPT_USERAGENT		=>	$_SERVER['HTTP_USER_AGENT'],
+	    CURLOPT_PORT		=>	$_SERVER['SERVER_PORT'],
+	    //CURLOPT_HTTPHEADER	=>	array('ORIGIN: _URL_'),
+	    CURLOPT_FOLLOWLOCATION	=>	1
+	));
+	$toReturn = curl_exec($this->ch);
+	$this->responseStatus = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
+	return $toReturn;
     }
+    
+    /**
+     * Read and store header back from cloaked request
+     */
+    private function read_curl_header($ch, $string) {
+	$h = explode(':',$string,2);
+	if (is_array($h) AND isset($h[1])) $this->responseHeader[$h[0]] = $h[1];
+	$length = strlen($string);
+	return $length;
+    }
+    
     
     /**
      * Get error message according to current transport
@@ -124,6 +149,8 @@ class router {
      * @param	BOOL	$client		If true, compute client cache params
      */
     private function get_cache($request, $ttl, $client) {
+	//if returned status code != 200, DO NOT CACHE
+	if ($this->responseStatus != 200) return false;
 	$currentTime = strtotime('now');
 	$last_time_limit = $currentTime-$ttl;
 	$requestTag = md5($request);
@@ -146,6 +173,8 @@ class router {
      * @param	STRING	$data		The data to return
      */
     function set_cache($request, $data) {
+	//if returned status code != 200, DO NOT CACHE
+	if ($this->responseStatus != 200) return false;
 	$requestTag = md5($request);
 	$fh = fopen($this->currentPath."/cache/".$requestTag, 'w');
 	if (!$fh) return false;
@@ -157,18 +186,66 @@ class router {
     /**
      * Set header content type and cache
      */
-    private function set_header() {
-	header('Cache-Control: ' . (!$this->maxAge ? 'no-cache, must-revalidate' : 'max-age='.$this->maxAge.', must-revalidate') );
-	header('Expires: '.$this->bestBefore);
-	header('Content-type: application/'.$this->contentType);
+    private function set_header($contentLenght) {
+	if (DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN == '*') header('Access-Control-Allow-Origin: *');
+	switch ($this->responseStatus) {
+	    case 200: //OK
+		header('Cache-Control: ' . (!$this->maxAge ? 'no-cache, must-revalidate' : 'max-age='.$this->maxAge.', must-revalidate') );
+		header('Expires: '.$this->bestBefore);
+		header('Content-type: application/'.$this->contentType);
+		header('Content-Length: '.$contentLength,true);
+	    break;
+	    case 202: //Accepted
+		//PLEASE NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description in body... just in case
+		header($_SERVER["SERVER_PROTOCOL"].' 202 Accepted');
+		header('Status: 202 Accepted');
+		header('Content-Length: '.$contentLength,true);
+	    break;
+	    case 204: //OK - No Content
+		header($_SERVER["SERVER_PROTOCOL"].' 204 No Content');
+		header('Status: 204 No Content');
+		header('Content-Length: 0',true);
+	    break;
+	    case 201: //Created
+	    case 301: //Moved Permanent
+	    case 302: //Found
+	    case 303: //See Other
+	    case 307: //Temporary Redirect - this should never happens in router
+		header("Location: ".$this->responseHeader['Location'],true,$this->responseStatus);
+		header('Content-Length: '.$contentLength,true); //is it needed?
+	    break;
+	    case 304: //Not Modified
+		    if (!isset($this->responseHeader['Last-Modified'])) header($_SERVER["SERVER_PROTOCOL"].' 304 Not Modified');
+		    else header('Last-Modified: '.$this->responseHeader['Last-Modified'], true, 304);
+		    header('Content-Length: '.$contentLength,true);
+	    break;
+	    case 400: //Bad Request
+		    header($_SERVER["SERVER_PROTOCOL"].' 400 Bad Request', true, 400);
+		    header('Content-Length: '.$contentLength,true); //is it needed?
+	    break;
+	    case 403:
+		    header('Origin not allowed', true, 403); //Not originated from allowed source
+	    break;
+	    case 404: //Not Found
+		    header($_SERVER["SERVER_PROTOCOL"].' 404 Not Found');
+		    header('Status: 404 Not Found');
+	    break;
+	    case 405:
+	    case 501:
+		    header('Allow: ' . $this->responseHeader['Allow'], true, $this->responseStatus);
+	    break;
+	}
+	foreach ($this->headersToThrow as $header) {
+	    if (isset($this->responseHeader[$header])) header($header.': '.$this->responseHeader[$header],true);
+	}
     }
     
     /**
      * Clean query string from service tag and return it.
      */
-    private function clean_query_string() {
+    private function clean_query_string($attributes) {
 	$qstring = false;
-	foreach ($_GET as $key=>$value) {
+	foreach ($attributes as $key=>$value) {
 	    if (strtolower($key) == 'service') continue;
 	    elseif (!$qstring) $qstring='?'.$key.'='.$value;
 	    else $qstring.='&'.$key.'='.$value;
@@ -196,39 +273,68 @@ class router {
 	if (isset($_GET['transport']) AND (@strtoupper($_GET['transport']) == "XML" OR @strtoupper($_GET['transport']) == "JSON") ) $this->contentType = strtolower($_GET['transport']);
 	else $this->contentType = strtolower(DEFAULT_TRANSPORT);
 	
+	//get attributes
+	switch($_SERVER['REQUEST_METHOD']) {
+	    case 'GET':
+	    case 'HEAD':
+		    $attributes = $_GET;
+	    break;
+	    case 'POST':
+		    $attributes = $_POST;
+	    break;
+	    case 'PUT':
+	    case 'DELETE':
+		    parse_str(file_get_contents('php://input'), $attributes);
+	    break;
+	}
+	
 	/***routing logic***/
+	//if GLOBALLY NOT AUTHORIZED, DIE IMMEDIATELY
+	if ((DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != '*' OR DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != false) AND @$_SERVER['HTTP_ORIGIN'] != DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN) {
+	    $this->responseStatus = 403;
+	    $toReturn = $this->go_error("Origin not allowed");
+	}
 	//if no service, die immediately
-	if (!isset($_GET['service'])) die ($this->go_error('unspecified service'));
+	elseif (!isset($attributes['service'])) die ($this->go_error('unspecified service'));
 	//if service not in routing table and autoroute disabled, die immediately
-	elseif (!isset($registered_services[$_GET['service']]) AND !AUTO_ROUTE) die ($this->go_error("unknown service"));
+	elseif (!isset($registered_services[$attributes['service']]) AND !AUTO_ROUTE) die ($this->go_error("unknown service"));
 	//if service not in routing table and autoroute enabled, process request
 	//with default cache params
 	elseif (
-	    (!isset($registered_services[$_GET['service']]) AND AUTO_ROUTE)
+	    (!isset($registered_services[$attributes['service']]) AND AUTO_ROUTE)
 		OR
-	    (isset($registered_services[$_GET['service']])
-		AND (!isset($registered_services[$_GET['service']]["target"]) OR !isset($registered_services[$_GET['service']]["policy"]))
+	    (isset($registered_services[$attributes['service']])
+		AND (!isset($registered_services[$attributes['service']]["target"]) OR !isset($registered_services[$attributes['service']]["policy"]))
 	    )
 	){
-	    if (is_readable("services/".$_GET['service'].".php")) {
-		$location = $currentUrl."/services/".$_GET['service'].".php".$this->clean_query_string();
+	    if (is_readable("services/".$attributes['service'].".php")) {
+		$location = $this->currentUrl."/services/".$attributes['service'].".php".$this->clean_query_string($attributes);
 		if (strtoupper(DEFAULT_POLICY) == 'CLOAK') $toReturn = $this->go_cloak($location);
 		else $this->go_route($location);
 	    }
 	    else die ($this->go_error("unknown service"));
 	}
 	else{
-	    $location = $currentUrl."/services/".$registered_services[$_GET['service']]["target"].$this->clean_query_string();
-	    if ($registered_services[$_GET['service']]["policy"] == 'CLOAK') {
+	    //service is in routing table
+	    $location = $this->currentUrl."/services/".$registered_services[$attributes['service']]["target"].$this->clean_query_string($attributes);
+	    if (isset($registered_services[$attributes['service']]["responseHadersToThrow"])) $this->headersToThrow = $registered_services[$attributes['service']]["responseHadersToThrow"];
+	    
+	    if (isset($registered_services[$attributes['service']]["accessControlAllowOrigin"]) AND
+		($registered_services[$attributes['service']]["accessControlAllowOrigin"] != '*' OR $registered_services[$attributes['service']]["accessControlAllowOrigin"] != false) AND
+		@$_SERVER['HTTP_ORIGIN'] != $registered_services[$attributes['service']]["accessControlAllowOrigin"]) {
+		$this->responseStatus = 403;
+		$toReturn = $this->go_error("Origin not allowed");
+	    }
+	    elseif ($registered_services[$attributes['service']]["policy"] == 'CLOAK') {
 		$toReturn = $this->go_cloak(
 		    $location,
-		    isset($registered_services[$_GET['service']]['cache']) ? $registered_services[$_GET['service']]['cache'] : AUTO_CACHE,
-		    isset($registered_services[$_GET['service']]['ttl']) ? $registered_services[$_GET['service']]['ttl'] : DEFAULT_TTL
+		    isset($registered_services[$attributes['service']]['cache']) ? $registered_services[$attributes['service']]['cache'] : AUTO_CACHE,
+		    isset($registered_services[$attributes['service']]['ttl']) ? $registered_services[$attributes['service']]['ttl'] : DEFAULT_TTL
 		);
 	    }
 	    else $this->go_route($location);
 	}
-	$this->set_header();
+	$this->set_header(strlen($toReturn));
 	echo $toReturn;
 	exit;
     }

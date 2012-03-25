@@ -93,8 +93,14 @@ define('DEFAULT_TTL', -1);
  * For more information, please visit following link.
  *
  * @link http://dev.w3.org/2006/waf/access-control/
+ *
+ * Possible values:
+ * - false  will disable completely access-control header (useful for manual
+ *          access control management or just framework hacking)
+ * - '*'    will send an 'Access-Control-Allow-Origin: *', just in case :)
+ * - _URL_  will restrict access with 'Access-Control-Allow-Origin: _URL_'
  */
-define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', '*');
+define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', "*");
 
 //***********************************************//
 

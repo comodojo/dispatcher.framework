@@ -15,7 +15,5 @@ class example_service extends simpleDataRestDispatcher {
 
 //create new service object
 $rest = new example_service();
-//dispatch request
-$rest->dispatch();
 
 ?>

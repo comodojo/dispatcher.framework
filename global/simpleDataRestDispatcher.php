@@ -223,11 +223,13 @@ class simpleDataRestDispatcher {
 	private function trace() {
 		if ($this->isTrace || GLOBAL_TRANSACTION_TRACING_ENABLED) {
 			$myMessage = "****** REQUEST FROM " . $_SERVER["REMOTE_ADDR"] . " AT " . date("d-m-Y (D) H:i:s",time()) . " ******\n";
+			$myMessage .= "- Client request's method: ".$_SERVER['REQUEST_METHOD']."\n";
 			$myMessage .= "- Client sent: \n";
 			foreach ($_GET as $parameter=>$value) {
 				if (in_array($parameter,$this->requiredParameters)) $myMessage .= "[".$parameter."]* => ".$value."\n"; 
 				else $myMessage .= "[".$parameter."] => ".$value."\n";
 			}
+			$myMessage .= "- Server reply with status code: ".$this->statusCode."\n";
 			$myMessage .= "- Server returns (".$this->transport."): \n";
 			if (strtoupper($this->transport) == "XML") $toReturn = $this->array2xml(Array("success"=>$this->success, "result"=>$this->result));
 			else $toReturn = $this->array2json(Array("success"=>$this->success, "result"=>$this->result));
@@ -428,7 +430,8 @@ class simpleDataRestDispatcher {
 	 */
 	private function setHeader ($statusCode, $contentLength) {
 		
-		header('Access-Control-Allow-Origin: '.$this->accessControlAllowOrigin);
+		//not strictly needed but may cause problems if omitted in some XHR request
+		if ($this->accessControlAllowOrigin == '*') header('Access-Control-Allow-Origin: *');
 		
 		switch ($statusCode) {
 			case 200: //OK
@@ -457,7 +460,6 @@ class simpleDataRestDispatcher {
 				header($_SERVER["SERVER_PROTOCOL"].' 204 No Content');
 				header('Status: 204 No Content');
 				header('Content-Length: 0',true);
-				header('Content-type: application/'.strtolower($this->transport),true);
 			break;
 			case 201: //Created
 			case 301: //Moved Permanent
@@ -501,7 +503,7 @@ class simpleDataRestDispatcher {
 	private function getServiceImplementedMethods() {
 		if (method_exists($this, 'logic')) {
 			$this->serviceImplementedMethods = SUPPORTED_METHODS;
-			$_supportedMethods = SUPPORTED_METHODS;
+			$_supportedMethods = explode(',',SUPPORTED_METHODS);
 		}
 		else {
 			$supportedMethods = explode(',',strtoupper(SUPPORTED_METHODS));
@@ -926,7 +928,7 @@ class simpleDataRestDispatcher {
 			$this->toReturn = $this->returnData(false,"service closed");
 		}
 		//eval if service is limited to some origind AND client send header orign information
-		elseif ($this->accessControlAllowOrigin != '*' AND $_SERVER['HTTP_ORIGIN'] != $this->accessControlAllowOrigin) {
+		elseif (($this->accessControlAllowOrigin != "*" AND $this->accessControlAllowOrigin != false) AND @$_SERVER['HTTP_ORIGIN'] != $this->accessControlAllowOrigin) {
 			$this->statusCode = 403;
 			$this->toReturn = $this->returnData(false,"Origin not allowed");
 		}
@@ -949,6 +951,7 @@ class simpleDataRestDispatcher {
 			$exec = strtolower($_SERVER['REQUEST_METHOD']);
 			if (method_exists($this, $exec)) $this::$exec($this->getAttributes());
 			else $this->logic($this->getAttributes());
+			if ($this->accessControlAllowOrigin != '*' AND $this->accessControlAllowOrigin != false) header('Access-Control-Allow-Origin: '.$this->accessControlAllowOrigin);
 			if (is_null($this->result)) {
 				$this->statusCode = !$this->statusCode ? 204 : $this->statusCode;
 				$this->toReturn = NULL;
@@ -962,7 +965,7 @@ class simpleDataRestDispatcher {
 		$this->trace();
 		$this->recordStat();
 		
-		$this->setHeader($header, strlen($this->toReturn));
+		$this->setHeader($this->statusCode, strlen($this->toReturn));
 		
 		ob_end_clean();
                 

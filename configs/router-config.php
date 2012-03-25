@@ -91,24 +91,53 @@ define('DEFAULT_TTL', 600);
 define('DEFAULT_ENCODING', 'UTF-8');
 
 /**
+ * Default access control origin, according to W3C Access Control specification.
+ *
+ * For more information, please visit following link.
+ *
+ * @link http://dev.w3.org/2006/waf/access-control/
+ *
+ * Possible values:
+ * - false  will disable completely access-control header (useful for manual
+ *          access control management or just framework hacking)
+ * - '*'    will send an 'Access-Control-Allow-Origin: *', just in case :)
+ * - _URL_  will restrict access with 'Access-Control-Allow-Origin: _URL_'
+ *
+ * PLEASE NOTE: access-control is a bit tricky. You can use it in single
+ * services OR in router BUT NOT in both of them! Please see "A NOTE ON
+ * ACCESS CONTROL" section in README file.
+ *
+ * WARNING: this setting, unless explicitly defined in routing table, will
+ * influence the behaviour of the whole router.
+ * 
+ */
+define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', false);
+
+/**
 * Registered services (a.k.a. the routing table).
 * Declare here services that router will understand. You can use also aliases
 * to same service (for example with different service name).
 *
-* PLEASE NOTE: AT LEAST TWO VALUES ARE REQUIRED:
+* AT LEAST TWO VALUES ARE REQUIRED FOR EACH PATH:
 * - target: target service script
 * - policy: routing policy (route/cloak)
 *
 * If they are not specified, router will route request according to AUTO_ROUTE
 * policies.
 *
-* OTHER VALUES:
-* - cache:      SERVER, CLIENT, BOTH. If false, don't use cache.
-* - ttl:        cache time to live
+* OTHER OPTIONAL VALUES:
+* - cache:                      SERVER, CLIENT, BOTH; If false, don't use cache
+* - ttl:                        cache time to live
+* - accessControlAllowOrigin:   FALSE, '*', _URL_
+* - responseHadersToThrow:      Array of header values (if defined) to throw to client
 *
-* PLEASE NOTE: CACHE DON'T WORK WITH ROUTE POLICY
+* PLEASE NOTE: router cache will work ONLY if following conditions (+) are met:
+* + HTTP METHOD is [GET]
+* + routing policy is to [CLOAK] response
+* + response ends with 200 status code
 *
-* WARNING: caching will speedup your service, but you will loose statistics, traces and debug info!
+* WARNING: caching will speedup your service, but you will loose statistics,
+* traces and debug info!
 * 
 * @static	ARRAY
 * @default	declared example services
