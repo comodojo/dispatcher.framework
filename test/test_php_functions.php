@@ -9,7 +9,7 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
- * @version	1.1
+ * @version	*_BUILD_VERSION_*
  * 
  * LICENSE:
  * 

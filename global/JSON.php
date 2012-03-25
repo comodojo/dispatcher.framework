@@ -810,7 +810,7 @@ if (class_exists('PEAR_Error')) {
  * @define function loadHelper_XML
  */
 function loadHelper_JSON() {
-	return false;
+    return false;
 }
     
 ?>

@@ -8,7 +8,11 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
+<<<<<<< HEAD
  * @version	{*_CURRENT_VERSION_*}
+=======
+ * @version	*_BUILD_VERSION_*
+>>>>>>> small fix
  * 
  * LICENSE:
  * 
