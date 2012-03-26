@@ -1,9 +1,6 @@
 -- Comodojo SQL Dump
 -- Comodojo Spare Parts
-<<<<<<< HEAD
 -- version {*_CURRENT_VERSION_*}
-=======
->>>>>>> small fix
 -- http://www.comodojo.net
 --
 -- 2012 comodojo.org (info@comodojo.org)
@@ -70,3 +67,4 @@ INSERT INTO comodojo_example VALUES (null,"1241020800",145,221,164);
 INSERT INTO comodojo_example VALUES (null,"1272556800",341,514,316);
 INSERT INTO comodojo_example VALUES (null,"1304092800",624,415,462);
 INSERT INTO comodojo_example VALUES (null,"1335715200",341,945,273);
+INSERT INTO comodojo_example VALUES (null,"1337715200",31,94,173);

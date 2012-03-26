@@ -8,11 +8,7 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
-<<<<<<< HEAD
  * @version	{*_CURRENT_VERSION_*}
-=======
- * @version	*_BUILD_VERSION_*
->>>>>>> small fix
  * 
  * LICENSE:
  * 
@@ -98,7 +94,6 @@ class router {
 	    $this->bestBefore = gmdate("D, d M Y H:i:s", time() + $ttl) . " GMT";
 	    $result = $this->go_curl($location);
 	}
-	//print_r($this->responseHeader);
 	return $result;
     }
     
@@ -153,8 +148,6 @@ class router {
      * @param	BOOL	$client		If true, compute client cache params
      */
     private function get_cache($request, $ttl, $client) {
-	//if returned status code != 200, DO NOT CACHE
-	if ($this->responseStatus != 200) return false;
 	$currentTime = strtotime('now');
 	$last_time_limit = $currentTime-$ttl;
 	$requestTag = md5($request);
@@ -177,8 +170,8 @@ class router {
      * @param	STRING	$data		The data to return
      */
     function set_cache($request, $data) {
-	//if returned status code != 200, DO NOT CACHE
-	if ($this->responseStatus != 200) return false;
+	//if returned status code != 200 or null content, DO NOT CACHE
+	if ($this->responseStatus != 200 OR strlen($data) == 0) return false;
 	$requestTag = md5($request);
 	$fh = fopen($this->currentPath."/cache/".$requestTag, 'w');
 	if (!$fh) return false;
@@ -294,7 +287,7 @@ class router {
 	
 	/***routing logic***/
 	//if GLOBALLY NOT AUTHORIZED, DIE IMMEDIATELY
-	if ((DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != '*' OR DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != false) AND @$_SERVER['HTTP_ORIGIN'] != DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN) {
+	if (DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != '*' AND DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != false AND @$_SERVER['HTTP_ORIGIN'] != DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN) {
 	    $this->responseStatus = 403;
 	    $toReturn = $this->go_error("Origin not allowed");
 	}
@@ -324,7 +317,7 @@ class router {
 	    if (isset($registered_services[$attributes['service']]["responseHadersToThrow"])) $this->headersToThrow = $registered_services[$attributes['service']]["responseHadersToThrow"];
 	    
 	    if (isset($registered_services[$attributes['service']]["accessControlAllowOrigin"]) AND
-		($registered_services[$attributes['service']]["accessControlAllowOrigin"] != '*' OR $registered_services[$attributes['service']]["accessControlAllowOrigin"] != false) AND
+		@$registered_services[$attributes['service']]["accessControlAllowOrigin"] != '*'AND $registered_services[$attributes['service']]["accessControlAllowOrigin"] != false AND
 		@$_SERVER['HTTP_ORIGIN'] != $registered_services[$attributes['service']]["accessControlAllowOrigin"]) {
 		$this->responseStatus = 403;
 		$toReturn = $this->go_error("Origin not allowed");

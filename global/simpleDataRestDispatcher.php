@@ -8,39 +8,10 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
-<<<<<<< HEAD
  * @version	{*_CURRENT_VERSION_*}
-=======
- * @version	*_BUILD_VERSION_*
->>>>>>> small fix
- * 
- * @example		Following usage example:
- * 
- *  include "[my_syte_path]/global/simpleDataRestDispatcher.php";
  *
- *  class myService extends simpleDataRestDispatcher {
- *  
- *  	// logic() method
- *  	//
- *  	// *** PUT HERE THE SERVICE LOGIC
- * 		// SHOULD END RETURNING:
- *  	// $this->success	[Request success or failure]
- *  	// $this->result	[Result content/body returned by dispatcher]
- *  	// *** --------------------------
- *  	public function logic() {
- *  
- *  		$this->success = true;
- *  		$this->result = "this is a test";
- *  
- *  	}
- *  
- *   }
- *   
- *   // Setup a new service
- *   $rest = new myService();
- *   
- *   // Dispatch request
- *   $rest->dispatch();
+ * @tutorial	please see README file
+ * @example	please see files in "services" directory
  *
  * LICENSE:
  * 
@@ -279,11 +250,11 @@ class simpleDataRestDispatcher {
 	 * 
 	 * @return	bool	Eval status
 	 */
-	private function evalRequiredParameters() {
+	private function evalRequiredParameters($attributes) {
 		$toReturn = true;
 		if ($this->requiredParameters != false AND sizeof($this->requiredParameters) != 0) {
 			foreach ($this->requiredParameters as $parameter) {
-				if (isset($_GET[$parameter])) {
+				if (isset($attributes[$parameter])) {
 					continue;
 				}
 				else {
@@ -394,7 +365,7 @@ class simpleDataRestDispatcher {
 	 * 
 	 * @return	ARRAY	Result (ASSOC) plus result length (i.e. sizeof)
 	 */
-	private function _buildResultSet($data) {
+	private function _buildResultSet($data,$id=false) {
 		$this->debug("INFO (dbLayer) - Building result set...");
 		if (is_resource($data) AND @get_resource_type($data) == "mysql result") {
 			$i = 0;
@@ -418,7 +389,8 @@ class simpleDataRestDispatcher {
 		}
 		return Array(
 			"result"	=>	$myResult,	
-			"resultLength"	=>	$myResultLength
+			"resultLength"	=>	$myResultLength,
+			"returnedId"	=>	$id
 		);
         }
         
@@ -683,10 +655,11 @@ class simpleDataRestDispatcher {
 	 * @param       HANDLER     $dbHandler      The database handler
 	 * @param       STRING      $dbDataModel    The database data model (db type)
 	 * @param       STRING      $query          The composed query
+	 * @param       BOOL	    $returnId       If true, return db last insert id
 	 *
 	 * @return	ARRAY|NULL  Query result (in FETCH_ASSOC mode) or null (will throw an Exception)
 	 */
-	protected function query($dbHandler, $query, $dbDataModel=false) {
+	protected function query($dbHandler, $query, $dbDataModel=false, $returnId=false) {
                 if (!$dbDataModel) $dbDataModel = DEFAULT_DB_DATA_MODEL;
                 // logging and tracing...
                 $this->debug($query);
@@ -699,8 +672,7 @@ class simpleDataRestDispatcher {
                                 throw new Exception($_error);
                                 return null;
                         }
-                        //$this->returnedId = $this->returnId ? mysql_insert_id($this->dbHandler) : false;
-                        $toReturn = $this->_buildResultSet($response);
+                        $toReturn = $this->_buildResultSet($response,!$returnId ? false : mysql_insert_id($dbHandler));
                 }
                 elseif ($dbDataModel == "MYSQL_PDO" OR $dbDataModel == "ORACLE_PDO" OR $dbDataModel == "SQLITE_PDO" OR $dbDataModel == "DBLIB_PDO") {
                         try {
@@ -713,8 +685,7 @@ class simpleDataRestDispatcher {
                                 throw new Exception($_error);
                                 return null;
                         }
-                        //$this->returnedId = $this->returnId ? $this->dbHandler->lastInsertId() : false;
-                        $toReturn = $this->_buildResultSet($response);
+                        $toReturn = $this->_buildResultSet($response,!$returnId ? false : $dbHandler->lastInsertId());
                 }
                 elseif ($dbDataModel == "DB2") {
                         $response = db2_exec($dbHandler,$query);
@@ -727,9 +698,8 @@ class simpleDataRestDispatcher {
                         $_response = Array();
                         while ($row = db2_fetch_assoc($response)) {
                                 array_push($_response, $row);
-                                //$_response[$row[0]] = $row[1];
                         }
-                        $toReturn = $this->_buildResultSet($_response);
+                        $toReturn = $this->_buildResultSet($_response,!$returnId ? false : db2_last_insert_id($dbHandler));
                 }
                 else {
                         $_error = "Unknown dbDataModel";
@@ -925,6 +895,7 @@ class simpleDataRestDispatcher {
 		/****** DIRECT DISPATCHING ******/
 		$this->setTransport();
 		$methods = $this->getServiceImplementedMethods();
+		$attributes = $this->getAttributes();
 		
 		//eval if service is active or closed
 		if (!$this->isServiceActive) {
@@ -943,18 +914,18 @@ class simpleDataRestDispatcher {
 		}
 		//eval if service request method match one of service implemented methods
 		elseif (!in_array($_SERVER['REQUEST_METHOD'], $methods)) {
-			$this->statusCode = 400;
+			$this->statusCode = 501;
 			$this->toReturn = NULL;
 		}
 		//eval required parameters and, in case, process request
-		elseif (!$this->evalRequiredParameters()) {
-			$this->statusCode = 501;
+		elseif (!$this->evalRequiredParameters($attributes)) {
+			$this->statusCode = 400;
 			$this->toReturn = $this->returnData(false,"conversation error");
 		}
 		else {
 			$exec = strtolower($_SERVER['REQUEST_METHOD']);
-			if (method_exists($this, $exec)) $this::$exec($this->getAttributes());
-			else $this->logic($this->getAttributes());
+			if (method_exists($this, $exec)) $this::$exec($attributes);
+			else $this->logic($attributes,$_SERVER['REQUEST_METHOD']);
 			if ($this->accessControlAllowOrigin != '*' AND $this->accessControlAllowOrigin != false) header('Access-Control-Allow-Origin: '.$this->accessControlAllowOrigin);
 			if (is_null($this->result)) {
 				$this->statusCode = !$this->statusCode ? 204 : $this->statusCode;
