@@ -38,17 +38,75 @@
  */
 class router {
     
+    /**
+     * Current URL (auto)
+     */
     private $currentUrl = false;
+    
+    /**
+     * Current PATH (auto)
+     */
     private $currentPath = false;
+    
+    /**
+     * Cache lifetime (default in the pas to disable browser cache)
+     */
     private $bestBefore = 'Mon, 26 Jul 1997 05:00:00 GMT';
+    
+    /**
+     * Cache max age
+     */
     private $maxAge = false;
+    
+    /**
+     * Content type (default or populated with 'transport' var)
+     */
     private $contentType = false;
+    
+    /**
+     * CURL channel (if any - in CLOAKED requests)
+     */
     private $ch = false;
     
+    /**
+     * Original request method (auto)
+     */
+    private $originalRequestMethod = false;
+    
+    /**
+     * Original request service (auto)
+     */
+    private $originalRequestService = false;
+    
+    /**
+     * Original request attributes (auto)
+     */
+    private $originalRequestAttributes = false;
+    
+    /**
+     * CURL request method (same of $requestMethod or different if 'forceMethod'
+     * specified in routing table)
+     */
+    private $requestMethod = false;
+    
+    /**
+     * Status received from service
+     */
     private $responseStatus = Array();
+    
+    /**
+     * Header received from service
+     */
     private $responseHeader = Array();
+    
+    /**
+     * Custom header to return to client (specified in routing table)
+     */
     private $headersToThrow = Array();
     
+    /**
+     * Default error patterns, to speedup error response
+     */
     private $error_patterns = Array(
 	'JSON'	=>	"{success: false, result: '{0}'}",
 	'XML'	=>	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<content><success></success><result>{0}</result></content>"
@@ -60,7 +118,7 @@ class router {
      * @param	STRING	$location	The location to route request to
      */
     private function go_route($location) {
-	header("Location: ".$location,true,302);
+	header("Location: ".$location.(!sizeof($this->originalRequestAttributes) ? '' : '?'.http_build_query($this->originalRequestAttributes)),true,302);
     }
     
     /**
@@ -105,8 +163,9 @@ class router {
     private function go_curl($location) {
 	$this->ch = curl_init();
 	if (!$this->ch) die ($this->go_error('router error'));
+	
 	curl_setopt_array($this->ch,Array(
-	    CURLOPT_URL			=>	$location,
+	    //CURLOPT_URL			=>	$location,
 	    CURLOPT_RETURNTRANSFER	=>	1,
 	    CURLOPT_HEADER 		=>	0,
 	    CURLOPT_HEADERFUNCTION	=>	array(&$this,'read_curl_header'),
@@ -114,11 +173,31 @@ class router {
 	    CURLOPT_TIMEOUT		=>	30,
 	    CURLOPT_USERAGENT		=>	$_SERVER['HTTP_USER_AGENT'],
 	    CURLOPT_PORT		=>	$_SERVER['SERVER_PORT'],
+	    CURLOPT_CUSTOMREQUEST	=>	$this->requestMethod,
 	    //CURLOPT_HTTPHEADER	=>	array('ORIGIN: _URL_'),
 	    CURLOPT_FOLLOWLOCATION	=>	1
 	));
+	
+	switch ($this->requestMethod) {
+	    case 'PUT':
+	    case 'DELETE':
+		curl_setopt($this->ch, CURLOPT_URL, $location);
+		curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($this->originalRequestAttributes));
+	    break;
+	    case 'POST':
+		curl_setopt($this->ch, CURLOPT_URL, $location);
+		curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->originalRequestAttributes);
+	    break;
+	    //FALLBACK to HTTP-GET
+	    default:
+		curl_setopt($this->ch, CURLOPT_URL, $location.(!sizeof($this->originalRequestAttributes) ? '' : '?'.http_build_query($this->originalRequestAttributes)));
+	    break;
+	}
+	
 	$toReturn = curl_exec($this->ch);
+	
 	$this->responseStatus = curl_getinfo($this->ch, CURLINFO_HTTP_CODE);
+	
 	return $toReturn;
     }
     
@@ -237,41 +316,10 @@ class router {
 	}
     }
     
-    /**
-     * Clean query string from service tag and return it.
-     */
-    private function clean_query_string($attributes) {
-	$qstring = false;
-	foreach ($attributes as $key=>$value) {
-	    if (strtolower($key) == 'service') continue;
-	    elseif (!$qstring) $qstring='?'.$key.'='.$value;
-	    else $qstring.='&'.$key.'='.$value;
-	}
-	return $qstring;
-    }
-    
-    /**
-     * Constructor: setup basic variables then apply routing logic.
-     */
-    public function __construct() {
-	
-	global $registered_services;
-	
-	//setup basic variables
-	$http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
-	$uri = $_SERVER['REQUEST_URI'];
-	$uri = strpos($uri,'index.php') !== false ? preg_replace("/\/index.php(.*?)$/i","",$uri) : preg_replace("/\/\?.*/","",$uri);
-	$currentUrl = $http . $_SERVER['HTTP_HOST'] . $uri;
-	$this->currentUrl = str_replace('%20',' ',$currentUrl);
-	$this->currentPath = getcwd();
-	$toReturn = false;
-	
-	//setup transport
-	if (isset($_GET['transport']) AND (@strtoupper($_GET['transport']) == "XML" OR @strtoupper($_GET['transport']) == "JSON") ) $this->contentType = strtolower($_GET['transport']);
-	else $this->contentType = strtolower(DEFAULT_TRANSPORT);
-	
-	//get attributes
-	switch($_SERVER['REQUEST_METHOD']) {
+
+    private function get_request_attributes() {
+	$attributes = Array();
+	switch($this->originalRequestMethod) {
 	    case 'GET':
 	    case 'HEAD':
 		    $attributes = $_GET;
@@ -284,49 +332,101 @@ class router {
 		    parse_str(file_get_contents('php://input'), $attributes);
 	    break;
 	}
+	if (isset($attributes['service'])) {
+	    $service = $attributes['service'];
+	    unset($attributes['service']);
+	}
+	else {
+	    $service = false;
+	}
+	return Array($service, $attributes);
+    }
+    
+    
+    private function get_current_url() {
+	$http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
+	$uri = $_SERVER['REQUEST_URI'];
+	$uri = strpos($uri,'index.php') !== false ? preg_replace("/\/index.php(.*?)$/i","",$uri) : preg_replace("/\/\?.*/","",$uri);
+	$currentUrl = $http . $_SERVER['HTTP_HOST'] . $uri;
+	return str_replace('%20',' ',$currentUrl);
+    }
+    
+    /**
+     * Constructor: setup basic variables then apply routing logic.
+     */
+    public function __construct() {
 	
-	/***routing logic***/
+	global $registered_services;
+	
+	//setup basic variables
+	$this->currentUrl = $this->get_current_url();
+	$this->currentPath = getcwd();
+	$this->originalRequestMethod = $_SERVER['REQUEST_METHOD'];
+	
+	//get attributes from original request
+	list($this->originalRequestService, $this->originalRequestAttributes) = $this->get_request_attributes();
+	
+	$this->contentType = (isset($this->originalRequestAttributes['transport']) AND (@strtoupper($this->originalRequestAttributes['transport']) == "XML" OR @strtoupper($this->originalRequestAttributes['transport']) == "JSON") ) ? strtolower($this->originalRequestAttributes['transport']) : strtolower(DEFAULT_TRANSPORT);
+	
+	//default, return null
+	$toReturn = NULL;
+	
+	/*********************/
+	/*** ROUTING LOGIC ***/
+	/*********************/
+	
 	//if GLOBALLY NOT AUTHORIZED, DIE IMMEDIATELY
 	if (DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != '*' AND DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != false AND @$_SERVER['HTTP_ORIGIN'] != DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN) {
 	    $this->responseStatus = 403;
 	    $toReturn = $this->go_error("Origin not allowed");
 	}
+	
 	//if no service, die immediately
-	elseif (!isset($attributes['service'])) die ($this->go_error('unspecified service'));
+	elseif (!$this->originalRequestService) die ($this->go_error('unspecified service'));
+	
 	//if service not in routing table and autoroute disabled, die immediately
-	elseif (!isset($registered_services[$attributes['service']]) AND !AUTO_ROUTE) die ($this->go_error("unknown service"));
+	elseif (!isset($registered_services[$this->originalRequestService]) AND !AUTO_ROUTE) {
+	    $this->responseStatus = 400;
+	    $toReturn = $this->go_error("unknown service");
+	}
+	
 	//if service not in routing table and autoroute enabled, process request
-	//with default cache params
+	//with default params
 	elseif (
-	    (!isset($registered_services[$attributes['service']]) AND AUTO_ROUTE)
+	    (!isset($registered_services[$this->originalRequestService]) AND AUTO_ROUTE)
 		OR
-	    (isset($registered_services[$attributes['service']])
-		AND (!isset($registered_services[$attributes['service']]["target"]) OR !isset($registered_services[$attributes['service']]["policy"]))
+	    (isset($registered_services[$this->originalRequestService])
+		AND (!isset($registered_services[$this->originalRequestService]["target"]) OR !isset($registered_services[$this->originalRequestService]["policy"]))
 	    )
 	){
-	    if (is_readable("services/".$attributes['service'].".php")) {
-		$location = $this->currentUrl."/services/".$attributes['service'].".php".$this->clean_query_string($attributes);
-		if (strtoupper(DEFAULT_POLICY) == 'CLOAK') $toReturn = $this->go_cloak($location);
-		else $this->go_route($location);
+	    if (is_readable("services/".$this->originalRequestService.".php")) {
+		$location = $this->currentUrl."/services/".$this->originalRequestService.".php";
+		$toReturn = strtoupper(DEFAULT_POLICY) == 'CLOAK' ? $this->go_cloak($location) : $this->go_route($location);
 	    }
-	    else die ($this->go_error("unknown service"));
+	    else {
+		$this->responseStatus = 400;
+		$toReturn = $this->go_error("unknown service");
+	    }
 	}
+	
+	//service IS in routing table
 	else{
-	    //service is in routing table
-	    $location = $this->currentUrl."/services/".$registered_services[$attributes['service']]["target"].$this->clean_query_string($attributes);
-	    if (isset($registered_services[$attributes['service']]["responseHadersToThrow"])) $this->headersToThrow = $registered_services[$attributes['service']]["responseHadersToThrow"];
+	    $location = $this->currentUrl.'/services/'.$registered_services[$this->originalRequestService]['target'];
+	    $this->requestMethod = isset($registered_services[$this->originalRequestService]['forceMethod']) ? strtoupper($registered_services[$this->originalRequestService]['forceMethod']) : $this->originalRequestMethod;
 	    
-	    if (isset($registered_services[$attributes['service']]["accessControlAllowOrigin"]) AND
-		@$registered_services[$attributes['service']]["accessControlAllowOrigin"] != '*'AND $registered_services[$attributes['service']]["accessControlAllowOrigin"] != false AND
-		@$_SERVER['HTTP_ORIGIN'] != $registered_services[$attributes['service']]["accessControlAllowOrigin"]) {
+	    if (isset($registered_services[$this->originalRequestService]['customHeaders'])) $this->headersToThrow = $registered_services[$this->originalRequestService]['customHeaders'];
+	    
+	    if (isset($registered_services[$this->originalRequestService]["accessControlAllowOrigin"]) AND
+		@$registered_services[$this->originalRequestService]["accessControlAllowOrigin"] != '*'AND $registered_services[$this->originalRequestService]["accessControlAllowOrigin"] != false AND
+		@$_SERVER['HTTP_ORIGIN'] != $registered_services[$this->originalRequestService]["accessControlAllowOrigin"]) {
 		$this->responseStatus = 403;
 		$toReturn = $this->go_error("Origin not allowed");
 	    }
-	    elseif ($registered_services[$attributes['service']]["policy"] == 'CLOAK') {
+	    elseif ($registered_services[$this->originalRequestService]["policy"] == 'CLOAK') {
 		$toReturn = $this->go_cloak(
 		    $location,
-		    isset($registered_services[$attributes['service']]['cache']) ? $registered_services[$attributes['service']]['cache'] : AUTO_CACHE,
-		    isset($registered_services[$attributes['service']]['ttl']) ? $registered_services[$attributes['service']]['ttl'] : DEFAULT_TTL
+		    isset($registered_services[$this->originalRequestService]['cache']) ? $registered_services[$attributes['service']]['cache'] : AUTO_CACHE,
+		    isset($registered_services[$this->originalRequestService]['ttl']) ? $registered_services[$attributes['service']]['ttl'] : DEFAULT_TTL
 		);
 	    }
 	    else $this->go_route($location);

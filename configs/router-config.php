@@ -128,7 +128,10 @@ define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', false);
 * - cache:                      SERVER, CLIENT, BOTH; If false, don't use cache
 * - ttl:                        cache time to live
 * - accessControlAllowOrigin:   FALSE, '*', _URL_
-* - responseHadersToThrow:      Array of header values (if defined) to throw to client
+* - customHeaders:              Array of header values (if defined) to throw
+*                               back to client
+* - forceMethod:                GET,POST,PUT,DELETE; force curl request to be in
+*                               specified method overriding original request one
 *
 * PLEASE NOTE: router cache will work ONLY if following conditions (+) are met:
 * + HTTP METHOD is [GET]
@@ -143,8 +146,10 @@ define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', false);
 */
 $registered_services = Array(
     
-    'example_service'                               =>  Array("target"=>'example_service.php', "policy"=>'ROUTE'),
-    'example_service_alias'                         =>  Array("target"=>'example_service.php', "policy"=>'CLOAK'),
+    'example_hello_world'                           =>  Array("target"=>'example_hello_world.php', "policy"=>'ROUTE'),
+    
+    'example_hello_world_alias'                     =>  Array("target"=>'example_service.php', "policy"=>'CLOAK'),
+    
     'example_service_alias_cached'                  =>  Array("target"=>'example_service.php', "policy"=>'CLOAK', "cache"=>'BOTH', "ttl"=>600),
     
     'example_database_based_service'                =>  Array("target"=>'example_database_based_service.php', "policy"=>'ROUTE'),
