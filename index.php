@@ -105,6 +105,12 @@ class router {
     private $headersToThrow = Array();
     
     /**
+     * Redirect status code, used only in routed requests
+     */
+    private $redirectStatusCode = 302;
+    
+    
+    /**
      * Default error patterns, to speedup error response
      */
     private $error_patterns = Array(
@@ -113,12 +119,22 @@ class router {
     );
     
     /**
+     * Print debug information in error log.
+     *
+     * @param	STRING	$message	The debug message
+     */
+    private function debug($message) {
+	if (ROUTER_DEBUG) error_log($message);
+    }
+    
+    /**
      * Route request with a 302 message back.
      *
      * @param	STRING	$location	The location to route request to
      */
     private function go_route($location) {
-	header("Location: ".$location.(!sizeof($this->originalRequestAttributes) ? '' : '?'.http_build_query($this->originalRequestAttributes)),true,302);
+	//header("Location: ".$location.(!sizeof($this->originalRequestAttributes) ? '' : '?'.http_build_query($this->originalRequestAttributes)),true,301);
+	header("Location: ".$location,true,$this->redirectStatusCode);
     }
     
     /**
@@ -129,6 +145,7 @@ class router {
      * @param	INT	$ttl		The cache time to live
      */
      private function go_cloak($location, $cache=AUTO_CACHE, $ttl=DEFAULT_TTL) {
+	$this->debug('CURL-ing request for location: '.$location.'; cache set as '.$cache.' with '.$ttl.' TTL secs');
 	if (!$cache) {
 	    $result = $this->go_curl($location);
 	}
@@ -136,7 +153,10 @@ class router {
 	    $result = $this->get_cache($location,$ttl,true);
 	    if ($result === false) {
 		$result = $this->go_curl($location);
-		$this->set_cache($location,$result);
+		if ($this->set_cache($location,$result)) {
+		    $this->maxAge = $ttl;
+		    $this->bestBefore = gmdate("D, d M Y H:i:s", time() + $ttl) . " GMT";
+		};
 	    }
 	}
 	elseif (strtoupper($cache) == "SERVER") {
@@ -249,8 +269,8 @@ class router {
      * @param	STRING	$data		The data to return
      */
     function set_cache($request, $data) {
-	//if returned status code != 200 or null content, DO NOT CACHE
-	if ($this->responseStatus != 200 OR strlen($data) == 0) return false;
+	//if returned status code != 200 or null content OR method != GET, DO NOT CACHE
+	if ($this->responseStatus != 200 OR strlen($data) == 0 OR $this->requestMethod != 'GET') return false;
 	$requestTag = md5($request);
 	$fh = fopen($this->currentPath."/cache/".$requestTag, 'w');
 	if (!$fh) return false;
@@ -262,7 +282,7 @@ class router {
     /**
      * Set header content type and cache
      */
-    private function set_header($contentLenght) {
+    private function set_header($contentLength) {
 	if (DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN == '*') header('Access-Control-Allow-Origin: *');
 	switch ($this->responseStatus) {
 	    case 200: //OK
@@ -362,6 +382,7 @@ class router {
 	$this->currentUrl = $this->get_current_url();
 	$this->currentPath = getcwd();
 	$this->originalRequestMethod = $_SERVER['REQUEST_METHOD'];
+	$this->requestMethod = $_SERVER['REQUEST_METHOD'];
 	
 	//get attributes from original request
 	list($this->originalRequestService, $this->originalRequestAttributes) = $this->get_request_attributes();
@@ -412,7 +433,6 @@ class router {
 	//service IS in routing table
 	else{
 	    $location = $this->currentUrl.'/services/'.$registered_services[$this->originalRequestService]['target'];
-	    $this->requestMethod = isset($registered_services[$this->originalRequestService]['forceMethod']) ? strtoupper($registered_services[$this->originalRequestService]['forceMethod']) : $this->originalRequestMethod;
 	    
 	    if (isset($registered_services[$this->originalRequestService]['customHeaders'])) $this->headersToThrow = $registered_services[$this->originalRequestService]['customHeaders'];
 	    
@@ -423,13 +443,17 @@ class router {
 		$toReturn = $this->go_error("Origin not allowed");
 	    }
 	    elseif ($registered_services[$this->originalRequestService]["policy"] == 'CLOAK') {
+		$this->requestMethod = isset($registered_services[$this->originalRequestService]['forceMethod']) ? strtoupper($registered_services[$this->originalRequestService]['forceMethod']) : $this->originalRequestMethod;
 		$toReturn = $this->go_cloak(
 		    $location,
-		    isset($registered_services[$this->originalRequestService]['cache']) ? $registered_services[$attributes['service']]['cache'] : AUTO_CACHE,
-		    isset($registered_services[$this->originalRequestService]['ttl']) ? $registered_services[$attributes['service']]['ttl'] : DEFAULT_TTL
+		    isset($registered_services[$this->originalRequestService]['cache']) ? $registered_services[$this->originalRequestService]['cache'] : AUTO_CACHE,
+		    isset($registered_services[$this->originalRequestService]['ttl']) ? $registered_services[$this->originalRequestService]['ttl'] : DEFAULT_TTL
 		);
 	    }
-	    else $this->go_route($location);
+	    else {
+		if (isset($registered_services[$this->originalRequestService]['redirectStatusCode'])) $this->redirectStatusCode = $registered_services[$this->originalRequestService]['redirectStatusCode'];
+		$this->go_route($location);
+	    }
 	}
 	$this->set_header(strlen($toReturn));
 	echo $toReturn;

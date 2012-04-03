@@ -18,6 +18,16 @@
 //***********************************************//
 
 /**
+ * Set the debug mode for the router.
+ *
+ * If enabled, router will print debug informations in error_log.
+ *
+ * @static	BOOL
+ * @default     false
+ */
+define('ROUTER_DEBUG', true);
+
+/**
  * Set the default behaviour (policy) for the router.
  *
  * If defined as 'ROUTE', index.php will act as a router redirecting
@@ -132,6 +142,9 @@ define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', false);
 *                               back to client
 * - forceMethod:                GET,POST,PUT,DELETE; force curl request to be in
 *                               specified method overriding original request one
+* - redirectStatusCode          Force 3xx status code in a routed request. If
+*                               none specified, router will redirect request
+*                               using 302 status code (Found).
 *
 * PLEASE NOTE: router cache will work ONLY if following conditions (+) are met:
 * + HTTP METHOD is [GET]
@@ -140,6 +153,14 @@ define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', false);
 *
 * WARNING: caching will speedup your service, but you will loose statistics,
 * traces and debug info!
+*
+* PLEASE NOTE ALSO: when routing POST, PUT or DELETE requests, if no
+* redirectStatusCode is defined, router will send a 302 redirect status code to
+* the browser. In that situation most modern browsers will convert original
+* request in GET, repackaging request attributes. In other hand, forcing a 300
+* redirect status code (Multiple Choises), could generate sometimes a browser
+* error or require a user action (confirmation dialog).
+* 
 * 
 * @static	ARRAY
 * @default	declared example services
@@ -148,9 +169,9 @@ $registered_services = Array(
     
     'example_hello_world'                           =>  Array("target"=>'example_hello_world.php', "policy"=>'ROUTE'),
     
-    'example_hello_world_alias'                     =>  Array("target"=>'example_service.php', "policy"=>'CLOAK'),
+    'example_hello_world_alias'                     =>  Array("target"=>'example_hello_world.php', "policy"=>'CLOAK'),
     
-    'example_service_alias_cached'                  =>  Array("target"=>'example_service.php', "policy"=>'CLOAK', "cache"=>'BOTH', "ttl"=>600),
+    'example_hello_world_alias_cached'              =>  Array("target"=>'example_hello_world.php', "policy"=>'CLOAK', "cache"=>'BOTH', "ttl"=>600),
     
     'example_database_based_service'                =>  Array("target"=>'example_database_based_service.php', "policy"=>'ROUTE'),
     'example_database_based_service_alias'          =>  Array("target"=>'example_database_based_service.php', "policy"=>'CLOAK'),

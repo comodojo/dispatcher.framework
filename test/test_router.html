@@ -107,11 +107,15 @@
 		}
 		
 		ready(function() {
-			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET,PUT,POST,DELETE) - ROUTED'}));
+			
+			/*
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET,PUT,POST,DELETE) - ROUTED (browser may handle request as GET, see router-config.php for more info)'}));
 			xhr_req('GET','example_hello_world',{service:'example_hello_world'});
 			xhr_req('PUT','example_hello_world',{service:'example_hello_world'});
 			xhr_req('POST','example_hello_world',{service:'example_hello_world'});
 			xhr_req('DELETE','example_hello_world',{service:'example_hello_world'});
+			
+			
 			
 			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET,PUT,POST,DELETE) - CLOAKED'}));
 			xhr_req('GET','example_hello_world_alias',{service:'example_hello_world_alias'});
@@ -119,9 +123,17 @@
 			xhr_req('POST','example_hello_world_alias',{service:'example_hello_world_alias'});
 			xhr_req('DELETE','example_hello_world_alias',{service:'example_hello_world_alias'});
 			
+			*/
+			
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET,PUT,POST,DELETE) - CLOAKED and CACHED (Client and Server)'}));
+			xhr_req('GET','example_hello_world_alias_cached',{service:'example_hello_world_alias_cached'});
+			xhr_req('PUT','example_hello_world_alias_cached',{service:'example_hello_world_alias_cached'});
+			xhr_req('POST','example_hello_world_alias_cached',{service:'example_hello_world_alias_cached'});
+			xhr_req('DELETE','example_hello_world_alias_cached',{service:'example_hello_world_alias_cached'});
 			
 			
 			/*
+			
 			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (LOGIC)'}));
 			xhr_req('GET','example_hello_world_logic');
 			xhr_req('PUT','example_hello_world_logic');
