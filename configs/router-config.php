@@ -18,16 +18,6 @@
 //***********************************************//
 
 /**
- * Set the debug mode for the router.
- *
- * If enabled, router will print debug informations in error_log.
- *
- * @static	BOOL
- * @default     false
- */
-define('ROUTER_DEBUG', true);
-
-/**
  * Set the default behaviour (policy) for the router.
  *
  * If defined as 'ROUTE', index.php will act as a router redirecting
@@ -43,6 +33,25 @@ define('ROUTER_DEBUG', true);
  * @default     'ROUTE'
  */
 define('DEFAULT_POLICY', 'ROUTE');
+
+/**
+ * Serialize in query string request parameters.
+ *
+ * Most browser, if redirected, tend to loose parameters and switch to a GET
+ * request (no matter if the initial one was a POST/PUT/...).
+ *
+ * With this switch enabled, router will try to serialize parameters and recompose
+ * the query string to serve.
+ *
+ * In a GET, nothing will be loosed (except the "service" tag).
+ *
+ * In other requests, this require that your service shoult support also GET
+ * method (or it uses th "logic" constructor).
+ * 
+ * @static	BOOL
+ * @default     true
+ */
+define('SERIALIZE_PARAMETERS_IN_ROUTING', true);
 
 /**
 * Default metadata transport (should be the same as simpleDataRestDispatcher)
@@ -75,7 +84,7 @@ define('AUTO_ROUTE', true);
 *   Expires header equal to local cache expire time as
 *                       best-before = [ (local+ttl) - now ]
 *
-* - FALSE: disable autocache.
+* - FALSE: disable autocache (Expires 1970 will be sent to clients).
 *
 * PLEASE NOTE: CACHE DON'T WORK WITH ROUTE POLICY
 * 
@@ -135,7 +144,7 @@ define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', false);
 * policies.
 *
 * OTHER OPTIONAL VALUES:
-* - cache:                      SERVER, CLIENT, BOTH; If false, don't use cache
+* - cache:                      SERVER, CLIENT, BOTH; If false, do not use cache
 * - ttl:                        cache time to live
 * - accessControlAllowOrigin:   FALSE, '*', _URL_
 * - customHeaders:              Array of header values (if defined) to throw
@@ -168,17 +177,19 @@ define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', false);
 $registered_services = Array(
     
     'example_hello_world'                           =>  Array("target"=>'example_hello_world.php', "policy"=>'ROUTE'),
-    
+    'example_hello_world_alias_301'                 =>  Array("target"=>'example_hello_world.php', "policy"=>'ROUTE', "redirectStatusCode"=>301),
     'example_hello_world_alias'                     =>  Array("target"=>'example_hello_world.php', "policy"=>'CLOAK'),
-    
     'example_hello_world_alias_cached'              =>  Array("target"=>'example_hello_world.php', "policy"=>'CLOAK', "cache"=>'BOTH', "ttl"=>600),
-    
+    'example_hello_world_alias_origin'              =>  Array("target"=>'example_hello_world.php', "policy"=>'CLOAK', "accessControlAllowOrigin"=>"comodojo.org"),
+    'example_hello_world_alias_forcepost'           =>  Array("target"=>'example_hello_world.php', "policy"=>'CLOAK', "forceMethod"=>"POST"),
+
     'example_database_based_service'                =>  Array("target"=>'example_database_based_service.php', "policy"=>'ROUTE'),
     'example_database_based_service_alias'          =>  Array("target"=>'example_database_based_service.php', "policy"=>'CLOAK'),
     'example_database_based_service_alias_cached'   =>  Array("target"=>'example_database_based_service.php', "policy"=>'CLOAK', "cache"=>'SERVER', "ttl"=>30),
     
     'example_external_service'                      =>  Array("target"=>'example_external_service.php', "policy"=>'CLOAK'),
-    'example_external_service_cached'               =>  Array("target"=>'example_external_service.php', "policy"=>'CLOAK', "cache"=>'CLIENT', "ttl"=>600)
+    'example_external_service_cached_srv'           =>  Array("target"=>'example_external_service.php', "policy"=>'CLOAK', "cache"=>'SERVER', "ttl"=>600),
+    'example_external_service_cached_cli'           =>  Array("target"=>'example_external_service.php', "policy"=>'CLOAK', "cache"=>'CLIENT', "ttl"=>600)
 );
 
 ?>

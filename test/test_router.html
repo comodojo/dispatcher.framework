@@ -108,14 +108,11 @@
 		
 		ready(function() {
 			
-			/*
 			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET,PUT,POST,DELETE) - ROUTED (browser may handle request as GET, see router-config.php for more info)'}));
 			xhr_req('GET','example_hello_world',{service:'example_hello_world'});
 			xhr_req('PUT','example_hello_world',{service:'example_hello_world'});
 			xhr_req('POST','example_hello_world',{service:'example_hello_world'});
 			xhr_req('DELETE','example_hello_world',{service:'example_hello_world'});
-			
-			
 			
 			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET,PUT,POST,DELETE) - CLOAKED'}));
 			xhr_req('GET','example_hello_world_alias',{service:'example_hello_world_alias'});
@@ -123,170 +120,45 @@
 			xhr_req('POST','example_hello_world_alias',{service:'example_hello_world_alias'});
 			xhr_req('DELETE','example_hello_world_alias',{service:'example_hello_world_alias'});
 			
-			*/
-			
 			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET,PUT,POST,DELETE) - CLOAKED and CACHED (Client and Server)'}));
 			xhr_req('GET','example_hello_world_alias_cached',{service:'example_hello_world_alias_cached'});
 			xhr_req('PUT','example_hello_world_alias_cached',{service:'example_hello_world_alias_cached'});
 			xhr_req('POST','example_hello_world_alias_cached',{service:'example_hello_world_alias_cached'});
 			xhr_req('DELETE','example_hello_world_alias_cached',{service:'example_hello_world_alias_cached'});
 			
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET) - Redirected with 301'}));
+			xhr_req('GET','example_hello_world_alias_301',{service:'example_hello_world_alias_301'});
 			
-			/*
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET) - Invalid origin'}));
+			xhr_req('GET','example_hello_world_alias_origin',{service:'example_hello_world_alias_origin'});
 			
-			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (LOGIC)'}));
-			xhr_req('GET','example_hello_world_logic');
-			xhr_req('PUT','example_hello_world_logic');
-			xhr_req('POST','example_hello_world_logic');
-			xhr_req('DELETE','example_hello_world_logic');
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET) - Invalid origin'}));
+			xhr_req('GET','example_hello_world_alias_forcepost',{service:'example_hello_world_alias_forcepost', to:"POST"});
 			
-			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world - POST ONLY; requests via GET,PUT,DELETE should return a <span style="color:#884444;">501 Not Implemented response</span>'}));
-			xhr_req('GET','example_hello_world_post_only');
-			xhr_req('PUT','example_hello_world_post_only');
-			xhr_req('POST','example_hello_world_post_only');
-			xhr_req('DELETE','example_hello_world_post_only');
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example internal service AUTO-ROUTED (GET) - 400/200/200/404'}));
+			xhr_req('GET','example_internal_service',{service:'example_internal_service'});
+			xhr_req('GET','example_internal_service',{service:'example_internal_service', text:1});
+			xhr_req('GET','example_internal_service',{service:'example_internal_service', text:2});
+			xhr_req('GET','example_internal_service',{service:'example_internal_service', text:3});
 			
-			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world - CORS access control enabled; <span style="color:#884444;">only reqests from comodojo.org should end with 200 OK response</span>'}));
-			xhr_req('GET','example_hello_world_cors_ac');
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example external service (GET/PUT/POST:200;DELETE:501'}));
+			xhr_req('GET','example_external_service',{service:'example_external_service', p:2});
+			xhr_req('PUT','example_external_service',{service:'example_external_service', p:2});
+			xhr_req('POST','example_external_service',{service:'example_external_service', p:2});
+			xhr_req('DELETE','example_external_service',{service:'example_external_service', p:2});
 			
-			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example database-based service with custom HTTP status codes <span style="color:#884444;">(GET:200,PUT/POST:202,DELETE:204)</span>'}));
-			xhr_req_db('GET','example_database_based_service',false);
-			xhr_req_db('PUT','example_database_based_service',{top:Math.floor(Math.random()*101),middle:Math.floor(Math.random()*101),bottom:Math.floor(Math.random()*101)});
-			xhr_req_db('POST','example_database_based_service',{top:Math.floor(Math.random()*101),middle:Math.floor(Math.random()*101),bottom:Math.floor(Math.random()*101)});
-			xhr_req_db('DELETE','example_database_based_service',false);
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example external service, alias, server-cached (2xGET:200 - second from cache)'}));
+			xhr_req('GET','example_external_service_cached_srv',{service:'example_external_service_cached_srv', p:2});
+			xhr_req('GET','example_external_service_cached_srv',{service:'example_external_service_cached_srv', p:2});
 			
-			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example internal file retrieval service; <span style="color:#884444;">(GET:200/404,PUT/POST/DELETE:501)</span>'}));
-			xhr_req('GET','example_internal_service',{text:1});
-			xhr_req('GET','example_internal_service',{text:2});
-			xhr_req('GET','example_internal_service',{text:3});
-			xhr_req('POST','example_internal_service',{text:1});
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example external service, alias, client-cached (2xGET:200)'}));
+			xhr_req('GET','example_external_service_cached_cli',{service:'example_external_service_cached_cli', p:2});
+			xhr_req('GET','example_external_service_cached_cli',{service:'example_external_service_cached_cli', p:2});
 			
-			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example external url retrieval service; <span style="color:#884444;">(GET/PUT/POST:200,DELETE:501)</span>'}));
-			xhr_req('GET','example_external_service',{p:1});
-			xhr_req('PUT','example_external_service',{p:2});
-			xhr_req('POST','example_external_service',{p:3});
-			xhr_req('DELETE','example_external_service',{text:1});
-			*/
 		});
 		
 	});
 	
-	
-	/*
-	require(["dojo/ready","dojo/_base/xhr","dojo/dom"], function(ready,xhr,dom){
-		ready(function(){
-		xhr.get({
-			url:"../?service=example_service&hello_to=test",
-			handleAs:"json",
-			failOk: true,
-			load: function(data,ioargs){
-				//console.log(ioargs.xhr.status);
-				//console.log(ioargs.xhr.getAllResponseHeaders());
-				document.getElementById('example_service_box').innerHTML = data.result;
-				document.getElementById('example_service_box').className = data.success ? "note" : 'important';
-			},
-			error: function(error) {
-				document.getElementById('example_service_box').innerHTML = error
-				document.getElementById('example_service_box').className = "warning";
-			}
-		});
-		xhr.get({
-			url:"../?service=example_service_alias&hello_to=test",
-			handleAs:"json",
-			failOk: true,
-			load: function(data,ioargs){
-				//console.log(ioargs.xhr.status);
-				//console.log(ioargs.xhr.getAllResponseHeaders());
-				document.getElementById('example_service_alias_box').innerHTML = data.result;
-				document.getElementById('example_service_alias_box').className = data.success ? "note" : 'important';
-			},
-			error: function(error) {
-				document.getElementById('example_service_alias_box').innerHTML = error
-				document.getElementById('example_service_alias_box').className = "warning";
-			}
-		});
-		xhr.get({
-			url:"../?service=example_database_based_service",
-			handleAs:"json",
-			failOk: true,
-			load: function(data){
-				if (data.success) {
-					document.getElementById('example_database_based_service_box').className = "note";
-					for (var i in data.result) {
-						document.getElementById('example_database_based_service_box').innerHTML += "ID="+data.result[i].id+
-						" TIMESTAMP="+data.result[i].timestamp+
-						" TOP="+data.result[i].top+
-						" MIDDLE="+data.result[i].middle+
-						" BOTTOM="+data.result[i].bottom+"<br />";
-					}
-				}
-				else {
-					document.getElementById('example_database_based_service_box').className = 'important';
-					document.getElementById('example_database_based_service_box').innerHTML = data.result;
-				}
-			},
-			error: function(error) {
-				document.getElementById('example_database_based_service_box').innerHTML = error;
-				document.getElementById('example_database_based_service_box').className = "warning";
-			}
-		});
-		
-		xhr.get({
-			url:"../?service=example_external_service&p=4",
-			handleAs:"json",
-			failOk: true,
-			load: function(data){
-				document.getElementById('example_external_service_box').innerHTML = data.result;
-				document.getElementById('example_external_service_box').className = data.success ? "note" : 'important';
-			},
-			error: function(error) {
-				document.getElementById('example_external_service_box').innerHTML = error;
-				document.getElementById('example_external_service_box').className = "warning";
-			}
-		});
-		
-		xhr.get({
-			url:"../?service=example_internal_service&text=1",
-			handleAs:"json",
-			failOk: true,
-			load: function(data){
-				document.getElementById('example_internal_service_1_box').innerHTML = data.result;
-				document.getElementById('example_internal_service_1_box').className = data.success ? "note" : 'important';
-			},
-			error: function(error) {
-				document.getElementById('example_internal_service_1_box').innerHTML = error;
-				document.getElementById('example_internal_service_1_box').className = "warning";
-			}
-		});
-		xhr.get({
-			url:"../?service=example_internal_service&text=2",
-			handleAs:"json",
-			failOk: true,
-			load: function(data){
-				document.getElementById('example_internal_service_2_box').innerHTML = data.result;
-				document.getElementById('example_internal_service_2_box').className = data.success ? "note" : 'important';
-			},
-			error: function(error) {
-				document.getElementById('example_internal_service_2_box').innerHTML = error;
-				document.getElementById('example_internal_service_2_box').className = "warning";
-			}
-		});
-		xhr.get({
-			url:"../?service=example_internal_service&text=3",
-			handleAs:"json",
-			failOk: true,
-			load: function(data){
-				document.getElementById('example_internal_service_3_box').innerHTML = data.result;
-				document.getElementById('example_internal_service_3_box').className = data.success ? "note" : 'important';
-			},
-			error: function(error) {
-				document.getElementById('example_internal_service_3_box').innerHTML = error;
-				document.getElementById('example_internal_service_3_box').className = "warning";
-			}
-		});
-		});
-	});
-	*/
 	</script>
 </head>
 
@@ -303,21 +175,6 @@
 		<div id="testContent">
 			<h1>This page will tests url router with different example services.</h1>
 			<h1>PLEASE NOTE: some tests will return a error, but (in most of cases) it's the desired return value.</h1>
-			
-			<!-- <h2>Example service, no alias, routed.</h2>
-			<div id="example_service_box">...</div>
-			<h2>Example service, alias, cloaked.</h2>
-			<div id="example_service_alias_box">...</div>
-			<h2>Example database based service (works only if dispatcher is fully installed (and example table created), no alias, cloaked.</h2>
-			<div id="example_database_based_service_box"></div>
-			<h2>Example external service, no alias, cloaked.</h2>
-			<div id="example_external_service_box">...</div>
-			<h2>Example internal service (text_1), routed automatically.</h2>
-			<div id="example_internal_service_1_box">...</div>
-			<h2>Example internal service (text_2), routed automatically.</h2>
-			<div id="example_internal_service_2_box">...</div>
-			<h2>Example internal service (File not found!), routed automatically.</h2>
-			<div id="example_internal_service_3_box">...</div> -->
 		</div>
 		
 		<div id="testFooter">

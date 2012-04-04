@@ -45,50 +45,49 @@
 	<script type="text/javascript">
 	
 	require(["dojo/_base/xhr","dojo/dom","dojo/ready"], function(xhr,dom,ready){
-	function goTest(test_pattern,test_query_string,test_box) {
-		var url = "../?service="+test_pattern+test_query_string;
-		var n = new Date();
-		xhr.get({
-			url: url,
-			handleAs:"json",
-			sync: true,
-			//failOk: true,
-			load: function(data){
-				var t = new Date();
-				document.getElementById(test_box).className = data.success ? "note" : 'important';
-				document.getElementById(test_box).innerHTML = (t.getTime()-n.getTime()) + " ms";
-			},
-			error: function(error) {
-				var t = new Date();
-				//console.log(error);
-				document.getElementById(test_box).className = "warning";
-				document.getElementById(test_box).innerHTML = (t.getTime()-n.getTime()) + " ms";
-			}
+		function goTest(test_pattern,test_query_string,test_box) {
+			var url = "../?service="+test_pattern+test_query_string;
+			var n = new Date();
+			xhr.get({
+				url: url,
+				handleAs:"json",
+				sync: true,
+				//failOk: true,
+				load: function(data){
+					var t = new Date();
+					document.getElementById(test_box).className = data.success ? "note" : 'important';
+					document.getElementById(test_box).innerHTML = (t.getTime()-n.getTime()) + " ms";
+				},
+				error: function(error) {
+					var t = new Date();
+					//console.log(error);
+					document.getElementById(test_box).className = "warning";
+					document.getElementById(test_box).innerHTML = (t.getTime()-n.getTime()) + " ms";
+				}
+			});
+		}
+		ready(function() {
+			
+			setTimeout(function() {
+				
+				document.getElementById("messages").innerHTML = "Tests running...";
+				
+				goTest('example_hello_world','&to=test','example_service_routed_box');
+				goTest('example_hello_world_alias','&to=test','example_service_cloaked_box');
+				goTest('example_hello_world_alias_cached','&to=test','example_service_cached_first_box');
+				goTest('example_hello_world_alias_cached','&to=test','example_service_cached_second_box');
+				
+				goTest('example_database_based_service','','example_database_based_service_routed_box');
+				goTest('example_database_based_service_alias','','example_database_based_service_cloaked_box');
+				goTest('example_database_based_service_alias_cached','','example_database_based_service_cached_first_box');
+				goTest('example_database_based_service_alias_cached','','example_database_based_service_cached_second_box');
+				
+				document.getElementById("messages").className = "note";
+				document.getElementById("messages").innerHTML = "Tests completed!";
+				
+			}, 2000);
+			
 		});
-	}		
-	
-	ready(function() {
-		
-		setTimeout(function() {
-			
-			document.getElementById("messages").innerHTML = "Tests running...";
-			
-			goTest('example_service','&hello_to=test','example_service_routed_box');
-			goTest('example_service_alias','&hello_to=test','example_service_cloaked_box');
-			goTest('example_service_alias_cached','&hello_to=test','example_service_cached_first_box');
-			goTest('example_service_alias_cached','&hello_to=test','example_service_cached_second_box');
-			
-			goTest('example_database_based_service','','example_database_based_service_routed_box');
-			goTest('example_database_based_service_alias','','example_database_based_service_cloaked_box');
-			goTest('example_database_based_service_alias_cached','','example_database_based_service_cached_first_box');
-			goTest('example_database_based_service_alias_cached','','example_database_based_service_cached_second_box');
-			
-			document.getElementById("messages").className = "note";
-			document.getElementById("messages").innerHTML = "Tests completed!";
-			
-		}, 2000);
-		
-	});
 	});
 		
 	</script>

@@ -92,7 +92,7 @@ class router {
     /**
      * Status received from service
      */
-    private $responseStatus = Array();
+    private $responseStatus = false;
     
     /**
      * Header received from service
@@ -119,22 +119,18 @@ class router {
     );
     
     /**
-     * Print debug information in error log.
-     *
-     * @param	STRING	$message	The debug message
-     */
-    private function debug($message) {
-	if (ROUTER_DEBUG) error_log($message);
-    }
-    
-    /**
      * Route request with a 302 message back.
      *
      * @param	STRING	$location	The location to route request to
      */
     private function go_route($location) {
 	//header("Location: ".$location.(!sizeof($this->originalRequestAttributes) ? '' : '?'.http_build_query($this->originalRequestAttributes)),true,301);
-	header("Location: ".$location,true,$this->redirectStatusCode);
+	if (SERIALIZE_PARAMETERS_IN_ROUTING AND sizeof($this->originalRequestAttributes) != 0) {
+	    header("Location: ".$location.'?'.http_build_query($this->originalRequestAttributes),true,$this->redirectStatusCode);
+	}
+	else {
+	    header("Location: ".$location,true,$this->redirectStatusCode);
+	}
     }
     
     /**
@@ -145,7 +141,6 @@ class router {
      * @param	INT	$ttl		The cache time to live
      */
      private function go_cloak($location, $cache=AUTO_CACHE, $ttl=DEFAULT_TTL) {
-	$this->debug('CURL-ing request for location: '.$location.'; cache set as '.$cache.' with '.$ttl.' TTL secs');
 	if (!$cache) {
 	    $result = $this->go_curl($location);
 	}
@@ -168,7 +163,6 @@ class router {
 	}
 	else {
 	    $this->maxAge = $ttl;
-	    //$this->bestBefore = http_date(strtotime('now') + $ttl);
 	    $this->bestBefore = gmdate("D, d M Y H:i:s", time() + $ttl) . " GMT";
 	    $result = $this->go_curl($location);
 	}
@@ -185,7 +179,6 @@ class router {
 	if (!$this->ch) die ($this->go_error('router error'));
 	
 	curl_setopt_array($this->ch,Array(
-	    //CURLOPT_URL			=>	$location,
 	    CURLOPT_RETURNTRANSFER	=>	1,
 	    CURLOPT_HEADER 		=>	0,
 	    CURLOPT_HEADERFUNCTION	=>	array(&$this,'read_curl_header'),
@@ -254,9 +247,9 @@ class router {
 	    if ($client) {
 		$cache_time = filemtime($this->currentPath."/cache/".$requestTag);
 		$this->maxAge = $cache_time + $ttl - $currentTime;
-		//$this->bestBefore = http_date($cache_time + $ttl);
 		$this->bestBefore = gmdate("D, d M Y H:i:s", $cache_time + $ttl) . " GMT";
 	    }
+	    $this->responseStatus = 200;
 	    return file_get_contents($this->currentPath."/cache/".$requestTag);
 	}
 	else return false;
@@ -274,11 +267,11 @@ class router {
 	$requestTag = md5($request);
 	$fh = fopen($this->currentPath."/cache/".$requestTag, 'w');
 	if (!$fh) return false;
-	if (fwrite($fh, $data)) return false;
+	if (!fwrite($fh, $data)) return false;
 	fclose($fh);
 	return true;
     }
-      
+    
     /**
      * Set header content type and cache
      */
@@ -336,20 +329,24 @@ class router {
 	}
     }
     
-
+    /**
+     * Get request attributes according to HTTP method.
+     *
+     * Also, result will be splitted to separate service tag to other values.
+     */
     private function get_request_attributes() {
-	$attributes = Array();
+	//$attributes = Array();
 	switch($this->originalRequestMethod) {
 	    case 'GET':
 	    case 'HEAD':
-		    $attributes = $_GET;
+		$attributes = $_GET;
 	    break;
 	    case 'POST':
-		    $attributes = $_POST;
+	        $attributes = $_POST;
 	    break;
 	    case 'PUT':
 	    case 'DELETE':
-		    parse_str(file_get_contents('php://input'), $attributes);
+		parse_str(file_get_contents('php://input'), $attributes);
 	    break;
 	}
 	if (isset($attributes['service'])) {
@@ -362,7 +359,9 @@ class router {
 	return Array($service, $attributes);
     }
     
-    
+    /**
+     * Get current url (http/https)
+     */
     private function get_current_url() {
 	$http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
 	$uri = $_SERVER['REQUEST_URI'];
@@ -403,7 +402,10 @@ class router {
 	}
 	
 	//if no service, die immediately
-	elseif (!$this->originalRequestService) die ($this->go_error('unspecified service'));
+	elseif (!$this->originalRequestService) {
+	    $this->responseStatus = 400;
+	    die ($this->go_error('unspecified service'));
+	}
 	
 	//if service not in routing table and autoroute disabled, die immediately
 	elseif (!isset($registered_services[$this->originalRequestService]) AND !AUTO_ROUTE) {
@@ -411,8 +413,7 @@ class router {
 	    $toReturn = $this->go_error("unknown service");
 	}
 	
-	//if service not in routing table and autoroute enabled, process request
-	//with default params
+	//if service not in routing table and autoroute enabled, process request with default params
 	elseif (
 	    (!isset($registered_services[$this->originalRequestService]) AND AUTO_ROUTE)
 		OR
@@ -436,14 +437,16 @@ class router {
 	    
 	    if (isset($registered_services[$this->originalRequestService]['customHeaders'])) $this->headersToThrow = $registered_services[$this->originalRequestService]['customHeaders'];
 	    
+	    $this->requestMethod = isset($registered_services[$this->originalRequestService]['forceMethod']) ? strtoupper($registered_services[$this->originalRequestService]['forceMethod']) : $this->originalRequestMethod;
+	    
 	    if (isset($registered_services[$this->originalRequestService]["accessControlAllowOrigin"]) AND
 		@$registered_services[$this->originalRequestService]["accessControlAllowOrigin"] != '*'AND $registered_services[$this->originalRequestService]["accessControlAllowOrigin"] != false AND
-		@$_SERVER['HTTP_ORIGIN'] != $registered_services[$this->originalRequestService]["accessControlAllowOrigin"]) {
+		@$_SERVER['HTTP_ORIGIN'] != $registered_services[$this->originalRequestService]["accessControlAllowOrigin"])
+	    {
 		$this->responseStatus = 403;
 		$toReturn = $this->go_error("Origin not allowed");
 	    }
-	    elseif ($registered_services[$this->originalRequestService]["policy"] == 'CLOAK') {
-		$this->requestMethod = isset($registered_services[$this->originalRequestService]['forceMethod']) ? strtoupper($registered_services[$this->originalRequestService]['forceMethod']) : $this->originalRequestMethod;
+	    elseif ($registered_services[$this->originalRequestService]["policy"] == 'CLOAK') {		
 		$toReturn = $this->go_cloak(
 		    $location,
 		    isset($registered_services[$this->originalRequestService]['cache']) ? $registered_services[$this->originalRequestService]['cache'] : AUTO_CACHE,
@@ -460,6 +463,9 @@ class router {
 	exit;
     }
     
+    /**
+     * Destructor; only kill curl channel if any
+     */
     public function __destruct() {
 	if ($this->ch !== false) curl_close($this->ch);
     }
