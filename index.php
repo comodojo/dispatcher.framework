@@ -84,8 +84,8 @@ class router {
     private $originalRequestAttributes = false;
     
     /**
-     * CURL request method (same of $requestMethod or different if 'forceMethod'
-     * specified in routing table)
+     * CURL request method (same of $originalRequestMethod, but may be different
+     * if 'forceMethod' specified in routing table for a service)
      */
     private $requestMethod = false;
     
@@ -223,7 +223,6 @@ class router {
 	$length = strlen($string);
 	return $length;
     }
-    
     
     /**
      * Get error message according to current transport

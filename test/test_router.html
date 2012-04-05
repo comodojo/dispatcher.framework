@@ -132,7 +132,7 @@
 			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET) - Invalid origin'}));
 			xhr_req('GET','example_hello_world_alias_origin',{service:'example_hello_world_alias_origin'});
 			
-			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET) - Invalid origin'}));
+			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example hello world (GET) - Forcing method to become POST'}));
 			xhr_req('GET','example_hello_world_alias_forcepost',{service:'example_hello_world_alias_forcepost', to:"POST"});
 			
 			dom.byId('testContent').appendChild(domConstruct.create('h2',{innerHTML: 'Example internal service AUTO-ROUTED (GET) - 400/200/200/404'}));
