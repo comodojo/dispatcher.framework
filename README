@@ -5,7 +5,7 @@
 @package	Comodojo Spare Parts
 @author         comodojo.org
 @copyright	2012 comodojo.org (info@comodojo.org)
-@version	{*_CURRENT_VERSION_*}
+@version	__CURRENT_VERSION__
 
 ABOUT
 =====
@@ -44,6 +44,8 @@ NEW IN 2.0
 - HTTP status codes support
 - HTTP Active Access-Control-Allow-Origin support
 - HTTP Allowed/Implemented method active check
+- HTTP method overriding in router
+- new CURL based tests
 
 NEW IN 1.1
 ==========
@@ -71,6 +73,10 @@ Log/statistics support      Y            N
 URL routing/cloaking        Y            N
 Server caching              Y            N
 Client caching              Y            Y
+Status code customization   Y		 Y
+GET/PUT/POST/DELETE supp.   Y		 Y
+CORS-Allow-Origin	    Y            Y
+Req. method transformation  Y		 N
 
 INSTALLATION
 ============

@@ -8,7 +8,7 @@
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
  * @copyright	2012 comodojo.org (info@comodojo.org)
- * @version	{*_CURRENT_VERSION_*}
+ * @version	__CURRENT_VERSION__
  *
  * @tutorial	please see README file
  * @example	please see files in "services" directory
@@ -397,8 +397,8 @@ class simpleDataRestDispatcher {
 	/**
 	 * Set transport according to request and default transport
 	 */
-	private function setTransport() {
-		if (isset($_GET['transport']) AND (@strtoupper($_GET['transport']) == "XML" OR @strtoupper($_GET['transport']) == "JSON") ) $this->transport = strtolower($_GET['transport']);
+	private function setTransport($attributes) {
+		if (isset($attributes['transport']) AND (@strtoupper($attributes['transport']) == "XML" OR @strtoupper($attributes['transport']) == "JSON") ) $this->transport = strtolower($attributes['transport']);
 	}
 	
 	/**
@@ -893,9 +893,9 @@ class simpleDataRestDispatcher {
 		}
 		
 		/****** DIRECT DISPATCHING ******/
-		$this->setTransport();
 		$methods = $this->getServiceImplementedMethods();
 		$attributes = $this->getAttributes();
+		$this->setTransport($attributes);
 		
 		//eval if service is active or closed
 		if (!$this->isServiceActive) {

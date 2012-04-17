@@ -1,6 +1,6 @@
 -- Comodojo SQL Dump
 -- Comodojo Spare Parts
--- version {*_CURRENT_VERSION_*}
+-- version __CURRENT_VERSION__
 -- http://www.comodojo.net
 --
 -- 2012 comodojo.org (info@comodojo.org)
