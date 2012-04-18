@@ -10,19 +10,22 @@
 ABOUT
 =====
 
-Comodojo simpleDataRestDispatcher is a small framework designed to make it easy
-to publish simple REST services starting from generic data sources (local files,
-remote files, database, ...). Framework currently support only services via GET
-method.
+Comodojo simpleDataRestDispatcher 2.0 is a small framework designed to make it
+easy to publish simple REST services starting from generic data sources (local
+files, remote files, database, É).
 
-The core is derived from Comodojo Core framework, and use the same structure of
+Framework supports natively HTTP GET, POST, PUT, DELETE, but can be hacked to
+work with other methods (see "HACKING FRAMEWORK" section).
+
+Framework core is derived from Comodojo Core, and use the same structure of
 comodojo kernel. Also XML and JSON encoder/decoder are the same.
 
 Main framework configuration is contained in configs/main-config.php file.
 
 Each service consists of two different files: the first (located in configs
 folder) contains basic configuration parameters (i.e. service name, debug, ...);
-second is the real service logic (in services folder). Files could be merged.
+second is the real service logic (in services folder). Files could be merged into
+one (that mean that config could be hardcoded in service logic).
 
 In addition, framework comes with a small URL router (index.php located in root
 folder) that can centralize requests to different services redirecting to them
@@ -44,7 +47,7 @@ NEW IN 2.0
 - HTTP status codes support
 - HTTP Active Access-Control-Allow-Origin support
 - HTTP Allowed/Implemented method active check
-- HTTP method overriding in router
+- HTTP method overriding/transformation in router
 - new CURL based tests
 
 NEW IN 1.1
@@ -81,7 +84,7 @@ Req. method transformation  Y		 N
 INSTALLATION
 ============
 
-Package version needs installation, that takes less than 10 minutes and
+Package version needs installation, that takes less than 1 minute and
 consists of:
  - (optional) create a database and user with grant on it
  - create comodojo_statistics table, where logs will be stored (you can find
@@ -104,38 +107,34 @@ Please refer to single files for parameters explanation:
 USAGE
 =====
 
-Defining a service is quite easy. First, you should create a service config file
-that should include:
+Defining a service is quite easy.
 
+First, you should create a service config file that should include:
+
+------------------------CODE------------------------
 $service_config = Array(
 
-        /*Name of the service*/
-	"serviceName"   =>	"example_service",
+	"serviceName"   	=>	"example_service",
         
-        /*Service on/off selector*/
-	"serviceActive"	=>	true,
+	"serviceActive"		=>	true,
         
-        /*Should service print debug information in error.log?*/
-	"isDebug"	=>	true,
+	"isDebug"		=>	true,
         
-        /*Should service print trace information in trace file?*/
-	"isTrace"	=>	true,
+	"isTrace"		=>	true,
         
-        /*Local trace file*/
-	"logFile"	=>	"example_service.log",
+        "logFile"		=>	"example_service.log",
 	
-	/*Cache time to live*/
-	"ttl"		=>	-1
+	"ttl"			=>	-1
         
+	"accessControlAllowOrigin"  =>  "comodojo.org"
 );
 
-/*Array of parameters that dispatcher will check on each requests
-  Uncomplete requests will receive a "conversation error" response.*/
 $service_required_parameters = Array("p");
+------------------------CODE------------------------
 
-Service_config parameters explanation:
+> $service_config parameters explanation:
 
-- serviceName (TEXT): It's the full service name
+- serviceName (STRING): It's the full service name
 
 - serviceActive (BOOL): if true, service will process requests, if false will return
   a "service closed" message (formatted according to current transport)
@@ -145,24 +144,34 @@ Service_config parameters explanation:
 - isTrace (BOOL): if true, service requests/response will be traced in specified log
   file (see below)
 
-- logFile (TEXT): name of the relative log file. If false and trace enabled, service
+- logFile (STRING): name of the relative log file. If false and trace enabled, service
   will log in default $logFile="global.log"
 
-- ttl (INT): control client-side caching; valid parameters are:
+- ttl (INTEGER): control client-side caching; valid parameters are:
   * -1 : no cache, no header sent to client
   *  0 : no cache, header sent to client (cache control, expires, max-age)
   * INT: cache on for (INT) seconds via header sent to clients
 
+- accessControlAllowOrigin (STRING): define valid origin in CORS requests
+
+> $service_required_parameters: an array of values that should be included in the
+  request, no matter the HTTP method; framework will check those values and, if
+  one or more or them are undefined, returns a 400 Bad-Request result.
+
 Then, you should create service file (in services folder) that contains the
-service logic. You can copy the file structure from examples and:
+service logic, using simple HTTP method pointer ($this->get, $this->put, ...).
+
+Also, if you donÕt need to specify method or simply you want some more flexible,
+customized logic, you can use the "logic" method, invoked on each request, no matter
+the type.
+
+You can copy the file structure from examples and:
 
  - include right service configuration file
- - change class name according to service name
- - write the service logic in logic() function (that's the most important part)
- - change the class init at the end of the file
+ - write the service logic (that's the most important part) according to your needs
  
-Service logic func, will be executed after checks, should not return any value
-BUT HAVE TO POPULATE two class variables:
+Service logic methods should not return any value BUT HAVE TO POPULATE two class
+variables:
 
  - $this->success  (bool)                           service end status
  - $this->result   (string|array|numeric|bool|...)  service result 
@@ -170,7 +179,8 @@ BUT HAVE TO POPULATE two class variables:
 A NOTE ON CACHING
 =================
 
-SimpleDataRestDispatcher support two levels caching.
+SimpleDataRestDispatcher support two levels caching when request are via GET method:
+
  - services-side: single service can, if specified, send cache header info to
    clients
  - router-side: router can cache requests in temp files, send cache header info
@@ -186,13 +196,32 @@ client cache) is recomended for services with lot requests or few changes
 during day (long ttl); client cache is suggested in any condition but for
 services with lots of changes in short unit of time.
 
+A NOTE ON ACCESS CONTROL
+========================
+
+CORS access control is a bit tricky; current dispatcher implements only the
+Access-Control-Allow-Origin header and check the HTTP-ORIGIN to handle requests.
+
+That mean:
+
+- if access-control value = "*", framework will return header = "*" for each
+  request
+- if access-control value = "some.domain", framework will check request HTTP ORIGIN
+  header and return a 403 Origin-not-allowed response in case of mismatch or a 200 OK
+  response containing access-control header
+- if access-control value = false, access control logic will be completely disabled
+
+Anyway, default value is "*"; it don't modify service behaviour and simply permit CORS
+requests.
+
 EXAMPLE SERVICES
 ================
 
 All example service are located in services folder.
 
- - example_service.php: simple hello-to service; it expects in input "hello_to"
-   parameter and replies greeting it.
+ - example_hello_world.php: simple hello-world service; it expects in input "to"
+   parameter and replies greeting it; there are different implementation of this
+   example to show framework capabilities.
  - example_database_based_service.php: output values from example table in
    database; no input parameter expected.
  - example_internal_service.php: output local file (text_1 or text_2 located in
@@ -212,6 +241,8 @@ All tests are located in test folder.
  - test_router.html: tests single services via url router and with http xhr
    requests (use dojotookit)
  - test_performance.html: router performance and caching test (use dojotookit)
+ 
+There are also new version of tests (.php instead of .html), still uncompleted.
 
 LICENSE
 =======
