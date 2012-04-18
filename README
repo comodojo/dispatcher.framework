@@ -12,7 +12,7 @@ ABOUT
 
 Comodojo simpleDataRestDispatcher 2.0 is a small framework designed to make it
 easy to publish simple REST services starting from generic data sources (local
-files, remote files, database, É).
+files, remote files, database, ...).
 
 Framework supports natively HTTP GET, POST, PUT, DELETE, but can be hacked to
 work with other methods (see "HACKING FRAMEWORK" section).
@@ -213,6 +213,11 @@ That mean:
 
 Anyway, default value is "*"; it don't modify service behaviour and simply permit CORS
 requests.
+
+HACKING FRAMEWORK
+=================
+
+(t.b.w.)
 
 EXAMPLE SERVICES
 ================
