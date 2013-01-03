@@ -49,6 +49,7 @@ NEW IN 2.0
 - HTTP Allowed/Implemented method active check
 - HTTP method overriding/transformation in router
 - new CURL based tests
+- CORS now supports multiple domains list (comma separated)
 
 NEW IN 1.1
 ==========
@@ -76,10 +77,10 @@ Log/statistics support      Y            N
 URL routing/cloaking        Y            N
 Server caching              Y            N
 Client caching              Y            Y
-Status code customization   Y		 Y
-GET/PUT/POST/DELETE supp.   Y		 Y
-CORS-Allow-Origin	    Y            Y
-Req. method transformation  Y		 N
+Status code customization   Y			 Y
+GET/PUT/POST/DELETE supp.   Y			 Y
+CORS-Allow-Origin	    	Y            Y
+Req. method transformation  Y			 N
 
 INSTALLATION
 ============
@@ -118,13 +119,13 @@ $service_config = Array(
         
 	"serviceActive"		=>	true,
         
-	"isDebug"		=>	true,
+	"isDebug"			=>	true,
         
-	"isTrace"		=>	true,
+	"isTrace"			=>	true,
         
-        "logFile"		=>	"example_service.log",
+	"logFile"			=>	"example_service.log",
 	
-	"ttl"			=>	-1
+	"ttl"				=>	-1
         
 	"accessControlAllowOrigin"  =>  "comodojo.org"
 );
@@ -161,7 +162,7 @@ $service_required_parameters = Array("p");
 Then, you should create service file (in services folder) that contains the
 service logic, using simple HTTP method pointer ($this->get, $this->put, ...).
 
-Also, if you donÕt need to specify method or simply you want some more flexible,
+Also, if you donï¿½t need to specify method or simply you want some more flexible,
 customized logic, you can use the "logic" method, invoked on each request, no matter
 the type.
 
@@ -209,6 +210,8 @@ That mean:
 - if access-control value = "some.domain", framework will check request HTTP ORIGIN
   header and return a 403 Origin-not-allowed response in case of mismatch or a 200 OK
   response containing access-control header
+- if access-control value is a list of domains, comma separated, framework will explode
+  values and match just like previous point
 - if access-control value = false, access control logic will be completely disabled
 
 Anyway, default value is "*"; it don't modify service behaviour and simply permit CORS

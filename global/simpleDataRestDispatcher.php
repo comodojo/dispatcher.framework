@@ -51,8 +51,8 @@ class simpleDataRestDispatcher {
 	 * Comma separated service implemented methods (or SUPPORTED_METHODS if
 	 * global logic)
 	 */
-        private $serviceImplementedMethods = false;
-        /********************** PRIVATE VARS **********************/
+	private $serviceImplementedMethods = false;
+	/********************** PRIVATE VARS **********************/
 	
 	/********************* PROTECTED VARS *********************/
 	/**
@@ -164,26 +164,21 @@ class simpleDataRestDispatcher {
         /******************** PPRIVATE METHODS ********************/
         
         /**
-	 * Debug someting into php error.log
+	 * Debug someting into php error log
 	 * 
 	 * @param	ARRAY|STRING|NUMERIC|BOOL   $message	Message to debug
 	 */
 	private function debug($message) {
 		if ($this->isDebug || GLOBAL_DEBUG_ENABLED) {
 			if (is_array($message)) {
-				foreach ($message as $key=>$value) {
-					if (is_array($value)) {
-						error_log("(DEBUG): ".$key." = Array(");
-						$this->debug($value);
-						error_log(")");
-					}
-					else error_log("(DEBUG): ".$key." = ".$value);
-				}
+				error_log("(DEBUG): ".$key." = Array(");
+				$this->debug_helper($message);
+				error_log(")");
 			}
 			elseif (is_object($message)) {
 				$this->debug($this->stdObj2array($message));
 			}
-			elseif(is_string($message) || is_bool($message) || is_numeric($message)) {
+			elseif(is_scalar($message)) {
 				error_log("(DEBUG): ".$message);
 			}
 			else {
@@ -192,6 +187,20 @@ class simpleDataRestDispatcher {
 		}
 	}
         
+	
+	private function debug_helper($value, $margin='') {
+		foreach ($value as $key => $value) {
+			if (is_array($value)) {
+				error_log($margin.$key." = Array(");
+				$this->debug_helper($value, $margin+='   ');
+				error_log($margin.")");
+			}
+			else {
+				error_log($margin.$key." = ".$value.",");
+			}
+		}
+	}
+
         /**
 	 * Trace request/response in the specified log file
 	 */
@@ -903,13 +912,13 @@ class simpleDataRestDispatcher {
 			$this->toReturn = $this->returnData(false,"service closed");
 		}
 		//eval if service is limited to some origind AND client send header orign information
-		elseif (($this->accessControlAllowOrigin != "*" AND $this->accessControlAllowOrigin != false) AND @$_SERVER['HTTP_ORIGIN'] != $this->accessControlAllowOrigin) {
+		elseif (($this->accessControlAllowOrigin != "*" AND $this->accessControlAllowOrigin != false) AND in_array(@$_SERVER['HTTP_ORIGIN'],explode(',',$this->accessControlAllowOrigin))) {
 			$this->statusCode = 403;
 			$this->toReturn = $this->returnData(false,"Origin not allowed");
 		}
 		//eval if service request method is allowed from framework
 		elseif (!in_array($_SERVER['REQUEST_METHOD'], explode(',',SUPPORTED_METHODS))) {
-			$this->statusCode = 400;
+			$this->statusCode = 405;
 			$this->toReturn = NULL;
 		}
 		//eval if service request method match one of service implemented methods
@@ -924,9 +933,9 @@ class simpleDataRestDispatcher {
 		}
 		else {
 			$exec = strtolower($_SERVER['REQUEST_METHOD']);
-			if (method_exists($this, $exec)) $this::$exec($attributes);
+			if (method_exists($this, $exec)) $this->$exec($attributes);
 			else $this->logic($attributes,$_SERVER['REQUEST_METHOD']);
-			if ($this->accessControlAllowOrigin != '*' AND $this->accessControlAllowOrigin != false) header('Access-Control-Allow-Origin: '.$this->accessControlAllowOrigin);
+			if ($this->accessControlAllowOrigin != '*' AND $this->accessControlAllowOrigin != false) header('Access-Control-Allow-Origin: './*$this->accessControlAllowOrigin*/@$_SERVER['HTTP_ORIGIN']);
 			if (is_null($this->result)) {
 				$this->statusCode = !$this->statusCode ? 204 : $this->statusCode;
 				$this->toReturn = NULL;
