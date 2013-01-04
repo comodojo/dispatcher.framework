@@ -6,7 +6,7 @@
 * 
 * @package	Comodojo Spare Parts
 * @author	comodojo.org
-* @copyright	2012 comodojo.org (info@comodojo.org)
+* @copyright	2013 comodojo.org (info@comodojo.org)
 * @version	*_BUILD_VERSION_*
 * 
 * LICENSE:
@@ -103,21 +103,46 @@ function go_curl($method, $location, $attributes=false, $origin=false) {
 		</div>
 	
 		<div id="testContent">
-			<h1>This page will tests different example services.</h1>
+			<h1>DIFFERENT HTTP METHODS REQUESTS.</h1>
 			<h2>Example hello world (GET,PUT,POST,DELETE)</h2>
 			<?php go_curl('GET','example_hello_world.php',Array('to'=>'Comodojo-GET')); ?>
 			<?php go_curl('PUT','example_hello_world.php',Array('to'=>'Comodojo-PUT')); ?>
 			<?php go_curl('POST','example_hello_world.php',Array('to'=>'Comodojo-POST')); ?>
 			<?php go_curl('DELETE','example_hello_world.php',Array('to'=>'Comodojo-DELETE')); ?>
+			<h1>NOT IMPLEMENTED HTTP METHODS</h1>
 			<h2>Example hello world (POST:200,GET/PUT/DELETE:501)</h2>
 			<?php go_curl('GET','example_hello_world_post_only.php',Array('to'=>'Comodojo-GET')); ?>
 			<?php go_curl('PUT','example_hello_world_post_only.php',Array('to'=>'Comodojo-PUT')); ?>
 			<?php go_curl('POST','example_hello_world_post_only.php',Array('to'=>'Comodojo-POST')); ?>
 			<?php go_curl('DELETE','example_hello_world_post_only.php',Array('to'=>'Comodojo-DELETE')); ?>
+			<h1>MANAGING CORS ORIGIN</h1>
 			<h2>Example hello world CORS (403 - Origin not allowed)</h2>
 			<?php go_curl('GET','example_hello_world_cors_ac.php',Array('to'=>'Comodojo-GET')); ?>
 			<h2>Example hello world CORS (200 - Origin = 'comodojo.org' simulation)</h2>
 			<?php go_curl('GET','example_hello_world_cors_ac.php',Array('to'=>'Comodojo-GET'),'comodojo.org'); ?>
+			<h1>EXTERNAL REQUESTS</h1>
+			<h2>Example external get</h2>
+			<?php go_curl('GET','example_external_service.php',Array('p'=>2)); ?>
+			<h1>INTERNAL FILE REQUESTS</h1>
+			<h2>Example internal get of file 1</h2>
+			<?php go_curl('GET','example_internal_service.php',Array('text'=>1)); ?>
+			<h2>Example internal get of file 2</h2>
+			<?php go_curl('GET','example_internal_service.php',Array('text'=>2)); ?>
+			<h2>Example internal get of file 3 (404 - FILE NOT FOUND)</h2>
+			<?php go_curl('GET','example_internal_service.php',Array('text'=>3)); ?>
+			<h2>Example internal get of file 1 with unimplemented method (501)</h2>
+			<?php go_curl('POST','example_internal_service.php',Array('text'=>1)); ?>
+			<h1>WORKING WITH DATABASE VIA HTTP METHODS</h1>
+			<h2>Read from database via HTTP GET</h2>
+			<?php go_curl('GET','example_database_based_service.php',Array()); ?>
+			<h2>Storing values via HTTP PUT</h2>
+			<?php go_curl('PUT','example_database_based_service.php',Array("top"=>100,"middle"=>60,"bottom"=>40)); ?>
+			<h2>Storing values via HTTP POST</h2>
+			<?php go_curl('POST','example_database_based_service.php',Array("top"=>"inserted","middle"=>"via","bottom"=>"post")); ?>
+			<h2>Read newly created values</h2>
+			<?php go_curl('GET','example_database_based_service.php',Array()); ?>
+			<h2>Deleting newly created values via HTTP DELETE</h2>
+			<?php go_curl('DELETE','example_database_based_service.php',Array()); ?>
 		</div>
 		
 		<div id="testFooter">

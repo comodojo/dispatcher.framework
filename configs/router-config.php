@@ -11,7 +11,7 @@
  *
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
- * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @copyright	2013 comodojo.org (info@comodojo.org)
  * @version	__CURRENT_VERSION__
  */
 

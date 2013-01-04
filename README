@@ -4,7 +4,7 @@
 
 @package	Comodojo Spare Parts
 @author         comodojo.org
-@copyright	2012 comodojo.org (info@comodojo.org)
+@copyright	2013 comodojo.org (info@comodojo.org)
 @version	__CURRENT_VERSION__
 
 ABOUT
@@ -50,6 +50,7 @@ NEW IN 2.0
 - HTTP method overriding/transformation in router
 - new CURL based tests
 - CORS now supports multiple domains list (comma separated)
+- Support for PostgreSQL
 
 NEW IN 1.1
 ==========
@@ -77,10 +78,10 @@ Log/statistics support      Y            N
 URL routing/cloaking        Y            N
 Server caching              Y            N
 Client caching              Y            Y
-Status code customization   Y			 Y
-GET/PUT/POST/DELETE supp.   Y			 Y
-CORS-Allow-Origin	    	Y            Y
-Req. method transformation  Y			 N
+Status code customization   Y		 Y
+GET/PUT/POST/DELETE supp.   Y		 Y
+CORS-Allow-Origin	    Y            Y
+Req. method transformation  Y		 N
 
 INSTALLATION
 ============
@@ -115,19 +116,19 @@ First, you should create a service config file that should include:
 ------------------------CODE------------------------
 $service_config = Array(
 
-	"serviceName"   	=>	"example_service",
+	"serviceName"   		=> "example_service",
         
-	"serviceActive"		=>	true,
+	"serviceActive"			=> true,
         
-	"isDebug"			=>	true,
+	"isDebug"			=> true,
         
-	"isTrace"			=>	true,
+	"isTrace"			=> true,
         
-	"logFile"			=>	"example_service.log",
+	"logFile"			=> "example_service.log",
 	
-	"ttl"				=>	-1
+	"ttl"				=> -1
         
-	"accessControlAllowOrigin"  =>  "comodojo.org"
+	"accessControlAllowOrigin"	=> "comodojo.org"
 );
 
 $service_required_parameters = Array("p");
@@ -162,7 +163,7 @@ $service_required_parameters = Array("p");
 Then, you should create service file (in services folder) that contains the
 service logic, using simple HTTP method pointer ($this->get, $this->put, ...).
 
-Also, if you don�t need to specify method or simply you want some more flexible,
+Also, if you don't need to specify method or simply you want some more flexible,
 customized logic, you can use the "logic" method, invoked on each request, no matter
 the type.
 

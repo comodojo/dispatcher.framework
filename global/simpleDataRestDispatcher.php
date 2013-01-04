@@ -363,6 +363,17 @@ class simpleDataRestDispatcher {
                                         $localDbHandler = $error;
                                 }
                                 break;
+			
+			case ("POSTGRESQL"):
+				$dsn = "host=".$dbHost." port=".$dbPort." dbname=".$dbName." user=".$dbUser." password=".$dbPass;
+				$localDbHandler = @pg_connect($dsn);
+                                if (!$localDbHandler) {
+                                        $error = pg_last_error();
+                                        $this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+                                        $connectionStatus = false;
+                                        $localDbHandler = $error;
+                                }
+                                break;
                 }
                 
                 return Array($connectionStatus,$localDbHandler);
@@ -380,8 +391,17 @@ class simpleDataRestDispatcher {
 			$i = 0;
 			$myResult = array();
 			$myResultLength = mysql_num_rows($data);
-			while($i < mysql_num_rows($data)) {
+			while($i < $myResultLength) {
 				$myResult[$i] = mysql_fetch_array($data, MYSQL_ASSOC);
+				$i++;
+			}			
+		}
+		elseif (is_resource($data) AND @get_resource_type($data) == "pgsql result") {
+			$i = 0;
+			$myResult = array();
+			$myResultLength = pg_num_rows($data);
+			while($i < $myResultLength) {
+				$myResult[$i] = pg_fetch_assoc($data);
 				$i++;
 			}			
 		}
@@ -651,7 +671,6 @@ class simpleDataRestDispatcher {
                 
                 if (!$connection[0]) {
                     throw new Exception($connection[1]);
-                    return null;
                 }
                 else {
                     return $connection[1];
@@ -679,7 +698,6 @@ class simpleDataRestDispatcher {
                                 $_error = mysql_errno()." - ".mysql_error();
                                 $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
                                 throw new Exception($_error);
-                                return null;
                         }
                         $toReturn = $this->_buildResultSet($response,!$returnId ? false : mysql_insert_id($dbHandler));
                 }
@@ -692,7 +710,6 @@ class simpleDataRestDispatcher {
                                 $_error = $_errorInfo[1]." - ".$_errorInfo[2];
                                 $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
                                 throw new Exception($_error);
-                                return null;
                         }
                         $toReturn = $this->_buildResultSet($response,!$returnId ? false : $dbHandler->lastInsertId());
                 }
@@ -702,7 +719,19 @@ class simpleDataRestDispatcher {
                                 $_error = db2_stmt_error();
                                 $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
                                 throw new Exception($_error);
-                                return null;
+                        }
+                        $_response = Array();
+                        while ($row = db2_fetch_assoc($response)) {
+                                array_push($_response, $row);
+                        }
+                        $toReturn = $this->_buildResultSet($_response,!$returnId ? false : db2_last_insert_id($dbHandler));
+                }
+		elseif ($dbDataModel == "POSTGRESQL") {
+                        $response = pg_query($dbHandler,$query);
+                        if (!$response) {
+                                $_error = pg_last_error();
+                                $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
+                                throw new Exception($_error);
                         }
                         $_response = Array();
                         while ($row = db2_fetch_assoc($response)) {
@@ -714,7 +743,6 @@ class simpleDataRestDispatcher {
                         $_error = "Unknown dbDataModel";
                         $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
                         throw new Exception($_error);
-                        return null;
                 }
                 return $toReturn;
         }
@@ -748,6 +776,9 @@ class simpleDataRestDispatcher {
                                 break;
                         case ("DBLIB_PDO"):
                                 unset($dbHandler);
+                                break;
+			case ("POSTGRESQL"):
+                                pg_close($dbHandler);
                                 break;
                         default:
                                 return false;
