@@ -122,7 +122,7 @@ function go_curl($method, $location, $attributes=false, $origin=false) {
 		
 		<div id="testFooter">
 		
-			<p>© 2012 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
+			<p>&copy; 2013 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
 		
 		</div>
 	

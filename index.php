@@ -395,7 +395,7 @@ class router {
 	/*********************/
 	
 	//if GLOBALLY NOT AUTHORIZED, DIE IMMEDIATELY
-	if (DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != '*' AND DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != false AND @$_SERVER['HTTP_ORIGIN'] != DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN) {
+	if (DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != '*' AND DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN != false AND !in_array(@$_SERVER['HTTP_ORIGIN'],explode(',',DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN))) {
 	    $this->responseStatus = 403;
 	    $toReturn = $this->go_error("Origin not allowed");
 	}
@@ -440,7 +440,7 @@ class router {
 	    
 	    if (isset($registered_services[$this->originalRequestService]["accessControlAllowOrigin"]) AND
 		@$registered_services[$this->originalRequestService]["accessControlAllowOrigin"] != '*'AND $registered_services[$this->originalRequestService]["accessControlAllowOrigin"] != false AND
-		@$_SERVER['HTTP_ORIGIN'] != $registered_services[$this->originalRequestService]["accessControlAllowOrigin"])
+		!in_array(@$_SERVER['HTTP_ORIGIN'],explode(',',$registered_services[$this->originalRequestService]["accessControlAllowOrigin"])))
 	    {
 		$this->responseStatus = 403;
 		$toReturn = $this->go_error("Origin not allowed");

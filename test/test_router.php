@@ -130,12 +130,12 @@ function go_curl($method, $attributes=false, $origin=false) {
 			<?php go_curl('GET',Array('p'=>2,'service'=>'example_external_service_cached_srv')); ?>
 			<h1>FORCING METHOD REDEFINITION</h1>
 			<h2>Sending GET request; it should become a POST request </h2>
-			<?php go_curl('GET',Array('to'=>'Comodojo-GET','service'=>'example_hello_world_alias_forcepost')); ?>
+			<?php go_curl('GET',Array('to'=>'Comodojo-GET-to-POST','service'=>'example_hello_world_alias_forcepost')); ?>
 		</div>
 		
 		<div id="testFooter">
 		
-			<p>© 2012 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
+			<p>&copy; 2013 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
 		
 		</div>
 	

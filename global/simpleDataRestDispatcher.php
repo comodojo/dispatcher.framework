@@ -912,7 +912,7 @@ class simpleDataRestDispatcher {
 			$this->toReturn = $this->returnData(false,"service closed");
 		}
 		//eval if service is limited to some origind AND client send header orign information
-		elseif (($this->accessControlAllowOrigin != "*" AND $this->accessControlAllowOrigin != false) AND in_array(@$_SERVER['HTTP_ORIGIN'],explode(',',$this->accessControlAllowOrigin))) {
+		elseif (($this->accessControlAllowOrigin != "*" AND $this->accessControlAllowOrigin != false) AND !in_array(@$_SERVER['HTTP_ORIGIN'],explode(',',$this->accessControlAllowOrigin))) {
 			$this->statusCode = 403;
 			$this->toReturn = $this->returnData(false,"Origin not allowed");
 		}
