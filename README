@@ -4,7 +4,7 @@
 
 @package	Comodojo Spare Parts
 @author         comodojo.org
-@copyright	2013 comodojo.org (info@comodojo.org)
+@copyright	2011-2013 comodojo.org (info@comodojo.org)
 @version	__CURRENT_VERSION__
 
 ABOUT
@@ -154,7 +154,8 @@ $service_required_parameters = Array("p");
   *  0 : no cache, header sent to client (cache control, expires, max-age)
   * INT: cache on for (INT) seconds via header sent to clients
 
-- accessControlAllowOrigin (STRING): define valid origin in CORS requests
+- accessControlAllowOrigin (STRING of comma-separated domains): define valid origin
+  in CORS requests
 
 > $service_required_parameters: an array of values that should be included in the
   request, no matter the HTTP method; framework will check those values and, if
@@ -228,30 +229,33 @@ EXAMPLE SERVICES
 
 All example service are located in services folder.
 
- - example_hello_world.php: simple hello-world service; it expects in input "to"
-   parameter and replies greeting it; there are different implementation of this
-   example to show framework capabilities.
- - example_database_based_service.php: output values from example table in
-   database; no input parameter expected.
- - example_internal_service.php: output local file (text_1 or text_2 located in
-   others folder) according to numeric input parameter "text".
+ - example_database_based_service.php: interact with local database via HTTP methods.
+ 
  - example_external_service.php: output lorem ipsum text from loripsum.net;
-   expects "p" input parameters used to set number of patagraphs to generate.
+ 
+ - example_internal_service.php: output local file.
+   
+ - example_hello_world.php: simple hello-world service.
+ 
+ - example_hello_world_cors.php: simple hello-world service with CORS check.
+ 
+ - example_hello_world_logic.php: simple hello-world service with logic() method.
+ 
+ - example_hello_world_post_only.php: simple hello-world service with POST support only.
 
 TESTS
 =====
 
 All tests are located in test folder.
 
- - test_php_functions.php: tells you if your php installation are compliant
-   to functions and extensions required by framework.
- - test_services.html: tests single services directly with http xhr requests (use
-   dojotoolkit).
- - test_router.html: tests single services via url router and with http xhr
-   requests (use dojotookit)
- - test_performance.html: router performance and caching test (use dojotookit)
- 
-There are also new version of tests (.php instead of .html), still uncompleted.
+ - test_php_functions.php: check if your php installation are compliant
+   to functions, extensions and grants required by framework.
+
+ - test_services.php: tests services directly, without router.
+
+ - test_router.php: test router and it's extra functionalities (like caching).
+
+ - test_xhr.html: test framework using XHR javascript requests (with dojotookit).
 
 LICENSE
 =======

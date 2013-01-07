@@ -1,29 +1,29 @@
 <?php
 
 /* test_services.php
-* 
-* Test example services included in package using server side requests.
-* 
-* @package	Comodojo Spare Parts
-* @author	comodojo.org
-* @copyright	2013 comodojo.org (info@comodojo.org)
-* @version	*_BUILD_VERSION_*
-* 
-* LICENSE:
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Affero General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * 
+ * Test example services included in package using server side requests.
+ * 
+ * @package	Comodojo Spare Parts
+ * @author	comodojo.org
+ * @copyright	2011-2013 comodojo.org (info@comodojo.org)
+ * @version	__CURRENT_VERSION__
+ * 
+ * LICENSE:
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 function go_curl($method, $location, $attributes=false, $origin=false) {
     
@@ -109,6 +109,9 @@ function go_curl($method, $location, $attributes=false, $origin=false) {
 			<?php go_curl('PUT','example_hello_world.php',Array('to'=>'Comodojo-PUT')); ?>
 			<?php go_curl('POST','example_hello_world.php',Array('to'=>'Comodojo-POST')); ?>
 			<?php go_curl('DELETE','example_hello_world.php',Array('to'=>'Comodojo-DELETE')); ?>
+			<h2>Example hello world with logic() (HTTP method independent)</h2>
+			<?php go_curl('PUT','example_hello_world_logic.php',Array('to'=>'Comodojo-PUT')); ?>
+			<?php go_curl('DELETE','example_hello_world_logic.php',Array('to'=>'Comodojo-DELETE')); ?>
 			<h1>NOT IMPLEMENTED HTTP METHODS</h1>
 			<h2>Example hello world (POST:200,GET/PUT/DELETE:501)</h2>
 			<?php go_curl('GET','example_hello_world_post_only.php',Array('to'=>'Comodojo-GET')); ?>
@@ -138,7 +141,7 @@ function go_curl($method, $location, $attributes=false, $origin=false) {
 			<h2>Storing values via HTTP PUT</h2>
 			<?php go_curl('PUT','example_database_based_service.php',Array("top"=>100,"middle"=>60,"bottom"=>40)); ?>
 			<h2>Storing values via HTTP POST</h2>
-			<?php go_curl('POST','example_database_based_service.php',Array("top"=>"inserted","middle"=>"via","bottom"=>"post")); ?>
+			<?php go_curl('POST','example_database_based_service.php',Array("top"=>10,"middle"=>6,"bottom"=>4)); ?>
 			<h2>Read newly created values</h2>
 			<?php go_curl('GET','example_database_based_service.php',Array()); ?>
 			<h2>Deleting newly created values via HTTP DELETE</h2>
@@ -147,7 +150,7 @@ function go_curl($method, $location, $attributes=false, $origin=false) {
 		
 		<div id="testFooter">
 		
-			<p>&copy; 2013 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
+			<p>&copy; 2011-2013 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
 		
 		</div>
 	

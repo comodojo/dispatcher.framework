@@ -8,8 +8,8 @@
  * 
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
- * @copyright	2013 comodojo.org (info@comodojo.org)
- * @version	*_BUILD_VERSION_*
+ * @copyright	2011-2013 comodojo.org (info@comodojo.org)
+ * @version	__CURRENT_VERSION__
  * 
  * LICENSE:
  * 
@@ -151,7 +151,7 @@ function check_folder_cache_permissions() {
 		
 		<div id="testFooter">
 		
-			<p>&copy; 2013 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
+			<p>&copy; 2011-2013 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
 		
 		</div>
 	

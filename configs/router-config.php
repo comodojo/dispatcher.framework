@@ -11,7 +11,7 @@
  *
  * @package	Comodojo Spare Parts
  * @author	comodojo.org
- * @copyright	2013 comodojo.org (info@comodojo.org)
+ * @copyright	2011-2013 comodojo.org (info@comodojo.org)
  * @version	__CURRENT_VERSION__
  */
 
@@ -177,7 +177,7 @@ define('DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN', false);
 $registered_services = Array(
     
     'example_hello_world'                           =>  Array("target"=>'example_hello_world.php', "policy"=>'ROUTE'),
-    'example_hello_world_alias_301'                 =>  Array("target"=>'example_hello_world.php', "policy"=>'ROUTE', "redirectStatusCode"=>301),
+    'example_hello_world_alias_307'                 =>  Array("target"=>'example_hello_world.php', "policy"=>'ROUTE', "redirectStatusCode"=>307),
     'example_hello_world_alias'                     =>  Array("target"=>'example_hello_world.php', "policy"=>'CLOAK'),
     'example_hello_world_alias_cached'              =>  Array("target"=>'example_hello_world.php', "policy"=>'CLOAK', "cache"=>'BOTH', "ttl"=>600),
     'example_hello_world_alias_origin'              =>  Array("target"=>'example_hello_world.php', "policy"=>'CLOAK', "accessControlAllowOrigin"=>"comodojo.org"),

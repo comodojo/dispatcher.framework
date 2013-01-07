@@ -3,29 +3,29 @@
 <?php
 
 /* test_router.php
-* 
-* Test URL router using server side requests.
-* 
-* @package	Comodojo Spare Parts
-* @author	comodojo.org
-* @copyright	2013 comodojo.org (info@comodojo.org)
-* @version	*_BUILD_VERSION_*
-* 
-* LICENSE:
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Affero General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * 
+ * Test URL router using server side requests.
+ * 
+ * @package	Comodojo Spare Parts
+ * @author	comodojo.org
+ * @copyright	2011-2013 comodojo.org (info@comodojo.org)
+ * @version	__CURRENT_VERSION__
+ * 
+ * LICENSE:
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 function go_curl($method, $attributes=false, $origin=false) {
     
@@ -135,7 +135,7 @@ function go_curl($method, $attributes=false, $origin=false) {
 		
 		<div id="testFooter">
 		
-			<p>&copy; 2013 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
+			<p>&copy; 2011-2013 comodojo.org | <a href="http://www.comodojo.org" target="_blank">comodojo.org</a> | All Rights Reserved | Distributed under <a href="http://www.gnu.org/copyleft/gpl.html" target="_blank">GPL V3</a> terms</p>
 		
 		</div>
 	
