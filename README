@@ -18,21 +18,24 @@ Framework supports natively HTTP GET, POST, PUT, DELETE, but can be hacked to
 work with other methods (see "HACKING FRAMEWORK" section).
 
 Framework core is derived from Comodojo Core, and use the same structure of
-comodojo kernel. Also XML and JSON encoder/decoder are the same.
+comodojo kernel (release 1.0 on the way).Also XML and JSON encoder/decoder are
+the same.
 
 Main framework configuration is contained in configs/main-config.php file.
 
 Each service consists of two different files: the first (located in configs
 folder) contains basic configuration parameters (i.e. service name, debug, ...);
-second is the real service logic (in services folder). Files could be merged into
-one (that mean that config could be hardcoded in service logic).
+the second one contains real service logic (and it's located in services folder).
+Files could be merged into one (that means that configuration could be hardcoded
+in service logic, although it's not recommended).
 
-In addition, framework comes with a small URL router (index.php located in root
-folder) that can centralize requests to different services redirecting to them
-or masquerading results in agreement to what declared in routing table
-(contained in configs/router-config.php). It can also route/cloak requests to
-services not declared in routing table (autoroute) if present in services
-folder.
+In addition, framework comes with a URL-to-service router (index.php located in
+root folder) that can centralize requests to different services, redirecting or
+masquerading (cloaking) results in agreement to what declared in routing table
+(contained in configs/router-config.php).
+
+It can also route/cloak requests to not explicitly declared services (autoroute)
+using the service file name.
 
 Comodojo simpleDataRestDispatcher is distributed in two flavours:
  - package version: complete version, needs installation
@@ -102,14 +105,14 @@ consists of:
 CONFIGURATION PARAMETERS
 ========================
 
-Please refer to single files for parameters explanation:
+Please refer to single configuration files for parameters explanation:
  - main-config.php
  - router-config.php
 
 USAGE
 =====
 
-Defining a service is quite easy.
+Defining a new service is quite easy.
 
 First, you should create a service config file that should include:
 
@@ -136,7 +139,7 @@ $service_required_parameters = Array("p");
 
 > $service_config parameters explanation:
 
-- serviceName (STRING): It's the full service name
+- serviceName (STRING): the service name
 
 - serviceActive (BOOL): if true, service will process requests, if false will return
   a "service closed" message (formatted according to current transport)
@@ -146,8 +149,8 @@ $service_required_parameters = Array("p");
 - isTrace (BOOL): if true, service requests/response will be traced in specified log
   file (see below)
 
-- logFile (STRING): name of the relative log file. If false and trace enabled, service
-  will log in default $logFile="global.log"
+- logFile (STRING): name of the relative log file. If false and trace is enabled,
+  service will log in default $logFile="global.log"
 
 - ttl (INTEGER): control client-side caching; valid parameters are:
   * -1 : no cache, no header sent to client
@@ -162,18 +165,19 @@ $service_required_parameters = Array("p");
   one or more or them are undefined, returns a 400 Bad-Request result.
 
 Then, you should create service file (in services folder) that contains the
-service logic, using simple HTTP method pointer ($this->get, $this->put, ...).
+service logic.
 
-Also, if you don't need to specify method or simply you want some more flexible,
+You can yse simple HTTP methods pointers ($this->get, $this->put, ...) or, if you
+don't need to discriminate http methods or simply you want some more flexible,
 customized logic, you can use the "logic" method, invoked on each request, no matter
-the type.
+the type, if specific method pointer is not declared.
 
-You can copy the file structure from examples and:
+You can also copy the file structure from examples and:
 
  - include right service configuration file
  - write the service logic (that's the most important part) according to your needs
  
-Service logic methods should not return any value BUT HAVE TO POPULATE two class
+Service logic methods should not return any value BUT they HAVE TO POPULATE two class
 variables:
 
  - $this->success  (bool)                           service end status
@@ -182,28 +186,30 @@ variables:
 A NOTE ON CACHING
 =================
 
-SimpleDataRestDispatcher support two levels caching when request are via GET method:
+SimpleDataRestDispatcher support two levels of caching (when request are via GET
+method):
 
  - services-side: single service can, if specified, send cache header info to
    clients
  - router-side: router can cache requests in temp files, send cache header info
    to clients or both
 
-Having said this, router can ensure best performances but first request can be
-heavy to process and in addition embedded curl http call is real slow.
-In the other hand, client caching is free but lots client in short unit of time
-will produce heavy traffic and lots service processing cicle.
+Having said this, router cache can ensure best performances but first request can be
+heavy to process and, in addition, embedded curl http call could be slow.
+In the other hand, client caching is free, but lots client in short unit of time
+will produce also heavy traffic and lots of service processing cicles.
 
-That's mean that, if you need this feature, server caching (with or without
-client cache) is recomended for services with lot requests or few changes
-during day (long ttl); client cache is suggested in any condition but for
-services with lots of changes in short unit of time.
+That means that, if you need this feature, server caching (with or without client
+cache) is recomended for services with lots of requests or few changes during day
+(long ttl); client cache is suggested in any condition but for services with lots
+of changes in short units of time.
 
 A NOTE ON ACCESS CONTROL
 ========================
 
-CORS access control is a bit tricky; current dispatcher implements only the
-Access-Control-Allow-Origin header and check the HTTP-ORIGIN to handle requests.
+CORS access control is a really simple way to enable cross origin request.
+The current version of dispatcher implements only the Access-Control-Allow-Origin
+header, and it checks the HTTP-ORIGIN header to handle requests.
 
 That mean:
 
@@ -213,11 +219,11 @@ That mean:
   header and return a 403 Origin-not-allowed response in case of mismatch or a 200 OK
   response containing access-control header
 - if access-control value is a list of domains, comma separated, framework will explode
-  values and match just like previous point
+  values and match HTTP-ORIGIN just like previous point
 - if access-control value = false, access control logic will be completely disabled
 
 Anyway, default value is "*"; it don't modify service behaviour and simply permit CORS
-requests.
+requests from any domain.
 
 HACKING FRAMEWORK
 =================
@@ -248,14 +254,14 @@ TESTS
 
 All tests are located in test folder.
 
- - test_php_functions.php: check if your php installation are compliant
+ - test_php_functions.php: checks if your php installation are compliant
    to functions, extensions and grants required by framework.
 
  - test_services.php: tests services directly, without router.
 
- - test_router.php: test router and it's extra functionalities (like caching).
+ - test_router.php: tests router and it's extra functionalities (like caching).
 
- - test_xhr.html: test framework using XHR javascript requests (with dojotookit).
+ - test_xhr.html: tests framework using XHR javascript requests (with dojotookit).
 
 LICENSE
 =======
