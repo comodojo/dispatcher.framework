@@ -3,7 +3,7 @@
 -- version __CURRENT_VERSION__
 -- http://www.comodojo.net
 --
--- 2013 comodojo.org (info@comodojo.org)
+-- __COPYRIGHT__ comodojo.org (info@comodojo.org)
 --
 --
 -- This is a sql dump you can use to create main database

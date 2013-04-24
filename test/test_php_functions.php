@@ -6,10 +6,10 @@
  * Show some useful information about function required by
  * simpleDataRestDispatcher.
  * 
- * @package	Comodojo Spare Parts
- * @author	comodojo.org
- * @copyright	2011-2013 comodojo.org (info@comodojo.org)
- * @version	__CURRENT_VERSION__
+ * @package 	Comodojo Spare Parts
+ * @author 		comodojo.org
+ * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version 	__CURRENT_VERSION__
  * 
  * LICENSE:
  * 
@@ -25,7 +25,6 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 function check_JSON() {
@@ -42,6 +41,10 @@ function check_curl() {
 
 function check_db_mysql() {
 	return (function_exists("mysql_connect"));
+}
+
+function check_db_mysqli() {
+	return (function_exists("mysqli_connect"));
 }
 
 function check_db_mysql_pdo() {
@@ -111,11 +114,14 @@ function check_folder_cache_permissions() {
 			else echo '<div class="warning">No SimpleXML extension: services will be available only with JSON transport and XML requests will produce errors!</div>';
 			
 			if (check_curl()) echo '<div class="note">Curl php extension loaded!</div>';
-			else echo '<div class="warning">No curl extension: url router will work only in \'ROUTE\' mode and \'CLOAK\' policy will produce errors!</div>';
+			else echo '<div class="warning">No curl extension: url router will work only in \'ROUTE\' mode and \'CLOAK\' policy will produce errors. Also curl-based tests will fail.</div>';
 			
 			if (check_db_mysql()) echo '<div class="note">MySQL php extension loaded!</div>';
 			else echo '<div class="important">No MySQL php extension installed: it will not be possible to connect to mysql database with native libs.</div>';
 			
+			if (check_db_mysqli()) echo '<div class="note">MySQLi php extension loaded!</div>';
+			else echo '<div class="important">No MySQLi php extension installed: it will not be possible to connect to mysql database with improved libs.</div>';
+
 			if (check_db_mysql_pdo()) echo '<div class="note">MySQL PDO extension loaded!</div>';
 			else echo '<div class="important">No MySQL PDO installed: it will not be possible to connect to mysql database with PDO libs.</div>';
 			

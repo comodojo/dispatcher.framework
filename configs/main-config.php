@@ -6,10 +6,10 @@
  * This file is intended to be a starting point. You can edit it according
  * to your needs.
  * 
- * @package	Comodojo Spare Parts
- * @author	comodojo.org
- * @copyright	2011-2013 comodojo.org (info@comodojo.org)
- * @version	__CURRENT_VERSION__
+ * @package 	Comodojo Spare Parts
+ * @author 		comodojo.org
+ * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version 	__CURRENT_VERSION__
  */
 
 //***********************************************//
@@ -111,7 +111,7 @@ define('STATISTICS_DB_HOST', 'localhost');
 /**
  * Statistics database data model (database type)
  */
-define('STATISTICS_DB_DATA_MODEL', 'MYSQL');
+define('STATISTICS_DB_DATA_MODEL', 'MYSQLI');
 
 /**
  * Statistics database port
@@ -148,7 +148,7 @@ define('DEFAULT_DB_PORT', 3306);
 /**
  * DEFAULT database data model (database type)
  */
-define('DEFAULT_DB_DATA_MODEL', 'MYSQL');
+define('DEFAULT_DB_DATA_MODEL', 'MYSQLI');
 
 /**
  * DEFAULT database name
@@ -164,6 +164,11 @@ define('DEFAULT_DB_USER', 'comodojo');
  * DEFAULT database password
  */
 define('DEFAULT_DB_PASSWORD', 'password');
+
+/**
+ * DEFAULT database fetch method
+ */
+define('DEFAULT_DB_FETCH', 'ASSOC');
 
 //***********************************************//
 

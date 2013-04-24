@@ -5,10 +5,10 @@
  * 
  * A simple REST Services dispatcher (package)
  * 
- * @package	Comodojo Spare Parts
- * @author	comodojo.org
- * @copyright	2011-2013 comodojo.org (info@comodojo.org)
- * @version	__CURRENT_VERSION__
+ * @package 	Comodojo Spare Parts
+ * @author 		comodojo.org
+ * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version 	__CURRENT_VERSION__
  *
  * @tutorial	please see README file
  * @example	please see files in "services" directory
@@ -27,7 +27,6 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 ob_start();
@@ -41,11 +40,11 @@ class simpleDataRestDispatcher {
 	 * Local pointer to database handler
 	 */
 	private $dbh = false;
-        
-        /**
+
+	/**
 	 * Local pointer to returned data (out of output buffer)
 	 */
-        private $toReturn = false;
+	private $toReturn = false;
 	
 	/**
 	 * Comma separated service implemented methods (or SUPPORTED_METHODS if
@@ -161,9 +160,9 @@ class simpleDataRestDispatcher {
 
 	/********************** PUBLIC VARS ***********************/
 	
-        /******************** PPRIVATE METHODS ********************/
-        
-        /**
+	/******************** PPRIVATE METHODS ********************/
+
+	/**
 	 * Debug someting into php error log
 	 * 
 	 * @param	ARRAY|STRING|NUMERIC|BOOL   $message	Message to debug
@@ -171,7 +170,7 @@ class simpleDataRestDispatcher {
 	private function debug($message) {
 		if ($this->isDebug || GLOBAL_DEBUG_ENABLED) {
 			if (is_array($message)) {
-				error_log("(DEBUG): ".$key." = Array(");
+				error_log("(DEBUG): Array(");
 				$this->debug_helper($message);
 				error_log(")");
 			}
@@ -186,8 +185,8 @@ class simpleDataRestDispatcher {
 			}
 		}
 	}
-        
-	
+
+
 	private function debug_helper($value, $margin='') {
 		foreach ($value as $key => $value) {
 			if (is_array($value)) {
@@ -201,11 +200,13 @@ class simpleDataRestDispatcher {
 		}
 	}
 
-        /**
+	/**
 	 * Trace request/response in the specified log file
 	 */
 	private function trace() {
+
 		if ($this->isTrace || GLOBAL_TRANSACTION_TRACING_ENABLED) {
+
 			$myMessage = "****** REQUEST FROM " . $_SERVER["REMOTE_ADDR"] . " AT " . date("d-m-Y (D) H:i:s",time()) . " ******\n";
 			$myMessage .= "- Client request's method: ".$_SERVER['REQUEST_METHOD']."\n";
 			$myMessage .= "- Client sent: \n";
@@ -215,10 +216,9 @@ class simpleDataRestDispatcher {
 			}
 			$myMessage .= "- Server reply with status code: ".$this->statusCode."\n";
 			$myMessage .= "- Server returns (".$this->transport."): \n";
-			if (strtoupper($this->transport) == "XML") $toReturn = $this->array2xml(Array("success"=>$this->success, "result"=>$this->result));
-			else $toReturn = $this->array2json(Array("success"=>$this->success, "result"=>$this->result));
-			$myMessage .= $toReturn;
+			$myMessage .= $this->toReturn;
 			$myMessage .= "\n****** REQUEST END ******\n";
+
 			try {
 				if (!$fh = fopen(getcwd()."/../".TRANSACTION_TRACES_PATH.$this->logFile, 'a')) {
 					throw new Exception('Could not open log file!');
@@ -226,12 +226,14 @@ class simpleDataRestDispatcher {
 				if (!$fw = fwrite($fh, $myMessage)) {
 					throw new Exception('Could not write log file!');
 				}
-                                fclose($fh);
+				fclose($fh);
 			}
 			catch (Exception $e) {
 				$this->debug($e);
 			}
-		}		
+
+		}
+
 	}
 	
 	/**
@@ -241,16 +243,16 @@ class simpleDataRestDispatcher {
 	 */
 	private function recordStat() {
 		if (GLOBAL_STATISTICS_ENABLED) {
-                        try {
-                                $dbh = $this->createDatabaseHandler(STATISTICS_DB_DATA_MODEL, STATISTICS_DB_HOST, STATISTICS_DB_PORT, STATISTICS_DB_NAME, STATISTICS_DB_USER, STATISTICS_DB_PASSWORD);
-                                $example_result = $this->query($dbh, "INSERT INTO `comodojo_statistics` (id,timestamp,service,address,userAgent) VALUES (0,".strtotime('now').",'".$this->service."','".$_SERVER["REMOTE_ADDR"]."','".$_SERVER["HTTP_USER_AGENT"]."')", STATISTICS_DB_DATA_MODEL);
-                        }
-                        catch (Exception $e) {
-                                $this->debug("Statistics error: " . $e->getMessage());
-                                return false;
-                        }
-                        $this->closeDatabaseHandler($dbh, STATISTICS_DB_DATA_MODEL);
-                        return true;
+			try {
+				$dbh = $this->createDatabaseHandler(STATISTICS_DB_DATA_MODEL, STATISTICS_DB_HOST, STATISTICS_DB_PORT, STATISTICS_DB_NAME, STATISTICS_DB_USER, STATISTICS_DB_PASSWORD);
+				$example_result = $this->query($dbh, "INSERT INTO `comodojo_statistics` (id,timestamp,service,address,userAgent) VALUES (0,".strtotime('now').",'".$this->service."','".$_SERVER["REMOTE_ADDR"]."','".$_SERVER["HTTP_USER_AGENT"]."')", STATISTICS_DB_DATA_MODEL);
+			}
+			catch (Exception $e) {
+				$this->debug("Statistics error: " . $e->getMessage());
+				return false;
+			}
+			$this->closeDatabaseHandler($dbh, STATISTICS_DB_DATA_MODEL);
+			return true;
 		}
 	}
 	
@@ -275,159 +277,218 @@ class simpleDataRestDispatcher {
 		return $toReturn;
 	}
         
-        /**
+	/**
 	 * Connect to database according to db data model (database type)
 	 * 
 	 * @return	ARRAY(BOOL,HANDLER|STRING)	Database connection status (bool), handler or error message
 	 */
 	private function _connectToDatabase($dbDataModel, $dbHost, $dbPort, $dbName, $dbUser, $dbPass) {
-                $localDbHandler = false;
-                $connectionStatus = true;
-                switch ($dbDataModel) {
-                        case ("MYSQL"):
-                                $localDbHandler = @mysql_connect($dbHost.":".$dbPort, $dbUser, $dbPass);
-                                if (!$localDbHandler) {
-                                        $error = mysql_errno()." - ".mysql_error();
-                                        $this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
-                                        $connectionStatus = false;
-                                        $localDbHandler = $error;
-                                }
-                                else {
-                                    $dbSelect = @mysql_select_db($dbName, $localDbHandler);
-                                    if (!$dbSelect) {
-                                            $error = mysql_errno()." - ".mysql_error();
-                                            $this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
-                                            $connectionStatus = false;
-                                            $localDbHandler = $error;
-                                    }
-                                }
-                        break;
-                        case ("MYSQL_PDO"):
-                                $dsn="mysql:host=".$dbHost.";port=".$dbPort .";dbname=".$dbName;
-                                try {
-                                        $localDbHandler = new PDO($dsn,$dbUser,$dbPass);
-                                }
-                                catch (PDOException $e) {
-                                        $error = $e->getCode()." - ".$e->getMessage();
-                                        $this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
-                                        $connectionStatus = false;
-                                        $localDbHandler = $error;
-                                }
-                                break;
-                        case ("ORACLE_PDO"):
-                                $dsn="oci:dbname=".$dbHost.":".$dbPort."/".$dbName;
-                                try {
-                                        $localDbHandler = new PDO($dsn,$dbUser,$dbPass);
-                                }
-                                catch (PDOException $e) {
-                                        $error = $e->getCode()." - ".$e->getMessage();
-                                        $this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
-                                        $connectionStatus = false;
-                                        $localDbHandler = $error;
-                                }
-                                break;
 
-                        case ("SQLITE_PDO"):
-                                $dsn="sqlite:".$dbName;
-                                try {
-                                        $localDbHandler = new PDO($dsn);
-                                }
-                                catch (PDOException $e) {
-                                        $error = $e->getCode()." - ".$e->getMessage();
-                                        $this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
-                                        $connectionStatus = false;
-                                        $localDbHandler = $error;
-                                }
-                                break;
+		$localDbHandler = false;
+		$connectionStatus = true;
 
-                        case ("DB2"):
-                                $dsn="ibm:DRIVER={IBM DB2 ODBC DRIVER};DATABASE=".$dbName.";HOSTNAME=".$dbHost.";PORT=".$dbPort.";PROTOCOL=TCPIP;UID=".$dbUser.";PWD=".$dbPass.";";
-                                $localDbHandler = db2_pconnect($dsn,$dbUser,$dbPass);
-                                if (!$localDbHandler){
-                                        $error = db2_conn_errormsg();
-                                        $this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
-                                        $connectionStatus = false;
-                                        $localDbHandler = $error;
-                                }
-                                break;
+		switch ($dbDataModel) {
 
-                        case ("DBLIB_PDO"):
-                                $dsn = "dblib:host=".$dbHost.":".$dbPort.";dbname=".$dbName;
-                                try {
-                                        $localDbHandler = new PDO($dsn,$dbUser,$dbPass);
-                                }
-                                catch (PDOException $e) {
-                                        $error = $e->getCode()." - ".$e->getMessage();
-                                        $this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
-                                        $connectionStatus = false;
-                                        $localDbHandler = $error;
-                                }
-                                break;
-			
+			case ("MYSQL"):
+			$localDbHandler = @mysql_connect($dbHost.":".$dbPort, $dbUser, $dbPass);
+			if (!$localDbHandler) {
+				$error = mysql_errno()." - ".mysql_error();
+				$this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+				$connectionStatus = false;
+				$localDbHandler = $error;
+			}
+			else {
+				$dbSelect = @mysql_select_db($dbName, $localDbHandler);
+				if (!$dbSelect) {
+					$error = mysql_errno()." - ".mysql_error();
+					$this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+					$connectionStatus = false;
+					$localDbHandler = $error;
+				}
+			}
+			break;
+
+			case ("MYSQLI"):
+			$localDbHandler = new mysqli($dbHost, $dbUser, $dbPass, $dbName, $dbPort);
+			if ($localDbHandler->connect_error) {
+				$error = $localDbHandler->connect_error." - ".$localDbHandler->connect_errno;
+				$this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+				$connectionStatus = false;
+				$localDbHandler = $error;
+			}
+			break;
+
+			case ("MYSQL_PDO"):
+			$dsn="mysql:host=".$dbHost.";port=".$dbPort .";dbname=".$dbName;
+			try {
+				$localDbHandler = new PDO($dsn,$dbUser,$dbPass);
+			}
+			catch (PDOException $e) {
+				$error = $e->getCode()." - ".$e->getMessage();
+				$this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+				$connectionStatus = false;
+				$localDbHandler = $error;
+			}
+			break;
+
+			case ("ORACLE_PDO"):
+			$dsn="oci:dbname=".$dbHost.":".$dbPort."/".$dbName;
+			try {
+				$localDbHandler = new PDO($dsn,$dbUser,$dbPass);
+			}
+			catch (PDOException $e) {
+				$error = $e->getCode()." - ".$e->getMessage();
+				$this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+				$connectionStatus = false;
+				$localDbHandler = $error;
+			}
+			break;
+
+			case ("SQLITE_PDO"):
+			$dsn="sqlite:".$dbName;
+			try {
+				$localDbHandler = new PDO($dsn);
+			}
+			catch (PDOException $e) {
+				$error = $e->getCode()." - ".$e->getMessage();
+				$this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+				$connectionStatus = false;
+				$localDbHandler = $error;
+			}
+			break;
+
+			case ("DB2"):
+			$dsn="ibm:DRIVER={IBM DB2 ODBC DRIVER};DATABASE=".$dbName.";HOSTNAME=".$dbHost.";PORT=".$dbPort.";PROTOCOL=TCPIP;UID=".$dbUser.";PWD=".$dbPass.";";
+			$localDbHandler = db2_pconnect($dsn,$dbUser,$dbPass);
+			if (!$localDbHandler){
+				$error = db2_conn_errormsg();
+				$this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+				$connectionStatus = false;
+				$localDbHandler = $error;
+			}
+			break;
+
+			case ("DBLIB_PDO"):
+			$dsn = "dblib:host=".$dbHost.":".$dbPort.";dbname=".$dbName;
+			try {
+				$localDbHandler = new PDO($dsn,$dbUser,$dbPass);
+			}
+			catch (PDOException $e) {
+				$error = $e->getCode()." - ".$e->getMessage();
+				$this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+				$connectionStatus = false;
+				$localDbHandler = $error;
+			}
+			break;
+
 			case ("POSTGRESQL"):
-				$dsn = "host=".$dbHost." port=".$dbPort." dbname=".$dbName." user=".$dbUser." password=".$dbPass;
-				$localDbHandler = @pg_connect($dsn);
-                                if (!$localDbHandler) {
-                                        $error = pg_last_error();
-                                        $this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
-                                        $connectionStatus = false;
-                                        $localDbHandler = $error;
-                                }
-                                break;
-                }
-                
-                return Array($connectionStatus,$localDbHandler);
-                
-        }
-        
-        /**
-	 * Build result set from database query
-	 * 
-	 * @return	ARRAY	Result (ASSOC) plus result length (i.e. sizeof)
-	 */
-	private function _buildResultSet($data,$id=false) {
+			$dsn = "host=".$dbHost." port=".$dbPort." dbname=".$dbName." user=".$dbUser." password=".$dbPass;
+			$localDbHandler = @pg_connect($dsn);
+			if (!$localDbHandler) {
+				$error = pg_last_error();
+				$this->debug("ERROR (dbLayer) - Cannot connect to database: ".$error);
+				$connectionStatus = false;
+				$localDbHandler = $error;
+			}
+			break;
+		}
+
+		return Array($connectionStatus,$localDbHandler);
+
+	}
+
+	/**
+	* Build result set from database query
+	* 
+	* @return	ARRAY
+	*/
+	private function resource_to_array($data,$id=false,$affectedRows=false,$fetch=false) {
+
 		$this->debug("INFO (dbLayer) - Building result set...");
+
+		$_fetch = in_array(strtoupper($fetch), Array('ASSOC','NUM','BOTH')) ? $fetch : 'BOTH';
+
 		if (is_resource($data) AND @get_resource_type($data) == "mysql result") {
+			switch ($_fetch) {
+				case 'NUM': $fetch = MYSQL_NUM; break;
+				case 'ASSOC': $fetch = MYSQL_ASSOC; break;
+				default: $fetch = MYSQL_BOTH; break;
+			}
 			$i = 0;
 			$myResult = array();
 			$myResultLength = mysql_num_rows($data);
 			while($i < $myResultLength) {
-				$myResult[$i] = mysql_fetch_array($data, MYSQL_ASSOC);
+				$myResult[$i] = mysql_fetch_array($data, $fetch);
 				$i++;
 			}			
+		}
+		if (is_resource($data) AND is_a($data, 'mysqli_result')) {
+			switch ($_fetch) {
+				case 'NUM': $fetch = MYSQLI_NUM; break;
+				case 'ASSOC': $fetch = MYSQLI_ASSOC; break;
+				default: $fetch = MYSQLI_BOTH; break;
+			}
+			$i = 0;
+			$myResult = array();
+			$myResultLength = $data->num_rows;
+			while($i < $myResultLength) {
+				$myResult[$i] = $data->fetch_array($fetch);
+				$i++;
+			}
+			$data->free();
 		}
 		elseif (is_resource($data) AND @get_resource_type($data) == "pgsql result") {
 			$i = 0;
 			$myResult = array();
 			$myResultLength = pg_num_rows($data);
 			while($i < $myResultLength) {
-				$myResult[$i] = pg_fetch_assoc($data);
+				switch ($_fetch) {
+					case 'NUM': 	$myResult[$i] = pg_fetch_array($data);	break;
+					case 'ASSOC': 	$myResult[$i] = pg_fetch_assoc($data);	break;
+					default: 		$myResult[$i] = pg_fetch_all($data);	break;
+				}
 				$i++;
 			}			
 		}
+		elseif (is_resource($data) AND @get_resource_type($data) == "DB2 Statement") {
+			$myResult = array();
+			$myResultLength = db2_num_fields($data);
+			switch ($_fetch) {
+				case 'NUM': 	while ($row = db2_fetch_row($data)) array_push($myResult, $row);	break;
+				case 'ASSOC': 	while ($row = db2_fetch_assoc($data)) array_push($myResult, $row);	break;
+				default: 		while ($row = db2_fetch_both($data)) array_push($myResult, $row);	break;
+			}
+		}
 		elseif(is_object($data)) {
 			$myResult = array();
-			foreach($data as $key=>$val){
-				$myResult[$key] = $val;
-			}
+			foreach($data as $key=>$val) $myResult[$key] = $val;
 			$myResultLength = sizeof($myResult);
 		}
 		else {
 			$myResult = $data;
 			$myResultLength = false;
 		}
+
+		foreach ($this->transform as $to) {
+			if (isset($myResult[$to])) $myResult[$to] = json2array($myResult[$to]);
+		}
+
 		return Array(
-			"result"	=>	$myResult,	
+			"result"		=>	$myResult,
 			"resultLength"	=>	$myResultLength,
-			"returnedId"	=>	$id
+			"transactionId"	=>	$id,
+			"affectedRows"	=>	$affectedRows
 		);
-        }
+
+	}
         
 	/**
 	 * Set transport according to request and default transport
 	 */
 	private function setTransport($attributes) {
-		if (isset($attributes['transport']) AND (@strtoupper($attributes['transport']) == "XML" OR @strtoupper($attributes['transport']) == "JSON") ) $this->transport = strtolower($attributes['transport']);
+		if (isset($attributes['transport'])) {
+			$this->transport = in_array(strtoupper($attributes['transport']),Array("XML","JSON","YAML")) ? strtolower($attributes['transport']) : strtolower($this->transport);
+		}
 	}
 	
 	/**
@@ -438,20 +499,33 @@ class simpleDataRestDispatcher {
 		//not strictly needed but may cause problems if omitted in some XHR request
 		if ($this->accessControlAllowOrigin == '*') header('Access-Control-Allow-Origin: *');
 		
+		switch ($this->transport) {
+			case 'xml':
+			case 'json':
+			$_transport = 'application/'.$this->transport;
+			break;
+			case 'yaml':
+			$_transport = 'application/x-yaml';
+			break;
+			default:
+			$_transport = 'text/plain';
+			break;
+		}
+
 		switch ($statusCode) {
 			case 200: //OK
 				if ($this->ttl > 0) {
-					header('Content-type: application/'.strtolower($this->transport));
+					header('Content-type: '.$_transport);
 					header('Cache-Control: max-age='.$this->ttl.', must-revalidate');
 					header('Expires: '.gmdate("D, d M Y H:i:s", time() + $this->ttl)." GMT");
 				}
 				elseif ($this->ttl == 0) {
-					header('Content-type: application/'.strtolower($this->transport),true);
+					header('Content-type: '.$_transport,true);
 					header('Cache-Control: no-cache, must-revalidate');
 					header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 				}
 				else {
-					header('Content-type: application/'.strtolower($this->transport),true);
+					header('Content-type: '.$_transport,true);
 				}
 				header('Content-Length: '.$contentLength,true);
 			break;
@@ -544,7 +618,7 @@ class simpleDataRestDispatcher {
 		}
 		return $attributes;
 	}
-        /******************** PPRIVATE METHODS ********************/
+	/******************** PPRIVATE METHODS ********************/
         
 	/******************* PROTECTED METHODS ********************/
 	/**
@@ -630,6 +704,32 @@ class simpleDataRestDispatcher {
 	}
 	
 	/**
+	 * Transform an array into YAML string 
+	 * 
+	 * @param	array		$array		The array to encode
+	 * @return	string/YAML				The encoded string
+	 */
+	protected function array2yaml($array) {
+		
+		require("Spyc.php");
+		return Spyc::YAMLDump($array);
+		
+	}
+
+	/**
+	 * Transform YAML string into an array 
+	 * 
+	 * @param	string/json		$dataString		The string to decode
+	 * @return	array							The decoded array
+	 */
+	function yaml2array($dataString) {
+		
+		require("Spyc.php");
+		return Spyc::YAMLLoadString($dataString);
+		
+	}
+
+	/**
 	 * Generate random alphanumerical string
 	 * 
 	 * @param	int		$length	The random string length
@@ -652,32 +752,34 @@ class simpleDataRestDispatcher {
 		
 	}
 	
-        /**
+	/**
 	 * Create a database handler according to parameters passed
 	 * 
 	 * @return	HANDLER     Database handler or null (will throw an Exception)
 	 */
 	protected function createDatabaseHandler($dbDataModel = false, $dbHost = false, $dbPort = false, $dbName = false, $dbUser = false, $dbPass = false) {
-                $this->debug("Creating DB Handler. Datamodel:".$dbDataModel.", host:".$dbHost.", port:".$dbPort.", name:".$dbName);
-                
-                $_dbDataModel = !$dbDataModel ? DEFAULT_DB_DATA_MODEL : $dbDataModel;
-                $_dbHost = !$dbHost ? DEFAULT_DB_HOST : $dbHost;
-                $_dbPort = !$dbPort ? DEFAULT_DB_PORT : $dbPort;
-                $_dbName = !$dbName ? DEFAULT_DB_NAME : $dbName;
-                $_dbUser = !$dbUser ? DEFAULT_DB_USER : $dbUser;
-                $_dbPass = !$dbPass ? DEFAULT_DB_PASSWORD : $dbPass;
-                
-                $connection = $this->_connectToDatabase($_dbDataModel, $_dbHost, $_dbPort, $_dbName, $_dbUser, $_dbPass);
-                
-                if (!$connection[0]) {
-                    throw new Exception($connection[1]);
-                }
-                else {
-                    return $connection[1];
-                }
-        }
 
-        /**
+		$this->debug("Creating DB Handler. Datamodel:".$dbDataModel.", host:".$dbHost.", port:".$dbPort.", name:".$dbName);
+
+		$_dbDataModel	= !$dbDataModel	? DEFAULT_DB_DATA_MODEL	: $dbDataModel;
+		$_dbHost		= !$dbHost		? DEFAULT_DB_HOST		: $dbHost;
+		$_dbPort		= !$dbPort		? DEFAULT_DB_PORT		: $dbPort;
+		$_dbName		= !$dbName		? DEFAULT_DB_NAME		: $dbName;
+		$_dbUser		= !$dbUser		? DEFAULT_DB_USER		: $dbUser;
+		$_dbPass		= !$dbPass		? DEFAULT_DB_PASSWORD	: $dbPass;
+
+		$connection = $this->_connectToDatabase($_dbDataModel, $_dbHost, $_dbPort, $_dbName, $_dbUser, $_dbPass);
+
+		if (!$connection[0]) {
+			throw new Exception($connection[1]);
+		}
+		else {
+			return $connection[1];
+		}
+
+	}
+
+	/**
 	 * Shot a query to database
 	 *
 	 * @param       HANDLER     $dbHandler      The database handler
@@ -687,67 +789,86 @@ class simpleDataRestDispatcher {
 	 *
 	 * @return	ARRAY|NULL  Query result (in FETCH_ASSOC mode) or null (will throw an Exception)
 	 */
-	protected function query($dbHandler, $query, $dbDataModel=false, $returnId=false) {
-                if (!$dbDataModel) $dbDataModel = DEFAULT_DB_DATA_MODEL;
-                // logging and tracing...
-                $this->debug($query);
+	protected function query($dbHandler, $query, $dbDataModel=DEFAULT_DB_DATA_MODEL, $returnId=false, $fetch=DEFAULT_DB_FETCH) {
 
-                if ($dbDataModel == "MYSQL") {
-                        $response = @mysql_query($query, $dbHandler);
-                        if (!$response) {
-                                $_error = mysql_errno()." - ".mysql_error();
-                                $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
-                                throw new Exception($_error);
-                        }
-                        $toReturn = $this->_buildResultSet($response,!$returnId ? false : mysql_insert_id($dbHandler));
-                }
-                elseif ($dbDataModel == "MYSQL_PDO" OR $dbDataModel == "ORACLE_PDO" OR $dbDataModel == "SQLITE_PDO" OR $dbDataModel == "DBLIB_PDO") {
-                        try {
-                                $response = $dbHandler->query($query,PDO::FETCH_ASSOC);
-                        }
-                        catch (PDOException $e) {
-                                $_errorInfo = $dbHandler->errorInfo();
-                                $_error = $_errorInfo[1]." - ".$_errorInfo[2];
-                                $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
-                                throw new Exception($_error);
-                        }
-                        $toReturn = $this->_buildResultSet($response,!$returnId ? false : $dbHandler->lastInsertId());
-                }
-                elseif ($dbDataModel == "DB2") {
-                        $response = db2_exec($dbHandler,$query);
-                        if (!$response) {
-                                $_error = db2_stmt_error();
-                                $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
-                                throw new Exception($_error);
-                        }
-                        $_response = Array();
-                        while ($row = db2_fetch_assoc($response)) {
-                                array_push($_response, $row);
-                        }
-                        $toReturn = $this->_buildResultSet($_response,!$returnId ? false : db2_last_insert_id($dbHandler));
-                }
-		elseif ($dbDataModel == "POSTGRESQL") {
-                        $response = pg_query($dbHandler,$query);
-                        if (!$response) {
-                                $_error = pg_last_error();
-                                $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
-                                throw new Exception($_error);
-                        }
-                        $_response = Array();
-                        while ($row = db2_fetch_assoc($response)) {
-                                array_push($_response, $row);
-                        }
-                        $toReturn = $this->_buildResultSet($_response,!$returnId ? false : db2_last_insert_id($dbHandler));
-                }
-                else {
-                        $_error = "Unknown dbDataModel";
-                        $this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
-                        throw new Exception($_error);
-                }
-                return $toReturn;
-        }
+		$this->debug($query);
 
-        /**
+		switch ($dbDataModel) {
+
+			case "MYSQL":
+			$response = @mysql_query($query, $dbHandler);
+			if (!$response) {
+				$_error = mysql_errno()." - ".mysql_error();
+				$this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
+				throw new Exception($_error);
+			}
+			$toReturn = $this->resource_to_array($response,!$returnId ? false : mysql_insert_id($dbHandler), @mysql_affected_rows($dbHandler),$fetch);
+			break;
+
+			case "MYSQLI":
+			$response = $dbHandler->query($query);
+			if (!$response) {
+				$_error = $dbHandler->errno()." - ".$dbHandler->error();
+				$this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
+				throw new Exception($_error);
+			}
+			$toReturn = $this->resource_to_array($response,!$returnId ? false : $dbHandler->insert_id, $dbHandler->affected_rows,$fetch);
+			break;
+
+			case "MYSQL_PDO":
+			case "ORACLE_PDO":
+			case "SQLITE_PDO":
+			case "DBLIB_PDO":
+			switch (strtoupper($fetch)) {
+				case 'NUM': $_fetch = PDO::FETCH_NUM; break;
+				case 'ASSOC': $_fetch = PDO::FETCH_ASSOC; break;
+				default: $_fetch = PDO::FETCH_BOTH; break;
+			}
+			try {
+				$response = $dbHandler->query($query,$_fetch);
+			}
+			catch (PDOException $e) {
+				$_errorInfo = $dbHandler->errorInfo();
+				$_error = $_errorInfo[1]." - ".$_errorInfo[2];
+				$this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
+				throw new Exception($_error);
+			}
+			$toReturn = $this->resource_to_array($response,!$returnId ? false : $dbHandler->lastInsertId(),@$response->rowCount(),$fetch);
+			break;
+
+			case "DB2":
+			$response = db2_exec($dbHandler,$query);
+			if (!$response) {
+				$_error = db2_stmt_error();
+				$this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
+				throw new Exception($_error);
+			}
+			$toReturn = $this->resource_to_array($response,!$returnId ? false : db2_last_insert_id($dbHandler),@db2_num_rows($data),$fetch);
+			break;
+
+			case "POSTGRESQL":
+			$response = pg_query($dbHandler,$query);
+			if (!$response) {
+				$_error = pg_last_error();
+				$this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
+				throw new Exception($_error);
+			}
+			$toReturn = $this->resource_to_array($response,!$returnId ? false : pg_last_oid($response), @pg_affected_rows($response),$fetch);
+			break;
+
+			default:
+			$_error = "Unknown dbDataModel";
+			$this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
+			throw new Exception($_error);
+			break;
+
+		}
+
+		return $toReturn;
+
+	}
+
+	/**
 	 * Close a database handler according to parameters passed
 	 *
 	 * @param       STRING      $dbDataModel    The database data model (db type)
@@ -756,38 +877,45 @@ class simpleDataRestDispatcher {
 	 * @return	BOOL        Operation status
 	 */
 	protected function closeDatabaseHandler($dbHandler, $dbDataModel=false) {
-                if (!$dbDataModel) $dbDataModel = DEFAULT_DB_DATA_MODEL;
-                $this->debug("Closing database handler. Datamodel:".$dbDataModel);
-                switch($dbDataModel) {
-                        case ("MYSQL"):
-                                mysql_close($dbHandler);
-                                break;
-                        case ("MYSQL_PDO"):
-                                $dbHandler=null;
-                                break;
-                        case ("ORACLE_PDO"):
-                                $dbHandler=null;
-                                break;
-                        case ("SQLITE_PDO"):
-                                $dbHandler=null;
-                                break;
-                        case ("DB2"):
-                                db2_close($dbHandler);
-                                break;
-                        case ("DBLIB_PDO"):
-                                unset($dbHandler);
-                                break;
+
+		if (!$dbDataModel) $dbDataModel = DEFAULT_DB_DATA_MODEL;
+		$this->debug("Closing database handler. Datamodel:".$dbDataModel);
+		switch($dbDataModel) {
+			case ("MYSQL"):
+			mysql_close($dbHandler);
+			$dbHandler=null;
+			break;
+			
+			case ("MYSQLI"):
+			$dbHandler->close(); 
+			break;
+			
+			case ("MYSQL_PDO"):
+			case ("ORACLE_PDO"):
+			case ("SQLITE_PDO"):
+			case ("DBLIB_PDO"):
+			$dbHandler=null;
+			break;
+			
+			case ("DB2"):
+			db2_close($dbHandler);
+			break;
+			
 			case ("POSTGRESQL"):
-                                pg_close($dbHandler);
-                                break;
-                        default:
-                                return false;
-                                break;
-                }
-                return true;
-        }
+			pg_close($dbHandler);
+			$dbHandler=null;
+			break;
+			
+			default:
+			return false;
+			break;
+		}
+
+		return true;
+
+	}
         
-        /**
+	/**
 	 * Try to get file from url via (not authenticated) http GET.
 	 * Will use CURL (if available) or fsocks (fallback)
 	 *
@@ -798,43 +926,47 @@ class simpleDataRestDispatcher {
 	 * @return	STRING      Grabbed data
 	 */
 	protected function httpGet($address, $port, $getdata=Array()) {
-                $channel = false;
-                $received = false;
-                if (function_exists("curl_init") AND !count($getdata)) {
-                        $channel = curl_init();
-                        if (!$channel) return false;
-                        curl_setopt($channel, CURLOPT_URL, $address);
-                        curl_setopt($channel, CURLOPT_RETURNTRANSFER, 1);
-                        curl_setopt($channel, CURLOPT_TIMEOUT, 30);
-                        curl_setopt($channel, CURLOPT_PORT, $port);
-                        $received = curl_exec($channel);
-                        curl_close($channel);
-                }
-                else {
-                        $getdata_str = count($getdata) ? '?' : '';
-                        foreach ($getdata as $k => $v) $getdata_str .= urlencode($k) .'='. urlencode($v) . '&';
-                        $_url = parse_url($address);
-                        $crlf = "\r\n";
 
-                        $req = 'GET '. $_url['path'] . $getdata_str .' HTTP/1.1' . $crlf;
-                        $req .= 'Host: '. $_url['host'] . $crlf;
-                        $req .= 'User-Agent: COMODOJO_SERVICES' . $crlf;
-                        $req .= 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' . $crlf;
-                        $req .= 'Accept-Language: en-us,en;q=0.5' . $crlf;
-                        $req .= 'Accept-Encoding: deflate' . $crlf;
-                        $req .= 'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7' . $crlf . $crlf;
+		$channel = false;
+		$received = false;
+		
+		if (function_exists("curl_init") AND !count($getdata)) {
+			$channel = curl_init();
+			if (!$channel) return false;
+			curl_setopt($channel, CURLOPT_URL, $address);
+			curl_setopt($channel, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($channel, CURLOPT_TIMEOUT, 30);
+			curl_setopt($channel, CURLOPT_PORT, $port);
+			$received = curl_exec($channel);
+			curl_close($channel);
+		}
+		else {
+			$getdata_str = count($getdata) ? '?' : '';
+			foreach ($getdata as $k => $v) $getdata_str .= urlencode($k) .'='. urlencode($v) . '&';
+			$_url = parse_url($address);
+			$crlf = "\r\n";
 
-                        $channel = fsockopen($_url['host'], $port, $errno, $errstr, 30);
-                        if (!$channel) return false;
-                        fputs($channel, $req);
-                        $received = '';
-                        while ($line = fgets($channel)) $received .= $line;
-                        fclose($channel);
-                        $received = substr($received, strpos($received, "\r\n\r\n") + 4);
-                        
-                }
-                return $received;
-        }        
+			$req = 'GET '. $_url['path'] . $getdata_str .' HTTP/1.1' . $crlf;
+			$req .= 'Host: '. $_url['host'] . $crlf;
+			$req .= 'User-Agent: COMODOJO_SERVICES' . $crlf;
+			$req .= 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' . $crlf;
+			$req .= 'Accept-Language: en-us,en;q=0.5' . $crlf;
+			$req .= 'Accept-Encoding: deflate' . $crlf;
+			$req .= 'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7' . $crlf . $crlf;
+
+			$channel = fsockopen($_url['host'], $port, $errno, $errstr, 30);
+			if (!$channel) return false;
+			fputs($channel, $req);
+			$received = '';
+			while ($line = fgets($channel)) $received .= $line;
+			fclose($channel);
+			$received = substr($received, strpos($received, "\r\n\r\n") + 4);
+
+		}
+
+		return $received;
+
+	}
         
 	/**
 	 * Return data according to selected transport (or fallback to JSON if none specified)
@@ -844,8 +976,30 @@ class simpleDataRestDispatcher {
 	 * @return	bool	Push status
 	 */
 	protected function returnData($success, $result) {
-		if (strtoupper($this->transport) == "XML") return $this->array2xml(Array("success"=>$success, "result"=>$result));
-		else return $this->array2json(Array("success"=>$success, "result"=>$result));
+		
+		$return = Array("success"=>$success, "result"=>$result);
+
+		switch (strtoupper($this->transport)) {
+
+			case 'JSON':
+			$toReturn = $this->array2json($return);
+			break;
+
+			case 'XML':
+			$toReturn = $this->array2xml($return);
+			break;
+
+			case 'YAML':
+			$toReturn = $this->array2yaml($return);
+			break;
+
+			default:
+			$toReturn = $this->array2json($return);
+			break;
+		}
+
+		return $toReturn;
+
 	}
 	
 	/**
@@ -855,6 +1009,7 @@ class simpleDataRestDispatcher {
 	 * @return	BOOL	Push status
 	 */
 	protected function addRequire($require) {
+
 		if (is_string($require)) {
 			array_push($this->requiredParameters, $require);
 			return true;
@@ -865,6 +1020,7 @@ class simpleDataRestDispatcher {
 			$this->debug("-------------------------------------------");
 			return false;
 		}
+
 	}
 	/******************* PROTECTED METHODS ********************/
 	
@@ -983,11 +1139,12 @@ class simpleDataRestDispatcher {
 		$this->setHeader($this->statusCode, strlen($this->toReturn));
 		
 		ob_end_clean();
-                
+
 		die($this->toReturn);
+
 	}
 	/********************* PUBLIC METHODS *********************/
-        
+
 }
 
 ?>

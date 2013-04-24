@@ -6,10 +6,10 @@
  * 
  * Test URL router using server side requests.
  * 
- * @package	Comodojo Spare Parts
- * @author	comodojo.org
- * @copyright	2011-2013 comodojo.org (info@comodojo.org)
- * @version	__CURRENT_VERSION__
+ * @package 	Comodojo Spare Parts
+ * @author 		comodojo.org
+ * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version 	__CURRENT_VERSION__
  * 
  * LICENSE:
  * 

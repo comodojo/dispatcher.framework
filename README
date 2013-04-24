@@ -2,10 +2,10 @@
 | Comodojo simpleDataRestDispatcher  |
  ====================================
 
-@package	Comodojo Spare Parts
-@author         comodojo.org
-@copyright	2011-2013 comodojo.org (info@comodojo.org)
-@version	__CURRENT_VERSION__
+@package    comodojo Spare Parts
+@author     comodojo.org
+@copyright  __COPYRIGHT__ comodojo.org (info@comodojo.org)
+@version    __CURRENT_VERSION__
 
 ABOUT
 =====
@@ -42,6 +42,13 @@ Comodojo simpleDataRestDispatcher is distributed in two flavours:
  - base class version: single file (self-contained service), doesn't needs
    installation
 
+NEW IN 2.1
+==========
+- Support for MySQL via mysqli
+- DB query fetch method (ASSOC,NUM,BOTH)
+- YAML output/transport
+- Bugfixing
+
 NEW IN 2.0
 ==========
 
@@ -71,6 +78,7 @@ VERSION FEATURES
 -----------------------------------------------
 XML encode/decode           Y            Y
 JSON encode/decode          Y            Y
+YAML encode/decode          Y            N
 Multiple DB support         Y            Y
 serverside httpGET          Y            Y
 Single service/file         N            Y
@@ -81,10 +89,10 @@ Log/statistics support      Y            N
 URL routing/cloaking        Y            N
 Server caching              Y            N
 Client caching              Y            Y
-Status code customization   Y		 Y
-GET/PUT/POST/DELETE supp.   Y		 Y
-CORS-Allow-Origin	    Y            Y
-Req. method transformation  Y		 N
+Status code customization   Y            Y
+GET/PUT/POST/DELETE supp.   Y            Y
+CORS-Allow-Origin           Y            Y
+Req. method transformation  Y            N
 
 INSTALLATION
 ============
