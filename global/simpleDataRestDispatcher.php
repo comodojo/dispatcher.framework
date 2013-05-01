@@ -6,7 +6,7 @@
  * A simple REST Services dispatcher (package)
  * 
  * @package 	Comodojo Spare Parts
- * @author 		comodojo.org
+ * @author		comodojo.org
  * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version 	__CURRENT_VERSION__
  *
@@ -808,7 +808,7 @@ class simpleDataRestDispatcher {
 			case "MYSQLI":
 			$response = $dbHandler->query($query);
 			if (!$response) {
-				$_error = $dbHandler->errno()." - ".$dbHandler->error();
+				$_error = $dbHandler->errno." - ".$dbHandler->error;
 				$this->debug("ERROR (dbLayer) - Cannot perform query: ".$_error);
 				throw new Exception($_error);
 			}
