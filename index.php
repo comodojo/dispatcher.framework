@@ -279,7 +279,7 @@ class router {
 		switch ($this->contentType) {
 			case 'xml':
 			case 'json':
-			$_transport = 'application/'.$this->transport;
+			$_transport = 'application/'.$this->contentType;
 			break;
 			case 'yaml':
 			$_transport = 'application/x-yaml';

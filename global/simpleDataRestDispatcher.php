@@ -10,8 +10,8 @@
  * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version 	__CURRENT_VERSION__
  *
- * @tutorial	please see README file
- * @example	please see files in "services" directory
+ * @tutorial please see README file
+ * @example  please see files in "services" directory
  *
  * LICENSE:
  * 
@@ -422,21 +422,6 @@ class simpleDataRestDispatcher {
 				$i++;
 			}			
 		}
-		if (is_resource($data) AND is_a($data, 'mysqli_result')) {
-			switch ($_fetch) {
-				case 'NUM': $fetch = MYSQLI_NUM; break;
-				case 'ASSOC': $fetch = MYSQLI_ASSOC; break;
-				default: $fetch = MYSQLI_BOTH; break;
-			}
-			$i = 0;
-			$myResult = array();
-			$myResultLength = $data->num_rows;
-			while($i < $myResultLength) {
-				$myResult[$i] = $data->fetch_array($fetch);
-				$i++;
-			}
-			$data->free();
-		}
 		elseif (is_resource($data) AND @get_resource_type($data) == "pgsql result") {
 			$i = 0;
 			$myResult = array();
@@ -458,6 +443,21 @@ class simpleDataRestDispatcher {
 				case 'ASSOC': 	while ($row = db2_fetch_assoc($data)) array_push($myResult, $row);	break;
 				default: 		while ($row = db2_fetch_both($data)) array_push($myResult, $row);	break;
 			}
+		}
+		else if (is_object($data) AND is_a($data, 'mysqli_result')) {
+			switch ($_fetch) {
+				case 'NUM': $fetch = MYSQLI_NUM; break;
+				case 'ASSOC': $fetch = MYSQLI_ASSOC; break;
+				default: $fetch = MYSQLI_BOTH; break;
+			}
+			$i = 0;
+			$myResult = array();
+			$myResultLength = $data->num_rows;
+			while($i < $myResultLength) {
+				$myResult[$i] = $data->fetch_array($fetch);
+				$i++;
+			}
+			$data->free();
 		}
 		elseif(is_object($data)) {
 			$myResult = array();
