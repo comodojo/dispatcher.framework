@@ -13,10 +13,10 @@
  *
  * Decoder will transform a source XML string into n-dimensional array.
  *
- * @package	Comodojo Spare Parts
- * @author	comodojo.org
- * @copyright	2011-2013 comodojo.org (info@comodojo.org)
- * @version	__CURRENT_VERSION__
+ * @package 	Comodojo Spare Parts
+ * @author 		comodojo.org
+ * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version 	__CURRENT_VERSION__
  *
  * LICENSE:
  * 
