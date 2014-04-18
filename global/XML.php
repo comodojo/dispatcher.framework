@@ -281,13 +281,4 @@ class XML {
 	
 }
 
-/**
- * Sanity check for CoMoDojo loader
- * 
- * @define function loadHelper_XML
- */
-function loadHelper_XML() {
-	return false;
-}
-
 ?>

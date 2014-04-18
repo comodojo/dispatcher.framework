@@ -646,37 +646,40 @@ class simpleDataRestDispatcher {
 	 * @param	array		$array			The array to encode
 	 * @return	string/json	$toReturn		The encoded string
 	 */
-	protected function array2json($array) {
+	protected function array2json($array, $numeric_check=true) {
 		if (!function_exists("json_encode")) {
-			if (!function_exists('loadHelper_JSON')) require("JSON.php");
+			require("JSON.php");
 			$json = new Services_JSON();
 			$string = $json->encode($array);
 		}
+		else if ($numeric_check) {
+			$string = json_encode($array, JSON_NUMERIC_CHECK);
+		}
 		else {
-			$string = json_encode($array);	
+			$string = json_encode($array);
 		}
 		return $string;
 	}
-	
+
 	/**
 	 * Transform json string into array 
 	 * 
 	 * @param	string/json		$string			The string to decode
 	 * @return	array			$toReturn		The decoded array
 	 */
-	protected function json2array($string) {
+	protected function json2array($string, $raw = false) {
 		if (!function_exists("json_decode")) {
-			if (!function_exists('loadHelper_JSON')) require("JSON.php");
+			require("JSON.php");
 			$json = new Services_JSON();
 			$array = $json->decode($string);
+			$return = $raw ? $array : $this->stdObj2array($array);
 		}
 		else {
-			$array = json_decode($string);
+			$return = json_decode($string, !$raw);
 		}
-		$array = $this->stdObj2array($array);
-		return $array;
+		return $return;
 	}
-	
+
 	/**
 	 * Transform an array into xml string 
 	 * 
@@ -684,7 +687,7 @@ class simpleDataRestDispatcher {
 	 * @return	string/xml	$toReturn	The encoded string
 	 */
 	protected function array2xml($array) {
-		if (!function_exists('loadHelper_XML')) require("XML.php");
+		require("XML.php");
 		$xmlEngine = new XML();
 		$xmlEngine->sourceArray = $array;
 		return $xmlEngine->encode();
@@ -697,7 +700,7 @@ class simpleDataRestDispatcher {
 	 * @return	array			$toReturn		The decoded array
 	 */
 	protected function xml2Array($dataString) {
-		if (!function_exists('loadHelper_XML')) require("XML.php");
+		require("XML.php");
 		$xmlEngine = new XML();
 		$xmlEngine->$sourceString = $dataString;
 		return $xmlEngine->decode();

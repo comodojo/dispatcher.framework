@@ -804,13 +804,4 @@ if (class_exists('PEAR_Error')) {
 
 }
 
-/**
- * Sanity check for CoMoDojo loader
- * 
- * @define function loadHelper_XML
- */
-function loadHelper_JSON() {
-    return false;
-}
-    
 ?>
