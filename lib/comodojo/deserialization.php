@@ -1,7 +1,7 @@
 <?php namespace comodojo;
 
 /**
- * standard spare parts exception handler
+ * standard spare parts deserialization class
  * 
  * @package 	Comodojo Spare Parts
  * @author		comodojo.org
@@ -24,9 +24,47 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Simply extend exception
- */
-class Exception extends \Exception {}
+class deserialization {
+
+	public final function fromJSON($data, $raw=false) {
+
+		if ( !is_string($data) ) throw new Exception("Invalid data for JSON deserialization");
+
+		return json_decode($data, !$raw);
+
+	}
+
+	public final function fromXML($data) {
+
+		if ( !is_string($data) ) throw new Exception("Invalid data for XML deserialization");
+
+		require('XML.php');
+
+		$xmlEngine = new XML();
+		$xmlEngine->sourceString = $data;
+
+		return $xmlEngine->decode();
+
+	}
+
+	public final function fromYAML($data) {
+
+		if ( !is_string($data) ) throw new Exception("Invalid data for YAML deserialization");
+
+		require('Spyc.php');
+		
+		return Spyc::YAMLLoadString($data);
+
+	}
+
+	public final function fromEXPORT($data) {
+
+		if ( !is_string($data) ) throw new Exception("Invalid data for EXPORT deserialization");
+
+		return unserialize($data);
+
+	}
+
+}
 
 ?>

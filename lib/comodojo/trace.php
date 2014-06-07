@@ -1,4 +1,4 @@
-<?php
+<?php namespace comodojo:
 
 /**
  * Produce request trace on file.
@@ -75,14 +75,14 @@ class trace {
 
 		try {
 			if (!$fh = fopen($this->trace_path.$this->service.".trace", 'a')) {
-				throw new comodojoException('Could not open log file!');
+				throw new comodojo\exception('Could not open log file!');
 			}
 			if (!$fw = fwrite($fh, $this->trace_content)) {
-				throw new comodojoException('Could not write log file!');
+				throw new comodojo\exception('Could not write log file!');
 			}
 			fclose($fh);
 		}
-		catch (comodojoException $e) {
+		catch (comodojo\exception $e) {
 			throw $e;
 		}
 	}
