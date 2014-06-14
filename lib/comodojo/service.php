@@ -124,9 +124,9 @@ class service {
 
 	}
 
-	public final function header($param, $value) {
+	public final function header($param, $value=NULL) {
 
-		if (in_array($param, $this->headers)) unset($this->headers[$param]);
+		//if (in_array($param, $this->headers)) unset($this->headers[$param]);
 
 		$this->headers[$param] = $value;
 
@@ -148,24 +148,23 @@ class service {
 
 	public final function get_methods() {
 
-		if (method_exists($this, 'any')) {
+		$supported_methods = explode(',',DISPATCHER_SUPPORTED_METHODS);
 
-			$this->methods = SUPPORTED_METHODS;
-			$return = explode(',',SUPPORTED_METHODS);
+		$implemented_methods = Array();
 
-		}
-		else {
+		foreach ( $supported_methods as $method ) {
 
-			$return = Array();
-
-			foreach ( explode(',',strtoupper(SUPPORTED_METHODS)) as $method ) {
-				if (method_exists($this, strtolower($method))) array_push($return,$method);
-			}
-			$this->methods = implode(',',$return);
+			if (method_exists($this, strtolower($method))) array_push($return,$method);
 
 		}
 
 		return $return;
+
+	}
+
+	public final function get_headers() {
+
+		return $this->headers;
 
 	}
 

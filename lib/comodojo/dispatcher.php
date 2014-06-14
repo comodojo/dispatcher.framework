@@ -1,8 +1,10 @@
 <?php namespace comodojo;
 
-
-
 class dispatcher {
+
+	private $current_time = NULL;
+
+	private $service_uri = NULL;
 
 	private $service_requested = NULL;
 
@@ -10,8 +12,44 @@ class dispatcher {
 
 	private $service_parameters = NULL;
 
+	private $request_method = NULL;
+
+	private $cacher = NULL;
+
+	private $header = NULL;
 
 	public final function __construct() {
+
+		require("../configs/dispatcher-config.php");
+		require("../configs/routing-table.php");		
+
+		require("exceptions.php");
+
+		require("database.php");
+		require("debug.php");
+		require("trace.php");
+		require("event.php");
+
+		require("cache.php");
+		require("header.php");
+
+		require("serialization.php");
+		require("deserialization.php");
+
+		require("http.php");
+		require("random.php");
+		
+		require("service.php");
+
+		$this->current_time = time();
+
+		$this->request_method = $_SERVER['REQUEST_METHOD'];
+
+		$this->service_uri = $this->url_uri();
+
+		$this->cacher = new cache();
+
+		$this->header = new header();
 
 	}
 
@@ -26,31 +64,100 @@ class dispatcher {
 				if ($uri[$i] == $scr[$i]) unset($uri[$i]);
 			}
 
-			$service_call = array_values($requestURI);
+			$service_matrix = array_values($requestURI);
 
-			$this->service_requested = $service_call[0];
-			$this->service_attributes = array_slice($service_call,1);
+			if (isset($service_matrix[0])) {
+
+				$this->service_requested = $service_matrix[0];
+				$this->service_attributes = array_slice($service_matrix,1);
+
+			}
 
 		}
 		else {
 			
+			$service_matrix = $_GET;
+
+			if (isset($service_matrix["service"])) {
+
+				$this->service_requested = $service_matrix["service"];
+				unset($service_matrix["service"]);
+
+			}
+
+			$this->service_attributes = $service_matrix;
+
 		}
 
 	}
 
-	private function dispatch() {
+	private function url_uri() {
+
+		return $_SERVER[‘REQUEST_URI’];
 
 	}
 
-	private function error() {
+	/**
+	 * Dispatch response composing also return header
+	 *
+	 * It process service specific header and then append also ones defined in routing table (if any)
+	 *
+	 * @param 	INT		$code				HTTP status code
+	 * @param 	INT		$contentLenght		Response content length
+	 * @param 	ARRAY	$route_headers		Headers defined in routing table for service
+	 * @param 	ARRAY	$service_headers	Service specific headers
+	 */
+	private function dispatch($code, $content, $route_headers, $service_headers) {
+
+		foreach ($service_headers as $header => $value) {
+			
+			$this->header->set($header, $value);
+
+		}
+
+		foreach ($route_headers as $header => $value) {
+			
+			$this->header->set($header, $value);
+
+		}
+
+		$this->header->compose($code, strlen($content));
+
+		return $content;
 
 	}
 
-	private function service_is_in_routing_table() {
+	private function redirect($code, $location) {
+
+		$this->header->free();
+
+		$this->header->compose($code, 0, $location);
+
+		return NULL;
 
 	}
 
-	private function service_is_routable() {
+	private function error($code, $message, $extra=false) {
+
+		$this->header->free();
+
+		$this->header->compose($code, strlen($message), $extra);
+		
+		return $message;
+
+	}
+
+	private function service_is_in_routing_table($service) {
+
+		global $routingtable;
+
+		return isset($routingtable[$service]) ? true : false;
+
+	}
+
+	private function service_is_routable($service_file) {
+
+		return is_readable($service_file) ? true : false;
 
 	}
 
@@ -60,29 +167,88 @@ class dispatcher {
 
 	private function get_service_route() {
 
+		global $routingtable;
+
+		return $routingtable[$service];
+
 	}
 
-	private function get_service_class() {
+	private function get_service_class($service_file, $service_class) {
 
+		$comodojo_classes = Array(
+			"Spyc",
+			"XML",
+			"cache",
+			"database",
+			"serialization",
+			"deserialization",
+			"event",
+			"Exception",
+			"header",
+			"http",
+			"trace",
+			"service"
+		);
+
+		foreach( get_declared_classes() as $class ) {
+
+			if ( in_array($class, $comodojo_classes) ) continue;
+
+			if( $class instanceof service ) return $class;
+
+		}
+
+		throw new Exception("Invalid service class");
+		
 	}
 
 	private function get_working_mode() {
 
+		return DISPATCHER_USE_REWRITE ? "REWRITE" : "STANDARD";
+
 	}
 
-	private function deserialize_parameters() {
+	private function deserialize_parameters($method, $raw=false) {
+
+		$parameters = Array();
+
+		switch($method) {
+
+			case 'POST':
+
+				$parameters = $raw ? file_get_contents('php://input') : $_POST;
+
+				break;
+
+			case 'PUT':
+			case 'DELETE':
+				
+				if ($raw) $parameters = file_get_contents('php://input');
+				else parse_str(file_get_contents('php://input'), $parameters);
+				
+				break;
+
+		}
+
+		return $parameters;
 
 	}
 
 	private function set_client_cache() {
 
+
+
 	}
 
 	private function set_server_cache() {
 
+		return $this->cacher->set($uri, $content);
+
 	}
 
-	private function compose_header() {
+	private function get_server_cache($uri, $ttl) {
+
+		return $this->cacher->get($uri, $ttl);
 
 	}
 
