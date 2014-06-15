@@ -47,9 +47,9 @@ class dispatcher {
 
 		$this->service_uri = $this->url_uri();
 
-		$this->cacher = new cache();
+		$this->cacher = new cache($this->current_time);
 
-		$this->header = new header();
+		$this->header = new header($this->current_time);
 
 	}
 

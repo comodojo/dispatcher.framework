@@ -22,7 +22,7 @@ class event {
 			!defined('EVENTS_DB_USER') OR 
 			!defined('EVENTS_DB_PASS')
 		) {
-			comodojo_debug("Cannot record event, database constants not defined", 'ERROR', "event");
+			debug("Cannot record event, database constants not defined", 'ERROR', "event");
 		}
 		else {
 			$this->record_event();
@@ -42,7 +42,7 @@ class event {
 		}
 		catch (comodojo\exception $e) {
 			//event's error should fail silently
-			comodojo_debug("Error recording event: ".$e->getMessage, 'ERROR', "event");
+			debug("Error recording event: ".$e->getMessage, 'ERROR', "event");
 		}
 
 	}

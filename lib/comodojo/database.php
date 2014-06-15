@@ -26,17 +26,17 @@
 
 class database {
 
-	private $model = DEFAULT_DB_DATA_MODEL;
+	private $model = COMODOJO_DEFAULT_DB_DATA_MODEL;
 
-	private $host = DEFAULT_DB_HOST;
+	private $host = COMODOJO_DEFAULT_DB_HOST;
 
-	private $port = DEFAULT_DB_PORT;
+	private $port = COMODOJO_DEFAULT_DB_PORT;
 
-	private $name = DEFAULT_DB_NAME;
+	private $name = COMODOJO_DEFAULT_DB_NAME;
 
-	private $user = DEFAULT_DB_USER;
+	private $user = COMODOJO_DEFAULT_DB_USER;
 
-	private $pass = DEFAULT_DB_PASSWORD;
+	private $pass = COMODOJO_DEFAULT_DB_PASSWORD;
 
 	private $dbh = false;
 
@@ -57,12 +57,12 @@ class database {
 		if (!empty($user)) $this->user = $user;
 		if (!empty($pass)) $this->pass = $pass;
 
-		comodojo_debug("Creating database handler (".$this->model.") - ".$this->name."@".$this->host.":".$this->port, "INFO", "database");
+		debug("Creating database handler (".$this->model.") - ".$this->name."@".$this->host.":".$this->port, "INFO", "database");
 
 		try {
 			$this->connect();
 		} catch (comodojo\exception $ce) {
-			comodojo_debug("Error creating database handler (".$this->model.") - ".$ce->getMessage, "ERROR", "database");
+			debug("Error creating database handler (".$this->model.") - ".$ce->getMessage, "ERROR", "database");
 			throw $ce;
 		}
 
@@ -96,7 +96,7 @@ class database {
 
 	public function query($query, $return_raw=false) {
 
-		comodojo_debug("Ready to perform query: ".$query, "INFO", "database");
+		debug("Ready to perform query: ".$query, "INFO", "database");
 
 		switch ($this->model) {
 
@@ -104,7 +104,7 @@ class database {
 				
 				$response = $this->dbh->query($query);
 				if (!$response) {
-					comodojo_debug("Cannot perform query: ".$this->dbh->error, "ERROR", "database");
+					debug("Cannot perform query: ".$this->dbh->error, "ERROR", "database");
 					throw new comodojo\exception($this->dbh->error, $this->dbh->errno);
 				}
 
@@ -122,7 +122,7 @@ class database {
 				}
 				catch (PDOException $e) {
 					$error = $dbHandler->errorInfo();
-					comodojo_debug("Cannot perform query: ".$error[2], "ERROR", "database");
+					debug("Cannot perform query: ".$error[2], "ERROR", "database");
 					throw new comodojo\exception($error[1], $error[2]);
 				}
 
@@ -132,7 +132,7 @@ class database {
 
 				$response = db2_exec($this->dbh,$query);
 				if (!$response) {
-					comodojo_debug("Cannot perform query: ".db2_stmt_error(), "ERROR", "database");
+					debug("Cannot perform query: ".db2_stmt_error(), "ERROR", "database");
 					throw new comodojo\exception(db2_stmt_error());
 				}
 				
@@ -144,7 +144,7 @@ class database {
 				$response = pg_query($this->dbh,$query);
 				if (!$response) {
 					$_error = pg_last_error();
-					comodojo_debug("Cannot perform query: ".pg_last_error(), "ERROR", "database");
+					debug("Cannot perform query: ".pg_last_error(), "ERROR", "database");
 					throw new comodojo\exception(pg_last_error());
 				}
 
@@ -294,7 +294,7 @@ class database {
 
 	private function disconnect() {
 
-		comodojo_debug("Closing database handler (".$this->model.")", "INFO", "database");
+		debug("Closing database handler (".$this->model.")", "INFO", "database");
 
 		switch($this->model) {
 			
@@ -319,7 +319,7 @@ class database {
 			break;
 			
 			default:
-				comodojo_debug("Unknown database model (".$this->model.")", "WARNING", "database");
+				debug("Unknown database model (".$this->model.")", "WARNING", "database");
 			break;
 		}
 
@@ -327,7 +327,7 @@ class database {
 
 	private function results_to_array($data) {
 
-		comodojo_debug("Building result set (".$this->model.")", "INFO", "database");
+		debug("Building result set (".$this->model.")", "INFO", "database");
 
 		if ( empty($this->model) ) throw new comodojo\exception('Invalid database data model');
 

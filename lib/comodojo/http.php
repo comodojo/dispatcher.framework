@@ -166,12 +166,12 @@ class http {
 			$this->remoteHost = isset($url['host']) ? $url['host'] : '';
 			$this->remotePath = isset($url['path']) ? $url['path'] : '';
 			$this->remoteQuery = isset($url['query']) ? $url['query'] : '';
-			comodojo_debug("http will use fsock (compatibility mode)","DEBUG","http");
+			debug("http will use fsock (compatibility mode)","DEBUG","http");
 		}
 		else {
 			$this->curl = true;
 			$this->address = $address;
-			comodojo_debug("http will use curl","DEBUG","http");
+			debug("http will use curl","DEBUG","http");
 		}
 
 	}
@@ -179,36 +179,36 @@ class http {
 	public final function authentication($method, $user, $pass) {
 		$method = strtoupper($method);
 		//if (!in_array($method, Array("BASIC","NTLM")) OR empty($user) OR empty($pass)) {
-		//	comodojo_debug("Unsupported authentication mode: ".$method,"ERROR","http");
+		//	debug("Unsupported authentication mode: ".$method,"ERROR","http");
 		//	throw new Exception("Unsupported authentication mode", 1506);
 		//}
 		//if (!$this->curl AND $method=="NTLM") {
-		//	comodojo_debug("NTLM auth with FSOCKS not supported","ERROR","http");
+		//	debug("NTLM auth with FSOCKS not supported","ERROR","http");
 		//	throw new Exception("NTLM auth with FSOCKS not supported", 1505);
 		//}
 		$this->authenticationMethod = $method;
 		$this->userName = $user;
 		$this->userPass = $pass;
-		comodojo_debug("Using auth method: ".$method,"DEBUG","http");
+		debug("Using auth method: ".$method,"DEBUG","http");
 		return $this;
 	}
 
 	//public final function encoding($enc) {
 	//	$this->encoding = $enc;
-	//	comodojo_debug("Using encoding: ".$enc,"DEBUG","http");
+	//	debug("Using encoding: ".$enc,"DEBUG","http");
 	//	return $this;
 	//}
 
 	public final function userAgent($ua) {
 		$this->userAgent = $ua;
-		comodojo_debug("Using user agent: ".$ua,"DEBUG","http");
+		debug("Using user agent: ".$ua,"DEBUG","http");
 		return $this;	
 	}
 
 	public final function timeout($sec) {
 		$time = filter_var($sec, FILTER_VALIDATE_INT);
 		$this->timeout = $time;
-		comodojo_debug("Timeout: ".$time,"DEBUG","http");
+		debug("Timeout: ".$time,"DEBUG","http");
 		return $this;
 	}
 
@@ -220,19 +220,19 @@ class http {
 			$version = $ver;
 		}
 		$this->httpVersion = $version;
-		comodojo_debug("Using http version: ".$version,"DEBUG","http");
+		debug("Using http version: ".$version,"DEBUG","http");
 		return $this;
 	}
 
 	public final function contentType($type) {
 		$this->contentType = $type;
-		comodojo_debug("Using content type: ".$type,"DEBUG","http");
+		debug("Using content type: ".$type,"DEBUG","http");
 		return $this;
 	}
 
 	public final function port($port) {
 		$port = filter_var($port, FILTER_VALIDATE_INT, array("options" => array("min_range" => 1, "max_range" => 65535, "default" => 80 )));
-		comodojo_debug("Using port: ".$port,"DEBUG","http");
+		debug("Using port: ".$port,"DEBUG","http");
 		return $this;
 	}
 
@@ -242,13 +242,13 @@ class http {
 		//	throw new Exception("Unsupported HTTP method", 1507);
 		//}
 		$this->method = $method;
-		comodojo_debug("Using method: ".$method,"DEBUG","http");
+		debug("Using method: ".$method,"DEBUG","http");
 		return $this;
 	}
 
 	public final function header($head) {
 		$this->header = !is_array($head) ? Array($head) : $head;
-		comodojo_debug("Using header: ".$head,"DEBUG","http");
+		debug("Using header: ".$head,"DEBUG","http");
 		return $this;
 	}
 
@@ -256,9 +256,9 @@ class http {
 		$this->proxy = filter_var($address, FILTER_VALIDATE_URL);
 		if ($user !== null AND $pass !== null) {
 			$this->proxy_auth = $user.':'.$pass;
-			comodojo_debug("Using proxy: ".$user."@".$address,"DEBUG","http");
+			debug("Using proxy: ".$user."@".$address,"DEBUG","http");
 		}
-		else comodojo_debug("Using proxy: ".$address,"DEBUG","http");
+		else debug("Using proxy: ".$address,"DEBUG","http");
 		return $this;
 	}
 
@@ -280,12 +280,12 @@ class http {
 			throw $e;
 		}
 
-		comodojo_debug("Sending data to ".$this->address,"DEBUG","http");
+		debug("Sending data to ".$this->address,"DEBUG","http");
 		
 		if ($this->curl) {
 			$body = curl_exec($this->ch);
 			if ($body === false) {
-				comodojo_debug("Cannot exec http request, curl error: ".curl_errno($this->ch)." - ".curl_error($this->ch),"ERROR","http");
+				debug("Cannot exec http request, curl error: ".curl_errno($this->ch)." - ".curl_error($this->ch),"ERROR","http");
 				throw new Exception("Cannot exec http request", 1504);
 			}
 			$header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
@@ -296,7 +296,7 @@ class http {
 			$body = '';
 			$receiver = fwrite($this->ch, $tosend, strlen($tosend));
 			if ($receiver === false) {
-				comodojo_debug("Cannot exec http request, fwrite error.","ERROR","http");
+				debug("Cannot exec http request, fwrite error.","ERROR","http");
 				throw new Exception("Cannot exec http request", 1504);
 			}
 			while(!feof($this->ch)) $body .= fgets($this->ch,4096); 
@@ -307,9 +307,9 @@ class http {
 		
 		$this->close_transport();
 		
-		comodojo_debug("-------- Received data --------- ","DEBUG","http");
-		comodojo_debug($received,"DEBUG","http");
-		comodojo_debug("---------- End of data --------- ","DEBUG","http");
+		debug("-------- Received data --------- ","DEBUG","http");
+		debug($received,"DEBUG","http");
+		debug("---------- End of data --------- ","DEBUG","http");
 		
 		return $received;
 	}
@@ -353,12 +353,12 @@ class http {
 	private function init_transport($data) {
 		
 		if (!in_array($this->authenticationMethod, Array("BASIC","NTLM","NONE"))) {
-			comodojo_debug("Unsupported authentication mode: ".$this->authenticationMethod,"ERROR","http");
+			debug("Unsupported authentication mode: ".$this->authenticationMethod,"ERROR","http");
 			throw new Exception("Unsupported authentication mode", 1506);
 		}
 
 		if (!in_array($this->method, $this->allowed_http_methods)) {
-			comodojo_debug("Unsupported HTTP method: ".$this->method,"ERROR","http");
+			debug("Unsupported HTTP method: ".$this->method,"ERROR","http");
 			throw new Exception("Unsupported HTTP method", 1507);
 		}
 
@@ -367,7 +367,7 @@ class http {
 			$this->ch = curl_init();
 			
 			if (!$this->ch) {
-				comodojo_debug("Cannot init data channel","ERROR","http");
+				debug("Cannot init data channel","ERROR","http");
 				throw new Exception("Cannot init data channel", 1501);
 			}
 
@@ -439,11 +439,11 @@ class http {
 		else {
 
 			if ($this->authenticationMethod == 'NTLM') {
-				comodojo_debug("NTLM auth with FSOCKS not supported","ERROR","http");
+				debug("NTLM auth with FSOCKS not supported","ERROR","http");
 				throw new Exception("NTLM auth with FSOCKS not supported", 1505);
 			}
 
-			comodojo_debug("Using http requests in compatible mode. Some features will not be available","WARNING","http");
+			debug("Using http requests in compatible mode. Some features will not be available","WARNING","http");
 
 			$crlf = "\r\n";
 
@@ -482,15 +482,15 @@ class http {
 			stream_set_timeout($this->ch, $this->timeout); 
 			
 			if (!$this->ch) {
-				comodojo_debug("Cannot init data channel, fsock error: ".$errno." - ".$errstr,"ERROR","http");
+				debug("Cannot init data channel, fsock error: ".$errno." - ".$errstr,"ERROR","http");
 				throw new Exception("Cannot init data channel", 1501);
 			}
 
 		}
 
-		comodojo_debug("------ Ready to send data ------ ","DEBUG","http");
-		comodojo_debug($data,"DEBUG","http");
-		comodojo_debug("---------- End of data --------- ","DEBUG","http");
+		debug("------ Ready to send data ------ ","DEBUG","http");
+		debug($data,"DEBUG","http");
+		debug("---------- End of data --------- ","DEBUG","http");
 
 		return $to_return;
 
