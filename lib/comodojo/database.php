@@ -61,7 +61,7 @@ class database {
 
 		try {
 			$this->connect();
-		} catch (comodojo\exception $ce) {
+		} catch (Exception $ce) {
 			debug("Error creating database handler (".$this->model.") - ".$ce->getMessage, "ERROR", "database");
 			throw $ce;
 		}
@@ -80,7 +80,7 @@ class database {
 			$this->fetch = strtoupper($fetch);
 		}
 		else {
-			throw new comodojo\exception('Invalid data fetch method');
+			throw new Exception('Invalid data fetch method');
 		}
 
 		return $this;
@@ -105,7 +105,7 @@ class database {
 				$response = $this->dbh->query($query);
 				if (!$response) {
 					debug("Cannot perform query: ".$this->dbh->error, "ERROR", "database");
-					throw new comodojo\exception($this->dbh->error, $this->dbh->errno);
+					throw new Exception($this->dbh->error, $this->dbh->errno);
 				}
 
 			break;
@@ -123,7 +123,7 @@ class database {
 				catch (PDOException $e) {
 					$error = $dbHandler->errorInfo();
 					debug("Cannot perform query: ".$error[2], "ERROR", "database");
-					throw new comodojo\exception($error[1], $error[2]);
+					throw new Exception($error[1], $error[2]);
 				}
 
 			break;
@@ -133,7 +133,7 @@ class database {
 				$response = db2_exec($this->dbh,$query);
 				if (!$response) {
 					debug("Cannot perform query: ".db2_stmt_error(), "ERROR", "database");
-					throw new comodojo\exception(db2_stmt_error());
+					throw new Exception(db2_stmt_error());
 				}
 				
 			}
@@ -145,7 +145,7 @@ class database {
 				if (!$response) {
 					$_error = pg_last_error();
 					debug("Cannot perform query: ".pg_last_error(), "ERROR", "database");
-					throw new comodojo\exception(pg_last_error());
+					throw new Exception(pg_last_error());
 				}
 
 			break;
@@ -156,7 +156,7 @@ class database {
 
 			try {
 				$this->results_to_array($response);
-			} catch (comodojo\exception $e) {
+			} catch (Exception $e) {
 				throw $e;
 			}
 
@@ -171,20 +171,20 @@ class database {
 
 	private function connect() {
 
-		if ( empty($this->model) ) throw new comodojo\exception('Invalid database data model');
+		if ( empty($this->model) ) throw new Exception('Invalid database data model');
 
 		switch ($this->model) {
 
 			case ("MYSQLI"):
 				
 				if ( empty($this->host) OR empty($this->port) OR empty($this->name) OR empty($this->user) OR empty($this->pass) ) {
-					throw new comodojo\exception('Invalid database parameters');
+					throw new Exception('Invalid database parameters');
 				}
 
 				$this->dbh = new mysqli($this->host, $this->user, $this->pass, $this->name, $this->port);
 
 				if ($this->dbh->connect_error) {
-					throw new comodojo\exception($this->dbh->connect_error, $this->dbh->connect_errno);
+					throw new Exception($this->dbh->connect_error, $this->dbh->connect_errno);
 				}
 
 			break;
@@ -192,7 +192,7 @@ class database {
 			case ("MYSQL_PDO"):
 
 				if ( empty($this->host) OR empty($this->port) OR empty($this->name) OR empty($this->user) OR empty($this->pass) ) {
-					throw new comodojo\exception('Invalid database parameters');
+					throw new Exception('Invalid database parameters');
 				}
 
 				$dsn="mysql:host=".$this->host.";port=".$this->port .";dbname=".$this->name;
@@ -201,7 +201,7 @@ class database {
 					$this->dbh = new PDO($dsn,$this->user,$this->pass);
 				}
 				catch (PDOException $e) {
-					throw new comodojo\exception($e->getMessage(), $e->getCode());
+					throw new Exception($e->getMessage(), $e->getCode());
 				}
 
 			break;
@@ -209,7 +209,7 @@ class database {
 			case ("ORACLE_PDO"):
 
 				if ( empty($this->host) OR empty($this->port) OR empty($this->name) OR empty($this->user) OR empty($this->pass) ) {
-					throw new comodojo\exception('Invalid database parameters');
+					throw new Exception('Invalid database parameters');
 				}
 
 				$dsn="oci:dbname=".$this->host.":".$this->port."/".$this->name;
@@ -218,7 +218,7 @@ class database {
 					$this->dbh = new PDO($dsn,$this->user,$this->pass);
 				}
 				catch (PDOException $e) {
-					throw new comodojo\exception($e->getMessage(), $e->getCode());
+					throw new Exception($e->getMessage(), $e->getCode());
 				}
 
 			break;
@@ -226,7 +226,7 @@ class database {
 			case ("SQLITE_PDO"):
 			
 				if ( empty($this->name) ) {
-					throw new comodojo\exception('Invalid database parameters');
+					throw new Exception('Invalid database parameters');
 				}
 
 				$dsn="sqlite:".$this->name;
@@ -235,7 +235,7 @@ class database {
 					$this->dbh = new PDO($dsn);
 				}
 				catch (PDOException $e) {
-					throw new comodojo\exception($e->getMessage(), $e->getCode());
+					throw new Exception($e->getMessage(), $e->getCode());
 				}
 
 			break;
@@ -243,14 +243,14 @@ class database {
 			case ("DB2"):
 
 				if ( empty($this->host) OR empty($this->port) OR empty($this->name) OR empty($this->user) OR empty($this->pass) ) {
-					throw new comodojo\exception('Invalid database parameters');
+					throw new Exception('Invalid database parameters');
 				}
 
 				$dsn="ibm:DRIVER={IBM DB2 ODBC DRIVER};DATABASE=".$this->name.";HOSTNAME=".$this->host.";PORT=".$this->port.";PROTOCOL=TCPIP;UID=".$this->user.";PWD=".$this->pass.";";
 
 				$this->dbh = db2_pconnect($dsn,$this->user,$this->pass);
 				if (!$this->dbh){
-					throw new comodojo\exception(db2_conn_errormsg());
+					throw new Exception(db2_conn_errormsg());
 				}
 
 			}
@@ -259,7 +259,7 @@ class database {
 			case ("DBLIB_PDO"):
 
 				if ( empty($this->host) OR empty($this->port) OR empty($this->name) OR empty($this->user) OR empty($this->pass) ) {
-					throw new comodojo\exception('Invalid database parameters');
+					throw new Exception('Invalid database parameters');
 				}
 
 				$dsn = "dblib:host=".$this->host.":".$this->port.";dbname=".$this->name;
@@ -268,7 +268,7 @@ class database {
 					$this->dbh = new PDO($dsn,$this->user,$this->pass);
 				}
 				catch (PDOException $e) {
-					throw new comodojo\exception($e->getMessage(), $e->getCode());
+					throw new Exception($e->getMessage(), $e->getCode());
 				}
 
 			break;
@@ -276,14 +276,14 @@ class database {
 			case ("POSTGRESQL"):
 
 				if ( empty($this->host) OR empty($this->port) OR empty($this->name) OR empty($this->user) OR empty($this->pass) ) {
-					throw new comodojo\exception('Invalid database parameters');
+					throw new Exception('Invalid database parameters');
 				}
 
 				$dsn = "host=".$this->host." port=".$this->port." dbname=".$this->name." user=".$this->user." password=".$this->pass;
 
 				$this->dbh = @pg_connect($dsn);
 				if (!$this->dbh) {
-					throw new comodojo\exception(pg_last_error());
+					throw new Exception(pg_last_error());
 				}
 
 			break;
@@ -329,7 +329,7 @@ class database {
 
 		debug("Building result set (".$this->model.")", "INFO", "database");
 
-		if ( empty($this->model) ) throw new comodojo\exception('Invalid database data model');
+		if ( empty($this->model) ) throw new Exception('Invalid database data model');
 
 		$result	= Array();
 		$id		= false;
@@ -342,7 +342,7 @@ class database {
 
 			case ("MYSQLI"):
 				
-				if ( !is_object($data) OR !is_a($data, 'mysqli_result') ) throw new comodojo\exception('Invalid result data for model '.$this->model);
+				if ( !is_object($data) OR !is_a($data, 'mysqli_result') ) throw new Exception('Invalid result data for model '.$this->model);
 
 				switch ($this->fetch) {
 					case 'NUM':		$fetch = MYSQLI_NUM;	break;
@@ -367,7 +367,7 @@ class database {
 			case ("SQLITE_PDO"):
 			case ("DBLIB_PDO"):
 
-				if ( !is_object($data) ) throw new comodojo\exception('Invalid result data for model '.$this->model);
+				if ( !is_object($data) ) throw new Exception('Invalid result data for model '.$this->model);
 
 				switch ($this->fetch) {
 					case 'NUM':		$fetch = PDO::FETCH_NUM;	break;
@@ -385,7 +385,7 @@ class database {
 
 			case ("DB2"):
 
-				if ( !is_resource($data) OR @get_resource_type($data) != "DB2 Statement" ) throw new comodojo\exception('Invalid result data for model '.$this->model);
+				if ( !is_resource($data) OR @get_resource_type($data) != "DB2 Statement" ) throw new Exception('Invalid result data for model '.$this->model);
 
 									$length = db2_num_fields($data);
 				if ($this->id)		$id 	= db2_last_insert_id($this->dbh);
@@ -402,7 +402,7 @@ class database {
 
 			case ("POSTGRESQL"):
 
-				if ( !is_resource($data) OR @get_resource_type($data) != "pgsql result" ) throw new comodojo\exception('Invalid result data for model '.$this->model);
+				if ( !is_resource($data) OR @get_resource_type($data) != "pgsql result" ) throw new Exception('Invalid result data for model '.$this->model);
 				
 									$length = pg_num_rows($data);
 				if ($this->id)		$id 	= pg_last_oid($data);

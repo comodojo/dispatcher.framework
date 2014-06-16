@@ -1,6 +1,6 @@
 <?php namespace comodojo;
 
-class event {
+class statistic {
 
 	private $time		= false;
 	private $service	= false;
@@ -25,22 +25,22 @@ class event {
 			debug("Cannot record event, database constants not defined", 'ERROR', "event");
 		}
 		else {
-			$this->record_event();
+			$this->record();
 		}
 
 	}
 
-	private function record_event() {
+	private function record() {
 
 		$query = "INSERT INTO `".EVENTS_DB_TABLE."` (timestamp,service,remote,useragent) VALUES (".$this->time.",'".$this->service."','".$this->remote."','".$this->user_agent."')";
 
 		try {
 			
-			$db = new comodojo\database(EVENTS_DB_MODEL,EVENTS_DB_HOST,EVENTS_DB_PORT,EVENTS_DB_NAME,EVENTS_DB_USER,EVENTS_DB_PASS);
+			$db = new database(EVENTS_DB_MODEL,EVENTS_DB_HOST,EVENTS_DB_PORT,EVENTS_DB_NAME,EVENTS_DB_USER,EVENTS_DB_PASS);
 			$db->query($query, true);
 
 		}
-		catch (comodojo\exception $e) {
+		catch (Exception $e) {
 			//event's error should fail silently
 			debug("Error recording event: ".$e->getMessage, 'ERROR', "event");
 		}

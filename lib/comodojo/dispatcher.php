@@ -20,6 +20,8 @@ class dispatcher {
 
 	private $header = NULL;
 
+	private $events = NULL;
+
 	public final function __construct() {
 
 		require("../configs/dispatcher-config.php");
@@ -30,10 +32,12 @@ class dispatcher {
 		require("database.php");
 		require("debug.php");
 		require("trace.php");
-		require("event.php");
+		require("statistic.php");
 
 		require("cache.php");
 		require("header.php");
+
+		require("events.php");
 
 		require("serialization.php");
 		require("deserialization.php");
@@ -53,9 +57,69 @@ class dispatcher {
 
 		$this->header = new header($this->current_time);
 
+		$this->events = new events();
+
 	}
 
 	public final function dispatch() {
+
+	}
+
+	public final function set($param, $value) {
+
+	}
+
+	public final function get($param, $value) {
+
+	}
+
+	public final function add($type, $param, $value) {
+
+		$type = strtoupper($type);
+
+		switch ($type) {
+
+			case 'ROUTE':
+				
+
+
+				break;
+			
+			case 'HOOK':
+
+				$this->events->add($param, $value);
+
+				break;
+
+			default:
+				# code...
+				break;
+
+		}
+
+	}
+
+	public final function remove($type, $param, $value=NULL) {
+
+		$type = strtoupper($type);
+
+		switch ($type) {
+
+			case 'ROUTE':
+				# code...
+				break;
+			
+			case 'HOOK':
+				
+				$this->events->remove($param, $value);
+
+				break;
+
+			default:
+				# code...
+				break;
+
+		}
 
 	}
 
@@ -113,7 +177,14 @@ class dispatcher {
 	 * @param 	ARRAY	$route_headers		Headers defined in routing table for service
 	 * @param 	ARRAY	$service_headers	Service specific headers
 	 */
-	private function route($code, $content, $route_headers, $service_headers) {
+	private function route($service, $code, $content, $route_headers, $service_headers) {
+
+		$content = $this->events->fire("DISPATCHER_PREROUTE", Array(
+				"service"	=>	$service,
+				"code"		=>	$code,
+				"content"	=>	$content
+			)
+		);
 
 		foreach ($service_headers as $header => $value) {
 			
@@ -129,26 +200,61 @@ class dispatcher {
 
 		$this->header->compose($code, strlen($content));
 
+		$this->events->fire("DISPATCHER_POSTROUTE", Array(
+				"service"	=>	$service,
+				"code"		=>	$code,
+				"content"	=>	$content
+			)
+		);
+
 		return $content;
 
 	}
 
-	private function redirect($code, $location) {
+	private function redirect($service, $code, $location) {
+
+		$location = $this->events->fire("DISPATCHER_PREREDIRECT", Array(
+				"service"	=>	$service,
+				"code"		=>	$code,
+				"location"	=>	$location
+			)
+		);
 
 		$this->header->free();
 
 		$this->header->compose($code, 0, $location);
 
+		$this->events->fire("DISPATCHER_POSTREDIRECT", Array(
+				"service"	=>	$service,
+				"code"		=>	$code,
+				"location"	=>	$location
+			)
+		);
+
 		return NULL;
 
 	}
 
-	private function error($code, $message, $extra=false) {
+	private function error($service, $code, $message, $extra=false) {
+
+		$message = $this->events->fire("DISPATCHER_PREERROR", Array(
+				"service"	=>	$service,
+				"code"		=>	$code,
+				"message"	=>	$message
+			)
+		);
 
 		$this->header->free();
 
 		$this->header->compose($code, strlen($message), $extra);
-		
+
+		$this->events->fire("DISPATCHER_POSTERROR", Array(
+				"service"	=>	$service,
+				"code"		=>	$code,
+				"message"	=>	$message
+			)
+		);		
+
 		return $message;
 
 	}

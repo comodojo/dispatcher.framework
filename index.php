@@ -1,9 +1,7 @@
 <?php use comodojo;
 
 /**
- * index.php
- * 
- * A simple URL router for REST Services dispatcher (package)
+ * Dispatcher frontend
  * 
  * @package 	Comodojo Spare Parts
  * @author 		comodojo.org
@@ -35,6 +33,8 @@ $dispatcher = new comodojo\dispatcher();
 //$dispatcher->get("param");
 
 //$dispatcher->add($route);
+
+//$dispatcher->remove($route);
 
 $dispatcher->dispatch();
 

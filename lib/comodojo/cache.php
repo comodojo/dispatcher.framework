@@ -1,4 +1,4 @@
-<?php
+<?php namespace comodojo;
 
 /**
  * standard spare parts cache controller

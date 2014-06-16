@@ -8,15 +8,25 @@ class service {
 
 	private $methods = NULL;
 
-	private $require_get = Array();
+	private $requires_get = Array();
 
-	private $require_put = Array();
+	private $likes_get = Array();
 
-	private $require_post = Array();
+	private $requires_put = Array();
 
-	private $require_delete = Array();
+	private $likes_put = Array();
 
-	private $require_any = Array();
+	private $requires_post = Array();
+
+	private $likes_post = Array();
+
+	private $requires_delete = Array();
+
+	private $likes_delete = Array();
+
+	private $requires_any = Array();
+
+	private $likes_any = Array();
 
 	private $content_type = "text/plain";
 
@@ -89,23 +99,51 @@ class service {
 		switch (strtoupper($method)) {
 
 			case 'GET':
-				$this->require_get = $parameters;
+				$this->requires_get = $parameters;
 				break;
 			
 			case 'PUT':
-				$this->require_put = $parameters;
+				$this->requires_put = $parameters;
 				break;
 			
 			case 'POST':
-				$this->require_post = $parameters;
+				$this->requires_post = $parameters;
 				break;
 			
 			case 'DELETE':
-				$this->require_delete = $parameters;
+				$this->requires_delete = $parameters;
 				break;
 
 			case 'ANY':
-				$this->require_any = $parameters;
+				$this->requires_any = $parameters;
+				break;
+
+		}
+
+	}
+
+	public final function like($method, $parameters) {
+
+		switch (strtoupper($method)) {
+
+			case 'GET':
+				$this->likes_get = $parameters;
+				break;
+			
+			case 'PUT':
+				$this->likes_put = $parameters;
+				break;
+			
+			case 'POST':
+				$this->likes_post = $parameters;
+				break;
+			
+			case 'DELETE':
+				$this->likes_delete = $parameters;
+				break;
+
+			case 'ANY':
+				$this->likes_any = $parameters;
 				break;
 
 		}
@@ -194,7 +232,37 @@ class service {
 
 		}
 
-		return ( sizeof($r) == 0 AND sizeof($this->require_any) != 0 ) ? $this->require_any : $r;
+		return ( sizeof($r) == 0 AND sizeof($this->requires_any) != 0 ) ? $this->requires_any : $r;
+
+	}
+
+	public final function liked($method) {
+
+		switch ($method) {
+
+			case 'GET':
+				$r = $this->likes_get;
+				break;
+			
+			case 'PUT':
+				$r = $this->likes_put;
+				break;
+			
+			case 'POST':
+				$r = $this->likes_post;
+				break;
+			
+			case 'DELETE':
+				$r = $this->likes_delete;
+				break;
+
+			default:
+				$r = Array();
+				break;
+
+		}
+
+		return ( sizeof($r) == 0 AND sizeof($this->likes_any) != 0 ) ? $this->likes_any : $r;
 
 	}
 
