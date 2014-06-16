@@ -28,6 +28,14 @@
 
 require "lib/comodojo/dispatcher.php";
 
-$instance = new comodojo\dispatcher();
+$dispatcher = new comodojo\dispatcher();
+
+//$dispatcher->set("param","value");
+
+//$dispatcher->get("param");
+
+//$dispatcher->add($route);
+
+$dispatcher->dispatch();
 
 ?>

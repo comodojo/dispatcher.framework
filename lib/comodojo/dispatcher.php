@@ -2,6 +2,8 @@
 
 class dispatcher {
 
+	private 
+
 	private $current_time = NULL;
 
 	private $service_uri = NULL;
@@ -50,6 +52,10 @@ class dispatcher {
 		$this->cacher = new cache($this->current_time);
 
 		$this->header = new header($this->current_time);
+
+	}
+
+	public final function dispatch() {
 
 	}
 
@@ -107,7 +113,7 @@ class dispatcher {
 	 * @param 	ARRAY	$route_headers		Headers defined in routing table for service
 	 * @param 	ARRAY	$service_headers	Service specific headers
 	 */
-	private function dispatch($code, $content, $route_headers, $service_headers) {
+	private function route($code, $content, $route_headers, $service_headers) {
 
 		foreach ($service_headers as $header => $value) {
 			
