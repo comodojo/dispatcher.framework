@@ -5,11 +5,13 @@ class header {
 
 	private $headers = Array();
 
-	private $current_time = time();
+	private $current_time = NULL;
 
 	public final function __construct($time=false) {
 
-		if ( $time !== false ) $this->current_time = $time;
+		$this->current_time = $time !== false ? $time : time();
+
+		debug(' + Header up and running; current time: '.$this->current_time,'INFO','header');
 
 	}
 
@@ -34,7 +36,7 @@ class header {
 
 	public final function compose($status, $contentLength=0, $value=false) {
 
-		switch ($statusCode) {
+		switch ($status) {
 
 			case 200: //OK
 
@@ -120,7 +122,7 @@ class header {
 			case 400: //Bad Request
 
 				header($_SERVER["SERVER_PROTOCOL"].' 400 Bad Request', true, 400);
-				if ($contentLength !== 0) header('Content-Length: '.$contentLength); //is it needed?
+				if ($contentLength !== 0) header('Content-Length: '.$contentLength);
 			
 				break;
 

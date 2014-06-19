@@ -9,22 +9,26 @@
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
  */
- 
+
+require(DISPATCHER_REAL_PATH."/Exception/CacheException.php");
+
 class cache {
 	
 	/**
 	 * If true, cache methods will not throw exception in case of error.
 	 * @var	bool
 	 */
-	private $fail_silently = COMODOJO_CACHE_FAIL_SILENTLY;
+	private $fail_silently = DISPATCHER_CACHE_FAIL_SILENTLY;
 	
-	private $cache_path = COMODOJO_CACHE_FOLDER;
+	private $cache_path = DISPATCHER_CACHE_FOLDER;
 
-	private $current_time = time();
+	private $current_time = NULL;
 
 	public final function __construct($time=false) {
 
-		if ( $time !== false ) $this->current_time = $time;
+		$this->current_time = $time !== false ? $time : time();
+
+		debug(' + Cache up and running; current time: '.$this->current_time,'INFO','cache');
 
 	}
 
@@ -45,7 +49,7 @@ class cache {
 	 */
 	public final function set($data, $request) {
 		
-		if (!COMODOJO_CACHE_ENABLED) {
+		if (!DISPATCHER_CACHE_ENABLED) {
 			debug('Caching administratively disabled','INFO','cache');
 			return false;
 		}
@@ -93,9 +97,9 @@ class cache {
 	 * 
 	 * @return	array|string|bool		Data cached, in array or plaintext, or false if no cache saved.
 	 */
-	public final function get($request, $ttl=COMODOJO_CACHE_TTL) {
+	public final function get($request, $ttl=DISPATCHER_CACHE_TTL) {
 		
-		if (!COMODOJO_CACHE_ENABLED) {
+		if (!DISPATCHER_CACHE_ENABLED) {
 			debug('Caching administratively disabled','INFO','cache');
 			return false;
 		}
@@ -158,7 +162,7 @@ class cache {
 			$cache_path = opendir($this->cache_path);
 			if ( $cache_path === false ) {
 				debug("Unable to open cache folder","ERROR","cache");
-				return false
+				return false;
 			}
 			
 			while( false !== ( $cache_file = readdir($cache_path) ) ) {

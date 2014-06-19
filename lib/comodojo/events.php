@@ -28,6 +28,12 @@ class events {
 
 	private $hooks = Array();
 
+	public final function __construct() {
+
+		debug(' + Events engine up and running','INFO','events');
+
+	}
+
 	public final function add($event, $callback) {
 
 		if ( isset($this->hooks[$event]) ) array_push($this->hooks[$event], $callback);
@@ -104,6 +110,8 @@ class events {
 			return $value;
 
 		}
+
+		return $data;
 
 	}
 

@@ -1,7 +1,7 @@
-<?php namespace comodojo;
+<?php namespace comodojo\Exception;
 
 /**
- * standard spare parts exception handler
+ * Dispatcher exception handler
  * 
  * @package 	Comodojo Spare Parts
  * @author		comodojo.org
@@ -24,9 +24,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Simply extend exception
- */
-class Exception extends \Exception {}
+class CacheException extends \Exception {}
 
 ?>

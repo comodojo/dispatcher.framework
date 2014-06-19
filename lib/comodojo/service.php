@@ -94,7 +94,7 @@ class service {
 
 	}
 
-	public final function require($method, $parameters) {
+	public final function expect($method, $parameters) {
 
 		switch (strtoupper($method)) {
 
@@ -206,7 +206,7 @@ class service {
 
 	}
 
-	public final function required($method) {
+	public final function expected($method) {
 
 		switch ($method) {
 
