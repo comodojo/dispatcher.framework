@@ -1,13 +1,13 @@
-<?php use comodojo\dispatcher;
+<?php namespace comodojo\Exception;
 
 /**
- * Dispatcher frontend
+ * Dispatcher exception handler
  * 
  * @package 	Comodojo Spare Parts
- * @author 		comodojo.org
+ * @author		comodojo.org
  * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version 	__CURRENT_VERSION__
- * 
+ *
  * LICENSE:
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -24,20 +24,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require "lib/comodojo/dispatcher.php";
-
-$dispatcher = new dispatcher();
-
-require "configs/routing-table.php";
-
-//$dispatcher->set("param","value");
-
-//$dispatcher->get("param");
-
-//$dispatcher->add($route);
-
-//$dispatcher->remove($route);
-
-$dispatcher->dispatch();
+class IOException extends \Exception {}
 
 ?>

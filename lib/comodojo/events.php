@@ -72,7 +72,7 @@ class events {
 
 	}
 
-	public final function fire($event, $data) {
+	public final function fire($event, \comodojo\ObjectResult\ObjectResultInterface $data) {
 
 		$value = $data;
 
@@ -103,7 +103,7 @@ class events {
 
 				}
 
-				$value = is_null($return_value) ? $value : $return_value;
+				$value = $return_value instanceof \comodojo\ObjectResult\ObjectResultInterface ? $return_value : $value;
 			
 			}
 

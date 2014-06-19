@@ -1,4 +1,4 @@
-<?php namespace comodojo;
+<?php
 
 /** 
  * 
@@ -65,5 +65,13 @@ $routingtable = Array(
 	)
 
 );
+
+global $dispatcher;
+
+$dispatcher->add("hook","dispatcher.error","test_me");
+
+function test_me($data) {
+	error_log("test me: ".$data->getStatusCode());
+}
 
 ?>

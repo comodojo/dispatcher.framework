@@ -1,12 +1,16 @@
 <?php namespace comodojo;
 
-use \comodojo\Exception\DispatcherException;
-
 define("DISPATCHER_REAL_PATH",realpath(dirname(__FILE__)));
 
 require(DISPATCHER_REAL_PATH."/../../configs/dispatcher-config.php");
-require(DISPATCHER_REAL_PATH."/../../configs/routing-table.php");
+//require(DISPATCHER_REAL_PATH."/../../configs/routing-table.php");
 require(DISPATCHER_REAL_PATH."/Exception/DispatcherException.php");
+require(DISPATCHER_REAL_PATH."/Exception/DatabaseException.php");
+require(DISPATCHER_REAL_PATH."/Exception/IOException.php");
+require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectResultInterface.php");
+require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectSuccess.php");
+require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectError.php");
+require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectRedirect.php");
 require(DISPATCHER_REAL_PATH."/debug.php");
 require(DISPATCHER_REAL_PATH."/cache.php");
 require(DISPATCHER_REAL_PATH."/header.php");
@@ -14,6 +18,13 @@ require(DISPATCHER_REAL_PATH."/events.php");
 require(DISPATCHER_REAL_PATH."/serialization.php");
 require(DISPATCHER_REAL_PATH."/deserialization.php");
 require(DISPATCHER_REAL_PATH."/service.php");
+
+use \comodojo\Exception\DispatcherException;
+use \comodojo\Exception\IOException;
+use \comodojo\Exception\DatabaseException;
+use \comodojo\ObjectResult\ObjectSuccess;
+use \comodojo\ObjectResult\ObjectError;
+use \comodojo\ObjectResult\ObjectRedirect;
 
 class dispatcher {
 
@@ -107,9 +118,14 @@ class dispatcher {
 				
 			}
 
-		} catch (DispatcherException $e) {
+		} catch (DispatcherException $de) {
 
-			$return = $this->error(NULL, $e->getCode(), $e->getMessage());
+			$route = new ObjectError();
+			$route->setService($this->service_requested)
+				  ->setStatusCode($de->getCode())
+				  ->setContent($de->getMessage());
+
+			$return = $this->route($route);
 
 		} catch (Exception $e) {
 
@@ -183,6 +199,16 @@ class dispatcher {
 
 	}
 
+	/**
+	 * Url interpreter
+	 *
+	 * Starting from $workingMode (REWRITE|STANDARD) will acquire service route from request.
+	 *
+	 * In other words, will separate service and attributes and populate class parameters
+	 * service_requested and service_attributes
+	 *
+	 * @param 	string 	$workingMode 	(REWRITE|STANDARD)
+	 */
 	private function url_interpreter($workingMode) {
 
 		if ($workingMode == "REWRITE") {
@@ -221,6 +247,11 @@ class dispatcher {
 
 	}
 
+	/**
+	 * Return current request uri
+	 *
+	 * @return uri 	The request uri
+	 */
 	private function url_uri() {
 
 		return $_SERVER['REQUEST_URI'];
@@ -228,92 +259,55 @@ class dispatcher {
 	}
 
 	/**
-	 * Dispatch response composing also return header
+	 * Route request handling ObjectResult hooks
 	 *
-	 * It process service specific header and then append also ones defined in routing table (if any)
-	 *
-	 * @param 	INT		$code				HTTP status code
-	 * @param 	INT		$contentLenght		Response content length
-	 * @param 	ARRAY	$route_headers		Headers defined in routing table for service
-	 * @param 	ARRAY	$service_headers	Service specific headers
+	 * @param 	ObjectResult 	$route 	An implementation of ObjectResultInterface
+	 * @return 	string 					Content (stuff that will go on screen)
 	 */
-	private function route($service, $code, $content, $route_headers, $service_headers) {
+	private function route(\comodojo\ObjectResult\ObjectResultInterface $route) {
 
-		$content = $this->events->fire("DISPATCHER_PREROUTE", Array(
-				"service"	=>	$service,
-				"code"		=>	$code,
-				"content"	=>	$content
-			)
-		);
+		// Starting from the routing instance, select the relative level2 hook
+		// This means event engine will fire a dispatcher.[routetype] event
+		// In case of wrong instance, create an ObjectError (500, NULL) instance
 
-		foreach ($service_headers as $header => $value) {
+		if ( $route instanceof ObjectSuccess ) $hook = "dispatcher.route";
+		else if ( $route instanceof ObjectError ) $hook = "dispatcher.error";
+		else if ( $route instanceof ObjectRedirect ) $hook = "dispatcher.redirect";
+		else {
+
+			$route = new ObjectError();
+
+		}
+
+		// Fire first hook (level2), as specified above
+
+		$fork = $this->events->fire($hook, $route);
+
+		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
+
+		// Now select and fire second hook (level3)
+		// This means that event engine will fire something like "dispatcher.route.200"
+		// or "dispatcher.error.500"
+
+		$fork = $this->events->fire($hook.".".$route->getStatusCode(), $route);
+
+		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;		
+
+		// After hooks, start composing header
+
+		$this->header->free();
+
+		foreach ($route->getHeaders() as $header => $value) {
 			
 			$this->header->set($header, $value);
 
 		}
 
-		foreach ($route_headers as $header => $value) {
-			
-			$this->header->set($header, $value);
+		$message = $route->getContent();
 
-		}
+		$this->header->compose($route->getStatusCode(), strlen($message), $route->getLocation()); # ><!/\!°>
 
-		$this->header->compose($code, strlen($content));
-
-		$this->events->fire("DISPATCHER_POSTROUTE", Array(
-				"service"	=>	$service,
-				"code"		=>	$code,
-				"content"	=>	$content
-			)
-		);
-
-		return $content;
-
-	}
-
-	private function redirect($service, $code, $location) {
-
-		$location = $this->events->fire("DISPATCHER_PREREDIRECT", Array(
-				"service"	=>	$service,
-				"code"		=>	$code,
-				"location"	=>	$location
-			)
-		);
-
-		$this->header->free();
-
-		$this->header->compose($code, 0, $location);
-
-		$this->events->fire("DISPATCHER_POSTREDIRECT", Array(
-				"service"	=>	$service,
-				"code"		=>	$code,
-				"location"	=>	$location
-			)
-		);
-
-		return NULL;
-
-	}
-
-	private function error($service, $code, $message, $extra=false) {
-
-		$message = $this->events->fire("DISPATCHER_PREERROR", Array(
-				"service"	=>	$service,
-				"code"		=>	$code,
-				"message"	=>	$message
-			)
-		);
-
-		$this->header->free();
-
-		$this->header->compose($code, strlen($message), $extra);
-
-		$this->events->fire("DISPATCHER_POSTERROR", Array(
-				"service"	=>	$service,
-				"code"		=>	$code,
-				"message"	=>	$message
-			)
-		);		
+		// Return the content (stuff that will go on screen)
 
 		return $message;
 

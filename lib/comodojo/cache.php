@@ -10,7 +10,7 @@
  * @license		GPL Version 3
  */
 
-require(DISPATCHER_REAL_PATH."/Exception/CacheException.php");
+use \comodojo\Exception\IOException;
 
 class cache {
 	
@@ -60,7 +60,7 @@ class cache {
 				return false;
 			}
 			else {
-				throw new Exception("Nothing to cache");
+				throw new IOException("Nothing to cache");
 			}
 		}
 		
@@ -77,7 +77,7 @@ class cache {
 				return false;
 			}
 			else {
-				throw new Exception("Error writing to cache folder", 1201);
+				throw new IOException("Error writing to cache folder", 1201);
 			}
 		}
 
@@ -128,7 +128,7 @@ class cache {
 					return false;
 				}
 				else {
-					throw new Exception("Error reading from cache file ".$cacheTag, 1203);
+					throw new IOException("Error reading from cache file ".$cacheTag, 1203);
 				}
 			}
 			

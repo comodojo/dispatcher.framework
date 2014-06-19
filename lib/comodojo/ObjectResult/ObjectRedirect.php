@@ -1,18 +1,16 @@
 <?php namespace comodojo\ObjectResult;
 
-class ObjectSuccess implements ObjectResultInterface {
+class ObjectRedirect implements ObjectResultInterface {
 
 	private $service = NULL;
 
-	private $code = 200;
+	private $code = 307;
 
-	private $supported_success_codes = Array(200,202,204);
+	private $supported_redirect_codes = Array(201,301,302,303,307);
 
-	private $content = NULL;
+	private $location = NULL;
 
 	private $headers = Array();
-
-	private $contentType = "text/plain";
 
 	public function setService($service) {
 
@@ -32,7 +30,7 @@ class ObjectSuccess implements ObjectResultInterface {
 
 		$code = filer_var($code, FILTER_VALIDATE_INT);
 
-		$this->code = in_array($code, $this->supported_success_codes) ? $code : $this->code;
+		$this->code = in_array($code, $this->supported_redirect_codes) ? $code : $this->code;
 
 		return $this;
 
@@ -44,23 +42,25 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	}
 
-	public function setContent($message) {
+	public function setContent($message) {}
 
-		$this->content = $message;
+	public function getContent() {}
+
+	public function setLocation($location) {
+
+		$location = filter_var($location, FILTER_VALIDATE_URL);
+
+		$this->location = $location !== false ? $location : $this->location;
 
 		return $this;
 
 	}
 
-	public function getContent() {
+	public function getLocation() {
 
-		return $this->content;
+		return $this->location;
 
 	}
-
-	public function setLocation($location) {}
-
-	public function getLocation() {}
 
 	public function setHeader($header, $value=NULL) {
 
@@ -108,19 +108,9 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	}
 
-	public function setContentType($type) {
+	public function setContentType($type) {}
 
-		$this->contentType = $type;
-
-		return $this;
-
-	}
-
-	public function getContentType() {
-
-		return $this->contentType;
-
-	}
+	public function getContentType() {}
 
 }
 
