@@ -87,13 +87,6 @@ define('DISPATCHER_CACHE_DEFAULT_TTL', 600);
 define('DISPATCHER_CACHE_FAIL_SILENTLY', true);
 
 /**
-* Cache folder.
-* 
-* @static	string
-*/
-define('DISPATCHER_CACHE_FOLDER', DISPATCHER_REAL_PATH."/../../cache/");
-
-/**
  * Default encoding, currently used only in xml transformations
  */
 define('DISPATCHER_DEFAULT_ENCODING', 'UTF-8');
@@ -120,6 +113,32 @@ define('DISPATCHER_DEFAULT_ENCODING', 'UTF-8');
 define('DISPATCHER_SUPPORTED_METHODS', 'GET,PUT,POST,DELETE,ANY');
 
 ######### END DISPATCHER PROPERTIES #########
+
+######## BEGIN DISPATCHER FOLDERS ########
+
+/**
+* Cache folder.
+* 
+* @static	string
+*/
+define('DISPATCHER_CACHE_FOLDER', DISPATCHER_REAL_PATH."/../../cache/");
+
+/**
+* Log (traces) folder.
+* 
+* @static	string
+*/
+define('DISPATCHER_TRACE_FOLDER', DISPATCHER_REAL_PATH."/../../log/");
+
+/**
+* Services folder.
+* 
+* @static	string
+*/
+define('DISPATCHER_SERVICE_FOLDER', DISPATCHER_REAL_PATH."/../../services/");
+
+######### END DISPATCHER FOLDERS #########
+
 
 
 

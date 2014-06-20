@@ -52,26 +52,9 @@
 * @static	ARRAY
 * @default	declared example services
 */
-$routingtable = Array(
 
-	"service"	=>	Array(
-		"target"	=>	"",
-		"policy"	=>	"",
-		"cache"		=>	"",
-		"headers"	=>	Array(),
-		"redirectStatusCode"	=>	302,
-		"redirectLocation"		=>	"",
-		"ttl"		=>	0
-	)
+//global $dispatcher;
 
-);
-
-global $dispatcher;
-
-$dispatcher->add("hook","dispatcher.error","test_me");
-
-function test_me($data) {
-	error_log("test me: ".$data->getStatusCode());
-}
+//$dispatcher->addRoute();
 
 ?>

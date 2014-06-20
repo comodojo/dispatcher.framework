@@ -59,7 +59,7 @@ class dispatcher {
 
 	private $request = NULL;
 
-	private $route = NULL;
+	private $serviceroute = NULL;
 
 	private $cacher = NULL;
 
@@ -169,38 +169,112 @@ class dispatcher {
 
 		if ( $fork instanceof \comodojo\ObjectRoutingTable\ObjectRoutingTable ) $this->routingtable = $fork;
 
-		// 
+		// Retrieve current route from routing table
 
-		try {
-			
-			if ( empty($this->service_requested) ) throw new DispatcherException("Bad request", 400);
-			
-			if ( $this->service_is_in_routing_table($this->service_requested) ) {
+		$service = $this->request->getService();
+
+		$preroute = $this->routingtable->getRoute($service);
+
+		$this->serviceroute = new ObjectRoute();
+		$this->serviceroute->setService($service)
+			->setType($preroute["type"])
+			->setTarget($preroute["target"]);
+
+		if ( isset($preroute["parameters"]["redirectCode"]) ) $this->serviceroute->setRedirectCode($preroute["parameters"]["redirectCode"]);
+		if ( isset($preroute["parameters"]["errorCode"]) ) $this->serviceroute->setErrorCode($preroute["parameters"]["errorCode"]);
+		if ( isset($preroute["parameters"]["cache"]) ) $this->serviceroute->setCache($preroute["parameters"]["cache"]);
+		if ( isset($preroute["parameters"]["ttl"]) ) $this->serviceroute->setTtl($preroute["parameters"]["ttl"]);
+		if ( isset($preroute["parameters"]["headers"]) ) $this->serviceroute->setHeaders($preroute["parameters"]["headers"]);
+		if ( isset($preroute["parameters"]["accessControl"]) ) $this->serviceroute->setRedirectCode($preroute["parameters"]["accessControl"]);
+
+		// Now that we have a route, fire the level2 event "dispatcher.serviceroute"
+		// and level3 events:
+		// - "dispatcher.serviceroute.[type]"
+		// - "dispatcher.serviceroute.[service]"
+
+		$fork = $this->events->fire("dispatcher.serviceroute", "ROUTE", $this->serviceroute);
+
+		if ( $fork instanceof \comodojo\ObjectRoute\ObjectRoute ) $this->serviceroute = $fork;
+
+		$fork = $this->events->fire("dispatcher.serviceroute.".$this->serviceroute->getType(), "ROUTE", $this->serviceroute);
+
+		if ( $fork instanceof \comodojo\ObjectRoute\ObjectRoute ) $this->serviceroute = $fork;
+
+		$fork = $this->events->fire("dispatcher.serviceroute.".$this->serviceroute->getService(), "ROUTE", $this->serviceroute);
+
+		if ( $fork instanceof \comodojo\ObjectRoute\ObjectRoute ) $this->serviceroute = $fork;
+
+		// Before using route to handle request, check if access control should block instance
+
+		$accesscontrol = preg_replace('/\s+/', '', $this->serviceroute->getAccessControl());
+
+		if ( $accesscontrol != NULL AND $accesscontrol != "*" ) {
+
+			$origins = explode(",", $accesscontrol);
+
+			if ( !in_array(@$_SERVER['HTTP_ORIGIN'], $origins) ) {
+
+				$route = new ObjectError();
+				$route->setStatusCode(403)->setContent("Origin not allowed");
+
+				$return = $this->route($route);
+
+				exit($return);
 
 			}
-			else if ( DISPATCHER_AUTO_ROUTE AND $this->service_is_routable($this->service_requested) ) {
 
-			}
-			else {
-
-				throw new DispatcherException("Not found", 404);
-				
-			}
-
-		} catch (DispatcherException $de) {
-
-			$route = new ObjectError();
-			$route->setService($this->service_requested)
-				  ->setStatusCode($de->getCode())
-				  ->setContent($de->getMessage());
-
-			$return = $this->route($route);
-
-		} catch (Exception $e) {
-
-			
-		
 		}
+
+		switch($this->serviceroute->getType()) {
+
+			case "ERROR":
+
+				$route = new ObjectError();
+				$route->setService($this->serviceroute->getService())
+					  ->setStatusCode($this->serviceroute->getErrorCode())
+					  ->setContent($this->serviceroute->getTarget())
+					  ->setHeaders($this->serviceroute->getHeaders);
+
+				break;
+
+			case "REDIRECT":
+
+				$route = new ObjectRedirect();
+				$route->setService($this->serviceroute->getService())
+					  ->setStatusCode($this->serviceroute->getRedirectCode())
+					  ->setHeaders($this->serviceroute->getHeaders);
+
+				break;
+
+			case "ROUTE"
+
+				try {
+					
+					$this->run();
+
+					$route = new ObjectSuccess();
+
+				} catch (DispatcherException $de) {
+				
+					$route = new ObjectError();
+					$route->setService($this->serviceroute->getService())
+						  ->setStatusCode($de->getCode())
+						  ->setContent($de->getMessage());
+
+				} catch (Exception $e) {
+
+					$route = new ObjectError();
+					$route->setService($this->serviceroute->getService())
+						  ->setStatusCode(500)
+						  ->setContent($e->getMessage());
+
+				}
+
+				break;
+
+		}
+
+		$return = $this->route($route);
 
 		ob_end_clean();
 
@@ -208,63 +282,27 @@ class dispatcher {
 
 	}
 
-	public final function set($param, $value) {
+	public final function setRoute($service, $type, $target, $parameters) {
+
+		$this->routingtable->setRoute($service, $type, $target, $parameters);
 
 	}
 
-	public final function get($param, $value) {
+	public final function unsetRoute($service) {
+
+		$this->routingtable->unsetRoute($service);
 
 	}
 
-	public final function add($type, $param, $value) {
+	public final function addHook($event, $callback) {
 
-		$type = strtoupper($type);
-
-		switch ($type) {
-
-			case 'ROUTE':
-				
-				$this->routingtable[$param] = $value;
-
-				break;
-			
-			case 'HOOK':
-
-				$this->events->add($param, $value);
-
-				break;
-
-			default:
-				# code...
-				break;
-
-		}
+		$this->events->add($event, $callback);
 
 	}
 
-	public final function remove($type, $param, $value=NULL) {
+	public final function removeHook($event, $callback=NULL) {
 
-		$type = strtoupper($type);
-
-		switch ($type) {
-
-			case 'ROUTE':
-				
-				if ( isset($this->routingtable[$param]) ) unset($this->routingtable[$param]);
-
-				break;
-			
-			case 'HOOK':
-				
-				$this->events->remove($param, $value);
-
-				break;
-
-			default:
-				# code...
-				break;
-
-		}
+		$this->events->remove($event, $callback);
 
 	}
 
