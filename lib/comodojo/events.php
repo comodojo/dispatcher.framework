@@ -72,7 +72,7 @@ class events {
 
 	}
 
-	public final function fire($event, \comodojo\ObjectResult\ObjectResultInterface $data) {
+	public final function fire($event, $type, $data) {
 
 		$value = $data;
 
@@ -98,12 +98,50 @@ class events {
 				}
 				else {
 
-					debug("Skipping not-callable hook ".$event, "WARNING", "events");
+					debug("Skipping not-callable hook ".$event."::".$callback, "WARNING", "events");
 					continue;
 
 				}
 
-				$value = $return_value instanceof \comodojo\ObjectResult\ObjectResultInterface ? $return_value : $value;
+				switch ($type) {
+
+					case 'DISPATCHER':
+						
+						$value = is_bool($return_value) ? $return_value : $value;
+
+						break;
+
+					case 'REQUEST':
+						
+						$value = $return_value instanceof \comodojo\ObjectRequest\ObjectRequest ? $return_value : $value;
+
+						break;
+
+					case 'TABLE':
+						
+						$value = $return_value instanceof \comodojo\ObjectRoutingTable\ObjectRoutingTable ? $return_value : $value;
+
+						break;
+					
+					case 'ROUTE':
+						
+						$value = $return_value instanceof \comodojo\ObjectRoute\ObjectRoute ? $return_value : $value;
+
+						break;
+					
+					case 'RESULT':
+						
+						$value = $return_value instanceof \comodojo\ObjectResult\ObjectResultInterface ? $return_value : $value;
+
+						break;
+					
+					default:
+						
+						$value = $value;
+
+						break;
+
+				}
 			
 			}
 

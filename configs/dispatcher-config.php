@@ -37,6 +37,15 @@ define('COMODOJO_GLOBAL_DEBUG_LEVEL', 'DEBUG');
 ######## BEGIN DISPATCHER PROPERTIES ########
 
 /**
+* If false, dispatcher will not route any request and will reply with an 503 Service 
+* Temporarily Unavailable status code
+* 
+* @static	bool
+* @default	true
+*/
+define ('DISPATCHER_ENABLED', true);
+
+/**
 * If true, dispatcher will use rewrite module to acquire service path and attibutes
 * 
 * @static	bool

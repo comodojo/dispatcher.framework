@@ -157,7 +157,36 @@ class header {
 			
 				break;
 
+			case 503: //Service Unavailable
+
+				header('HTTP/1.1 503 Service Temporarily Unavailable');
+				header('Status: 503 Service Temporarily Unavailable');
+				if ($value !== false AND @is_int($value) {
+					header('Retry-After: '.$value);
+				}
+			
+				break;
+
 		}
+
+	}
+
+	public final function get_request_headers() {
+
+		$headers = '';
+
+		if (function_exists('getallheaders')) $headers = getallheaders();
+
+		else {
+
+			foreach ($_SERVER as $name => $value) {
+
+				if (substr($name, 0, 5) == 'HTTP_') $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+			}
+
+		}
+
+		return $headers;
 
 	}
 

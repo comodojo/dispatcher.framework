@@ -3,10 +3,12 @@
 define("DISPATCHER_REAL_PATH",realpath(dirname(__FILE__)));
 
 require(DISPATCHER_REAL_PATH."/../../configs/dispatcher-config.php");
-//require(DISPATCHER_REAL_PATH."/../../configs/routing-table.php");
 require(DISPATCHER_REAL_PATH."/Exception/DispatcherException.php");
 require(DISPATCHER_REAL_PATH."/Exception/DatabaseException.php");
 require(DISPATCHER_REAL_PATH."/Exception/IOException.php");
+require(DISPATCHER_REAL_PATH."/ObjectRequest/ObjectRequest.php");
+require(DISPATCHER_REAL_PATH."/ObjectRoutingTable/ObjectRoutingTable.php");
+require(DISPATCHER_REAL_PATH."/ObjectRoute/ObjectRoute.php");
 require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectResultInterface.php");
 require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectSuccess.php");
 require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectError.php");
@@ -19,30 +21,45 @@ require(DISPATCHER_REAL_PATH."/serialization.php");
 require(DISPATCHER_REAL_PATH."/deserialization.php");
 require(DISPATCHER_REAL_PATH."/service.php");
 
+//require("database.php");
+//require("trace.php");
+//require("statistic.php");
+//require("http.php");
+//require("random.php");
+
 use \comodojo\Exception\DispatcherException;
 use \comodojo\Exception\IOException;
 use \comodojo\Exception\DatabaseException;
+use \comodojo\ObjectRequest\ObjectRequest;
+use \comodojo\ObjectRoutingTable\ObjectRoutingTable;
+use \comodojo\ObjectRoute\ObjectRoute;
 use \comodojo\ObjectResult\ObjectSuccess;
 use \comodojo\ObjectResult\ObjectError;
 use \comodojo\ObjectResult\ObjectRedirect;
 
 class dispatcher {
 
+	private $enabled = DISPATCHER_ENABLED;
+
 	private $current_time = NULL;
+
+	private $working_mode = 'STANDARD';
 
 	private $service_uri = NULL;
 
-	private $service_requested = NULL;
-
-	private $service_attributes = NULL;
-
-	private $service_parameters = NULL;
-
 	private $request_method = NULL;
 
-	private $routingtable = Array();
+	private $routingtable = NULL;
 
-	private $working_mode = 'STANDARD';
+	//private $service_requested = NULL;
+
+	//private $service_attributes = NULL;
+
+	//private $service_parameters = NULL;
+
+	private $request = NULL;
+
+	private $route = NULL;
 
 	private $cacher = NULL;
 
@@ -54,30 +71,30 @@ class dispatcher {
 
 		ob_start();
 
-		global $routingtable;
+		// Before building dispatcher instance, fire THE level1 event "dispatcher"
+		// This is the only way (out of dispatcher-config) to disable dispatcher
 
-		if ( is_array($routingtable) ) $this->routingtable = $routingtable;
+		$fork = $this->events->fire("dispatcher", "DISPATCHER", $this->enabled);
 
-		//require("database.php");
-		//require("trace.php");
-		//require("statistic.php");
-		//require("http.php");
-		//require("random.php");
-		
+		if ( is_bool($fork)  ) $this->enabled = $fork;
+
+		// Now start to build dispatcher instance
+
 		$this->current_time = time();
 
 		$this->working_mode = $this->get_working_mode();
 
+		$this->service_uri = $this->url_uri();
+
 		$this->request_method = $_SERVER['REQUEST_METHOD'];
 
-		$this->service_uri = $this->url_uri();
+		$this->routingtable = new ObjectRoutingTable();
 
 		debug('-----------------------------------------------------------','INFO','dispatcher');
 		debug(' *** Starting dispatcher ***','INFO','dispatcher');
 		debug('-----------------------------------------------------------','INFO','dispatcher');
 		debug(' * Current time: '.$this->current_time,'INFO','dispatcher');
 		debug(' * Working mode: '.$this->working_mode,'INFO','dispatcher');
-		debug(' * Request HTTP method: '.$this->request_method,'INFO','dispatcher');
 		debug(' * Request URI: '.$this->service_uri,'INFO','dispatcher');
 		debug('-----------------------------------------------------------','INFO','dispatcher');
 		debug(' *** Loading modules...','INFO','dispatcher');
@@ -90,17 +107,69 @@ class dispatcher {
 
 		debug('-----------------------------------------------------------','INFO','dispatcher');
 
-		$this->url_interpreter($this->working_mode);
+		// Starts composing request object (ObjectRequest)
+
+		list($request_service,$request_attributes) = $this->url_interpreter($this->working_mode);
+
+		list($request_parameters, $request_raw_parameters) = $this->deserialize_parameters($this->request_method);
+
+		$request_headers = $this->header->get_request_headers();
+
+		$this->request = new ObjectRequest();
+
+		$this->request
+			->setMethod($this->request_method)
+			->setService($request_service)
+			->setAttributes($request_attributes)
+			->setParameters($request_parameters)
+			->setRawParameters($request_raw_parameters)
+			->setHeaders($request_headers);
 
 		debug(' * Requested service: '.$this->service_requested,'INFO','dispatcher');
-		debug(' * Raw attributes: ','INFO','dispatcher');
-		debug($this->service_attributes,'INFO','dispatcher');
-
+		debug(' * Request HTTP method: '.$this->request_method,'INFO','dispatcher');
 		debug('-----------------------------------------------------------','INFO','dispatcher');
+
+		// After building dispatcher instance, fire THE level2 event "dispatcher.request"
+		// This default hook will expose current request (ObjectRequest) to callbacks
+
+		$fork = $this->events->fire("dispatcher.request", "REQUEST", $this->request);
+
+		if ( $fork instanceof \comodojo\ObjectRequest\ObjectRequest ) $this->request = $fork;
+
+		// Fire level3 event "dispatcher.request.[method]"
+		
+		$fork = $this->events->fire("dispatcher.request.".$this->request_method, "REQUEST", $this->request);
+
+		if ( $fork instanceof \comodojo\ObjectRequest\ObjectRequest ) $this->request = $fork;
+
+		// Fire level3 event "dispatcher.request.[service]"
+		
+		$fork = $this->events->fire("dispatcher.request.".$request_service, "REQUEST", $this->request);
+
+		if ( $fork instanceof \comodojo\ObjectRequest\ObjectRequest ) $this->request = $fork;
 
 	}
 
 	public final function dispatch() {
+
+		if ( $this->enabled === false ) {
+
+			$route = new ObjectError();
+			$route->setStatusCode(503);
+
+			$return = $this->route($route);
+
+			exit($return);
+
+		}
+
+		// Before calculating service route, expose the routing table via level2 event "dispatcher.routingtable"
+
+		$fork = $this->events->fire("dispatcher.routingtable", "TABLE", $this->routingtable);
+
+		if ( $fork instanceof \comodojo\ObjectRoutingTable\ObjectRoutingTable ) $this->routingtable = $fork;
+
+		// 
 
 		try {
 			
@@ -224,8 +293,14 @@ class dispatcher {
 
 			if (isset($service_matrix[0])) {
 
-				$this->service_requested = $service_matrix[0];
-				$this->service_attributes = array_slice($service_matrix,1);
+				$service_requested = $service_matrix[0];
+				$service_attributes = array_slice($service_matrix,1);
+
+			}
+			else {
+
+				$service_requested = "default";
+				$service_attributes = Array();
 
 			}
 
@@ -236,14 +311,21 @@ class dispatcher {
 
 			if (isset($service_matrix["service"])) {
 
-				$this->service_requested = $service_matrix["service"];
+				$service_requested = $service_matrix["service"];
 				unset($service_matrix["service"]);
+				$service_attributes = $service_matrix;
+
+			}
+			else {
+
+				$service_requested = "default";
+				$service_attributes = Array();
 
 			}
 
-			$this->service_attributes = $service_matrix;
-
 		}
+
+		return Array($service_requested, $service_attributes);
 
 	}
 
@@ -281,7 +363,7 @@ class dispatcher {
 
 		// Fire first hook (level2), as specified above
 
-		$fork = $this->events->fire($hook, $route);
+		$fork = $this->events->fire($hook, "RESULT", $route);
 
 		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
 
@@ -289,7 +371,7 @@ class dispatcher {
 		// This means that event engine will fire something like "dispatcher.route.200"
 		// or "dispatcher.error.500"
 
-		$fork = $this->events->fire($hook.".".$route->getStatusCode(), $route);
+		$fork = $this->events->fire($hook.".".$route->getStatusCode(), "RESULT", $route);
 
 		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;		
 
@@ -313,25 +395,7 @@ class dispatcher {
 
 	}
 
-	private function service_is_in_routing_table($service) {
-
-		return isset($this->routingtable[$service]) ? true : false;
-
-	}
-
-	private function service_is_routable($service_file) {
-
-		return is_readable($service_file) ? true : false;
-
-	}
-
 	private function service_is_compliant() {
-
-	}
-
-	private function get_service_route($service) {
-
-		return $this->routingtable[$service];
 
 	}
 
@@ -370,7 +434,7 @@ class dispatcher {
 
 	}
 
-	private function deserialize_parameters($method, $raw=false) {
+	private function deserialize_parameters($method) {
 
 		$parameters = Array();
 
@@ -378,21 +442,20 @@ class dispatcher {
 
 			case 'POST':
 
-				$parameters = $raw ? file_get_contents('php://input') : $_POST;
+				$parameters = $_POST;
 
 				break;
 
 			case 'PUT':
 			case 'DELETE':
 				
-				if ($raw) $parameters = file_get_contents('php://input');
-				else parse_str(file_get_contents('php://input'), $parameters);
+				parse_str(file_get_contents('php://input'), $parameters);
 				
 				break;
 
 		}
 
-		return $parameters;
+		return Array($parameters, file_get_contents('php://input'));
 
 	}
 

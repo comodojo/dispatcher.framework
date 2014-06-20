@@ -6,7 +6,7 @@ class ObjectError implements ObjectResultInterface {
 
 	private $code = 500;
 
-	private $supported_error_codes = Array(400,403,404,405,500,501);
+	private $supported_error_codes = Array(400,403,404,405,500,501,503);
 
 	private $content = NULL;
 
@@ -62,6 +62,14 @@ class ObjectError implements ObjectResultInterface {
 
 	public function getLocation() {}
 
+	/**
+	 * Set header component
+	 *
+	 * @param 	string 	$header 	Header name
+	 * @param 	string 	$value 		Header content (optional)
+	 *
+	 * @return 	ObjectRequest 	$this
+	 */
 	public function setHeader($header, $value=NULL) {
 
 		$this->headers[$header] = $value;
@@ -70,7 +78,35 @@ class ObjectError implements ObjectResultInterface {
 
 	}
 
-	public function getHeader($header) {
+	/**
+	 * Unset header component
+	 *
+	 * @param 	string 	$header 	Header name
+	 *
+	 * @return 	bool
+	 */
+	public function unsetHeader($header) {
+
+		if ( isset($this->headers[$header]) ) {
+
+			unset($this->headers[$header]); 
+
+			return true;
+
+		}
+
+		return false;
+
+	}
+
+	/**
+	 * Get header component
+	 *
+	 * @param 	string 	$header 	Header name
+	 *
+	 * @return 	string 	Header component in case of success, false otherwise
+	 */
+	private function getHeader($attribute) {
 
 		if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
@@ -78,15 +114,14 @@ class ObjectError implements ObjectResultInterface {
 
 	}
 
-	public function unsetHeader($header) {
-
-		if ( isset($this->headers[$header]) ) unset($this->headers[$header]);
-
-		return $this;
-
-	}
-
-	public function setHeaders($headers) {
+	/**
+	 * Set headers
+	 *
+	 * @param 	array 	$headers 	Headers array
+	 *
+	 * @return 	ObjectRequest 	$this
+	 */
+	private function setHeaders($attributes) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 
@@ -94,17 +129,27 @@ class ObjectError implements ObjectResultInterface {
 
 	}
 
-	public function getHeaders() {
-
-		return $this->headers;
-
-	}
-
-	public function unsetHeaders() {
+	/**
+	 * Unset headers
+	 *
+	 * @return 	ObjectRequest 	$this
+	 */
+	private function unsetHeaders() {
 
 		$this->headers = Array();
 
 		return $this;
+
+	}
+
+	/**
+	 * Get headers
+	 *
+	 * @return 	Array 	Headers array
+	 */
+	private function getHeaders() {
+
+		return $this->headers;
 
 	}
 
