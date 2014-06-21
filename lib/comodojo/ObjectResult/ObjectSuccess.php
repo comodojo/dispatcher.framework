@@ -6,13 +6,13 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	private $code = 200;
 
-	private $supported_success_codes = Array(200,202,204);
-
 	private $content = NULL;
 
 	private $headers = Array();
 
 	private $contentType = "text/plain";
+
+	private $supported_success_codes = Array(200,202,204);
 
 	public function setService($service) {
 
@@ -121,7 +121,7 @@ class ObjectSuccess implements ObjectResultInterface {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	private function setHeaders($attributes) {
+	public function setHeaders($attributes) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 
@@ -134,7 +134,7 @@ class ObjectSuccess implements ObjectResultInterface {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	private function unsetHeaders() {
+	public function unsetHeaders() {
 
 		$this->headers = Array();
 
@@ -147,7 +147,7 @@ class ObjectSuccess implements ObjectResultInterface {
 	 *
 	 * @return 	Array 	Headers array
 	 */
-	private function getHeaders() {
+	public function getHeaders() {
 
 		return $this->headers;
 

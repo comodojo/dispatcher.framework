@@ -47,6 +47,8 @@ class dispatcher {
 
 	private $service_uri = NULL;
 
+	private $service_url = NULL;
+
 	private $request_method = NULL;
 
 	private $routingtable = NULL;
@@ -67,6 +69,8 @@ class dispatcher {
 
 	private $events = NULL;
 
+	private $result_comes_from_cache = false;
+
 	public final function __construct() {
 
 		ob_start();
@@ -85,6 +89,8 @@ class dispatcher {
 		$this->working_mode = $this->get_working_mode();
 
 		$this->service_uri = $this->url_uri();
+
+		$this->service_url = $this->url_url();
 
 		$this->request_method = $_SERVER['REQUEST_METHOD'];
 
@@ -250,9 +256,7 @@ class dispatcher {
 
 				try {
 					
-					$this->run();
-
-					$route = new ObjectSuccess();
+					$route = $this->run_service($this->request, $this->serviceroute);
 
 				} catch (DispatcherException $de) {
 				
@@ -378,6 +382,12 @@ class dispatcher {
 
 	}
 
+	private function url_url() {
+
+		return $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+
+	}
+
 	/**
 	 * Route request handling ObjectResult hooks
 	 *
@@ -413,7 +423,21 @@ class dispatcher {
 
 		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;		
 
-		// After hooks, start composing header
+		// After hooks:
+		// - store cache
+		// - start composing header
+		// - return result
+
+		if ( $this->request_method == "GET" AND 
+			( $this->serviceroute->getCache() == "SERVER" OR $this->serviceroute->getCache() == "BOTH" ) AND
+			$this->result_comes_from_cache == false AND 
+			$fork instanceof \comodojo\ObjectResult\ObjectSuccess )
+		{
+
+			$this->cacher->set($this->service_url, $route);
+
+		}
+
 
 		$this->header->free();
 
@@ -503,15 +527,41 @@ class dispatcher {
 
 	}
 
-	private function set_server_cache() {
+	private function run_service($request, $route) {
 
-		return $this->cacher->set($uri, $content);
+		$method = $request->getMethod();
+		$service = $route->getService();
+		$cache = $route->getCache();
+		$ttl = $route->getTtl();
 
-	}
+		// First of all, check cache (in case of GET request)
 
-	private function get_server_cache($uri, $ttl) {
+		if ( $method == "GET" AND ( $cache == "SERVER" OR $cache == "BOTH" ) ) {
 
-		return $this->cacher->get($uri, $ttl);
+			$from_cache = $this->cacher->get($this->service_url, $ttl);
+
+			if ( is_array($from_cache) ) {
+
+				$maxage = $from_cache["maxage"];
+				$bestbefore = $from_cache["bestbefore"];
+				$result = $from_cache["object"];
+
+				// Publish that result comes from cache (so will not be re-cached)
+
+				$this->result_comes_from_cache = true;
+
+				// $result = new ObjectSuccess();
+				// $result->setService($from_cache["service"])
+				// 	->setStatusCode($from_cache["statuscode"])
+				// 	->setContent($from_cache["content"])
+				// 	->setHeaders($from_cache["headers"])
+				// 	->setContentType($from_cache["contenttype"]);
+
+				return $result;
+
+			}
+
+		}
 
 	}
 

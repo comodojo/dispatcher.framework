@@ -47,7 +47,7 @@ class cache {
 	 * 
 	 * @return	bool
 	 */
-	public final function set($data, $request) {
+	public final function set($request, $data) {
 		
 		if (!DISPATCHER_CACHE_ENABLED) {
 			debug('Caching administratively disabled','INFO','cache');
@@ -68,7 +68,17 @@ class cache {
 
 		$cacheFile = $this->cache_path . ( $this->cache_path[strlen($this->cache_path)-1] == "/" ? "" : "/" ) . $cacheTag;
 
-		$f_data = serialize(Array("cache_content" => $data));
+		// $a_data = Array(
+		// 	"service"		=>	$data->getService(),
+		// 	"code"			=>	$data->getStatusCode(),
+		// 	"content"		=>	$data->getContent(),
+		// 	"headers"		=>	$data->getHeaders(),
+		// 	"contentType"	=>	$data->getContentType()
+		// );
+
+		//$f_data = serialize($a_data);
+
+		$f_data = serialize($data);
 
 		$cached = file_put_contents($cacheFile, $f_data);
 		if ($cached === false) {
@@ -135,7 +145,8 @@ class cache {
 			return Array(
 				"maxage"	=>	$max_age,
 				"bestbefore"=>	$best_before,
-				"content"	=>	$u_data["cache_content"]
+				//"content"	=>	$u_data["cache_content"]
+				"object"	=>	$u_data
 			);
 
 		}

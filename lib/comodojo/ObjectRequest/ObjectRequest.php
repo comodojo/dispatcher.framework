@@ -94,7 +94,7 @@ class ObjectRequest {
 
 	}
 
-	private function getAttributes() {
+	public function getAttributes() {
 
 		return $this->attributes;
 
@@ -214,7 +214,7 @@ class ObjectRequest {
 	 *
 	 * @return 	string 	Header component in case of success, false otherwise
 	 */
-	private function getHeader($attribute) {
+	public function getHeader($attribute) {
 
 		if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
@@ -229,7 +229,7 @@ class ObjectRequest {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	private function setHeaders($attributes) {
+	public function setHeaders($attributes) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 
@@ -242,7 +242,7 @@ class ObjectRequest {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	private function unsetHeaders() {
+	public function unsetHeaders() {
 
 		$this->headers = Array();
 
@@ -255,7 +255,7 @@ class ObjectRequest {
 	 *
 	 * @return 	Array 	Headers array
 	 */
-	private function getHeaders() {
+	public function getHeaders() {
 
 		return $this->headers;
 
