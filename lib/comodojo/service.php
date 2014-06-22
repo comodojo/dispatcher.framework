@@ -14,6 +14,10 @@ class service {
 
 	private $headers = Array();
 
+	private $supported_http_methods = DISPATCHER_SUPPORTED_METHODS;
+
+	private $charset = DISPATCHER_DEFAULT_ENCODING;
+
 	// Thins a service could use for free
 
 	public $attributes = Array();
@@ -28,27 +32,41 @@ class service {
 
 	// Things a service may define
 
-	private $requires_get = Array();
+	// Expected attributes
+	private $expected_attributes = Array(
+		"GET"	=>	Array(),
+		"PUT"	=>	Array(),
+		"POST"	=>	Array(),
+		"DELETE"=>	Array(),
+		"ANY"	=>	Array()
+	);
 
-	private $likes_get = Array();
+	// Expected parameters
+	private $expected_parameters = Array(
+		"GET"	=>	Array(),
+		"PUT"	=>	Array(),
+		"POST"	=>	Array(),
+		"DELETE"=>	Array(),
+		"ANY"	=>	Array()
+	);
 
-	private $requires_put = Array();
+	// Liked attributes
+	private $liked_attributes = Array(
+		"GET"	=>	Array(),
+		"PUT"	=>	Array(),
+		"POST"	=>	Array(),
+		"DELETE"=>	Array(),
+		"ANY"	=>	Array()
+	);
 
-	private $likes_put = Array();
-
-	private $requires_post = Array();
-
-	private $likes_post = Array();
-
-	private $requires_delete = Array();
-
-	private $likes_delete = Array();
-
-	private $requires_any = Array();
-
-	private $likes_any = Array();
-
-	private $methods = NULL;
+	// Liked parameters
+	private $liked_parameters = Array(
+		"GET"	=>	Array(),
+		"PUT"	=>	Array(),
+		"POST"	=>	Array(),
+		"DELETE"=>	Array(),
+		"ANY"	=>	Array()
+	);
 
 	// Things dedicated to internal use
 
@@ -60,43 +78,37 @@ class service {
 	 * Implement this method if your service should support
 	 * HTTP-GET requests
 	 */
-	//public function get($attributes) {}
+	//public function get() {}
 	
 	/**
 	 * Implement this method if your service should support
 	 * HTTP-POST requests
 	 */
-	// public function post($attributes) {}
+	// public function post() {}
 	
 	/**
 	 * Implement this method if your service should support
 	 * HTTP-PUT requests
 	 */
-	// public function put($attributes) {}
+	// public function put() {}
 	
 	/**
 	 * Implement this method if your service should support
 	 * HTTP-DELETE requests
 	 */
-	// public function delete($attributes) {}
+	// public function delete() {}
 	
 	/**
 	 * Implement this method if your service should support
 	 * any HTTP requests (it's quite a wildcard, please be careful...)
 	 */
-	// public function logic($attributes) {}
+	// public function logic() {}
 	
 	/*************** HTTP METHODS IMPLEMENTATIONS **************/
 	
 	/******************* OVERRIDABLE METHODS *******************/
 
 	public function setup() {
-
-	}
-
-	public function error() {
-
-		//$this->status = 
 
 	}
 
@@ -116,31 +128,12 @@ class service {
 	 * @param 	string 	$method 	HTTP method for punctual attributes rematch or ANY
 	 * @param 	array 	$parameters An array of parameters, with or without compliance check
 	 */
-	public final function expect($method, $parameters) {
+	public final function expects($method, $attributes, $parameters=Array()) {
 
-		switch (strtoupper($method)) {
+		$method = strtoupper($method);
 
-			case 'GET':
-				$this->requires_get = $parameters;
-				break;
-			
-			case 'PUT':
-				$this->requires_put = $parameters;
-				break;
-			
-			case 'POST':
-				$this->requires_post = $parameters;
-				break;
-			
-			case 'DELETE':
-				$this->requires_delete = $parameters;
-				break;
-
-			case 'ANY':
-				$this->requires_any = $parameters;
-				break;
-
-		}
+		$this->expected_attributes[$method] = $attributes;
+		$this->expected_parameters[$method] = $parameters;
 
 		return $this;
 
@@ -152,31 +145,31 @@ class service {
 	 * @param 	string 	$method 	HTTP method for punctual attributes rematch or ANY
 	 * @param 	array 	$parameters An array of parameters, with or without compliance check
 	 */
-	public final function like($method, $parameters) {
+	public final function likes($method, $attributes, $parameters=Array()) {
 
-		switch (strtoupper($method)) {
+		$method = strtoupper($method);
 
-			case 'GET':
-				$this->likes_get = $parameters;
-				break;
-			
-			case 'PUT':
-				$this->likes_put = $parameters;
-				break;
-			
-			case 'POST':
-				$this->likes_post = $parameters;
-				break;
-			
-			case 'DELETE':
-				$this->likes_delete = $parameters;
-				break;
+		$this->liked_attributes[$method] = $attributes;
+		$this->liked_parameters[$method] = $parameters;
 
-			case 'ANY':
-				$this->likes_any = $parameters;
-				break;
+		return $this;
+
+	}
+
+	public final function setSupportedMethods($methods) {
+
+		$methods = preg_replace('/\s+/', '', $methods);
+		$methods = explode(",", $methods);
+
+		$supported_methods = Array();
+
+		foreach ($methods as $method) {
+			
+			array_push($supported_methods, strtoupper($method));
 
 		}
+
+		$this->supported_http_methods = implode(",", $supported_methods);
 
 		return $this;
 
@@ -190,9 +183,23 @@ class service {
 
 	}
 
-	public final function getContentType($type) {
+	public final function getContentType() {
 
 		return $this->content_type;
+
+	}
+
+	public final function setCharset($type) {
+
+		$this->charset = $type;
+
+		return $this;
+
+	}
+
+	public final function getCharset() {
+
+		return $this->charset;
 
 	}
 
@@ -206,7 +213,7 @@ class service {
 
 	}
 
-	public final function getStatusCode($code) {
+	public final function getStatusCode() {
 
 		return $this->status_code;
 
@@ -256,7 +263,7 @@ class service {
 	 *
 	 * @return 	string 	Header component in case of success, false otherwise
 	 */
-	public function getHeader($attribute) {
+	public function getHeader($header) {
 
 		if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
@@ -271,7 +278,7 @@ class service {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	public function setHeaders($attributes) {
+	public function setHeaders($headers) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 
@@ -301,82 +308,68 @@ class service {
 
 		return $this->headers;
 
-	}	
+	}
 
-	public final function getMethods() {
+	public final function getSupportedMethods() {
 
-		$supported_methods = explode(',',DISPATCHER_SUPPORTED_METHODS);
+		return $this->supported_http_methods;
+
+	}
+
+	public final function getImplementedMethods() {
+
+		$supported_methods = explode(',',$this->supported_http_methods);
 
 		$implemented_methods = Array();
 
 		foreach ( $supported_methods as $method ) {
 
-			if (method_exists($this, strtolower($method))) array_push($return,$method);
+			if (method_exists($this, strtolower($method))) array_push($implemented_methods,$method);
 
 		}
 
-		return $return;
+		return $implemented_methods;
 
 	}
 
-	public final function expected($method) {
+	public final function getExpected($method) {
 
-		switch ($method) {
+		$method = strtoupper($method);
 
-			case 'GET':
-				$r = $this->require_get;
-				break;
-			
-			case 'PUT':
-				$r = $this->require_put;
-				break;
-			
-			case 'POST':
-				$r = $this->require_post;
-				break;
-			
-			case 'DELETE':
-				$r = $this->require_delete;
-				break;
+		return Array(
 
-			default:
-				$r = Array();
-				break;
+			( sizeof($this->expected_attributes[$method]) == 0 AND sizeof($this->expected_attributes["ANY"]) != 0 ) ? $this->expected_attributes["ANY"] : $this->expected_attributes[$method],
 
-		}
+			( sizeof($this->expected_parameters[$method]) == 0 AND sizeof($this->expected_parameters["ANY"]) != 0 ) ? $this->expected_parameters["ANY"] : $this->expected_parameters[$method]			
 
-		return ( sizeof($r) == 0 AND sizeof($this->requires_any) != 0 ) ? $this->requires_any : $r;
+		);
 
 	}
 
-	public final function liked($method) {
+	public final function getLiked($method) {
 
-		switch ($method) {
+		$method = strtoupper($method);
 
-			case 'GET':
-				$r = $this->likes_get;
-				break;
-			
-			case 'PUT':
-				$r = $this->likes_put;
-				break;
-			
-			case 'POST':
-				$r = $this->likes_post;
-				break;
-			
-			case 'DELETE':
-				$r = $this->likes_delete;
-				break;
+		return Array(
 
-			default:
-				$r = Array();
-				break;
+			( sizeof($this->liked_attributes[$method]) == 0 AND sizeof($this->liked_attributes["ANY"]) != 0 ) ? $this->liked_attributes["ANY"] : $this->liked_attributes[$method],
 
-		}
+			( sizeof($this->liked_parameters[$method]) == 0 AND sizeof($this->liked_parameters["ANY"]) != 0 ) ? $this->liked_parameters["ANY"] : $this->liked_parameters[$method]			
 
-		return ( sizeof($r) == 0 AND sizeof($this->likes_any) != 0 ) ? $this->likes_any : $r;
+		);
 
+	}
+
+	public final function getAttributes() {
+
+		return $this->attributes;
+
+	}
+
+	public final function getParameters($raw=false) {
+
+		return $raw ? $this->rawparameters : $this->parameters;
+		
 	}
 
 }

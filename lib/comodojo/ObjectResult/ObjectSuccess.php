@@ -12,6 +12,8 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	private $contentType = "text/plain";
 
+	private $charset = DISPATCHER_DEFAULT_ENCODING;
+
 	private $supported_success_codes = Array(200,202,204);
 
 	public function setService($service) {
@@ -30,7 +32,7 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	public function setStatusCode($code) {
 
-		$code = filer_var($code, FILTER_VALIDATE_INT);
+		$code = filter_var($code, FILTER_VALIDATE_INT);
 
 		$this->code = in_array($code, $this->supported_success_codes) ? $code : $this->code;
 
@@ -106,7 +108,7 @@ class ObjectSuccess implements ObjectResultInterface {
 	 *
 	 * @return 	string 	Header component in case of success, false otherwise
 	 */
-	private function getHeader($attribute) {
+	public function getHeader($header) {
 
 		if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
@@ -121,7 +123,7 @@ class ObjectSuccess implements ObjectResultInterface {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	public function setHeaders($attributes) {
+	public function setHeaders($headers) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 
@@ -164,6 +166,20 @@ class ObjectSuccess implements ObjectResultInterface {
 	public function getContentType() {
 
 		return $this->contentType;
+
+	}
+
+	public function setCharset($type) {
+
+		$this->charset = $type;
+
+		return $this;
+
+	}
+
+	public function getCharset() {
+
+		return $this->charset;
 
 	}
 

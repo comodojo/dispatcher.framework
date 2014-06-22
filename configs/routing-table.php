@@ -55,6 +55,12 @@
 
 //global $dispatcher;
 
-//$dispatcher->addRoute();
+//$dispatcher->setRoute("serve","ROUTE","serve.php");
+
+//$dispatcher->setRoute("default","ROUTE","serve.php");
+
+//$dispatcher->addHook("dispatcher.serviceroute", "comodojo\debug");
+
+
 
 ?>

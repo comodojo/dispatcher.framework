@@ -18,7 +18,7 @@ class ObjectRoutingTable {
 
 	}
 
-	public function setRoute($service, $type, $target, $parameters) {
+	public function setRoute($service, $type, $target, $parameters=Array()) {
 
 		$this->table[$service] = Array(
 			"type"			=>	$type,
@@ -52,7 +52,7 @@ class ObjectRoutingTable {
 
 		// If service is null, return default route
 
-		if ( is_null($service) ) return $this->route_to_default();
+		if ( empty($service) ) return $this->route_to_default();
 
 		// If service is in table, check if it is routable (in case of "ROUTE" route).
 		// If true, route request
@@ -75,11 +75,11 @@ class ObjectRoutingTable {
 		// If autoroute is enabled, try to match service name with a service file.
 		// If true, try to route request
 
-		else if ( DISPATCHER_AUTO_ROUTE AND $this->routable($service) ) {
+		else if ( DISPATCHER_AUTO_ROUTE AND $this->routable($service.".php") ) {
 
 			return Array(
 				"type"			=>	"ROUTE",
-				"target"		=>	$service,
+				"target"		=>	$service.".php",
 				"parameters"	=>	Array()
 			);
 

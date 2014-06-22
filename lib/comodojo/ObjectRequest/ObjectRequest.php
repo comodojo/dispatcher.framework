@@ -178,7 +178,7 @@ class ObjectRequest {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	public function setHeader($header) {
+	public function setHeader($header, $value=NULL) {
 
 		$this->headers[$header] = $value;
 
@@ -214,7 +214,7 @@ class ObjectRequest {
 	 *
 	 * @return 	string 	Header component in case of success, false otherwise
 	 */
-	public function getHeader($attribute) {
+	public function getHeader($header) {
 
 		if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
@@ -229,7 +229,7 @@ class ObjectRequest {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	public function setHeaders($attributes) {
+	public function setHeaders($headers) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 

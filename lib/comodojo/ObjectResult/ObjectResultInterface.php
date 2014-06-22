@@ -35,6 +35,10 @@ interface ObjectResultInterface {
 
 	public function getContentType();
 
+	public function setCharset($type);
+
+	public function getCharset();
+
 }
 
 ?>

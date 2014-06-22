@@ -6,6 +6,8 @@ class ObjectRoute {
 
 	private $target = NULL;
 
+	private $class = NULL;
+
 	private $type = "ERROR";
 
 	private $redirect_code = 307;
@@ -68,6 +70,20 @@ class ObjectRoute {
 	public function getTarget() {
 
 		return $this->target;
+
+	}
+
+	public function setClass($class) {
+
+		$this->class = $class;
+
+		return $this;
+
+	}
+
+	public function getClass() {
+
+		return $this->class;
 
 	}
 
@@ -164,7 +180,7 @@ class ObjectRoute {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	public function setHeader($header) {
+	public function setHeader($header, $value=NULL) {
 
 		$this->headers[$header] = $value;
 
@@ -200,7 +216,7 @@ class ObjectRoute {
 	 *
 	 * @return 	string 	Header component in case of success, false otherwise
 	 */
-	public function getHeader($attribute) {
+	public function getHeader($header) {
 
 		if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
@@ -215,7 +231,7 @@ class ObjectRoute {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	public function setHeaders($attributes) {
+	public function setHeaders($headers) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 

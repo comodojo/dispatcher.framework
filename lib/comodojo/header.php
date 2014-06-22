@@ -19,6 +19,8 @@ class header {
 
 		$this->headers[$header] = $value;
 
+		return $this;
+
 	}
 
 	public final function get($header) {
@@ -32,6 +34,8 @@ class header {
 
 		$this->headers = Array();
 
+		return $this;
+
 	}
 
 	public final function compose($status, $contentLength=0, $value=false) {
@@ -39,37 +43,6 @@ class header {
 		switch ($status) {
 
 			case 200: //OK
-
-				if ( array_key_exists("ttl", $this->headers) ) {
-
-					if ( $this->headers["ttl"] > 0 ) {
-						header('Cache-Control: max-age='.$this->headers["ttl"].', must-revalidate');
-						header('Expires: '.gmdate("D, d M Y H:i:s", $this->current_time + $this->headers["ttl"])." GMT");
-					}
-					elseif ($this->headers["ttl"] == 0) {
-						header('Cache-Control: no-cache, must-revalidate');
-						header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-					}
-					else {
-						//null
-					}
-
-					unset($this->headers["ttl"]);
-
-				}
-				
-				if ( array_key_exists("contentType", $this->headers) ) {
-
-					if ( array_key_exists("charset", $this->headers) ) {
-						header('Content-type: '.strtolower($this->headers["contentType"]).'; charset='.$this->headers["charset"]);
-						unset($this->headers["charset"]);
-					}
-					else {
-						header('Content-type: '.strtolower($this->headers["contentType"]));
-					}
-					unset($this->headers["contentType"]);
-
-				}
 
 				if ($contentLength !== 0) header('Content-Length: '.$contentLength);
 
@@ -117,6 +90,8 @@ class header {
 
 				if ($contentLength !== 0) header('Content-Length: '.$contentLength); //is it needed?
 
+				$this->process_extra($this->headers);
+
 				break;
 
 			case 400: //Bad Request
@@ -161,13 +136,40 @@ class header {
 
 				header('HTTP/1.1 503 Service Temporarily Unavailable');
 				header('Status: 503 Service Temporarily Unavailable');
-				if ($value !== false AND @is_int($value) {
+				if ( $value !== false AND @is_int($value) ) {
 					header('Retry-After: '.$value);
 				}
 			
 				break;
 
 		}
+
+	}
+
+	public function setClientCache($ttl) {
+
+		$ttl = filter_var($ttl, FILTER_VALIDATE_INT);
+
+		if ( $ttl > 0 ) {
+			$this->set("Cache-Control","max-age=".$this->headers["ttl"].", must-revalidate");
+			$this->set("Expires",gmdate("D, d M Y H:i:s", $this->current_time + $ttl)." GMT");
+		}
+		else {
+			$this->set("Cache-Control","no-cache, must-revalidate");
+			$this->set("Expires","Mon, 26 Jul 1997 05:00:00 GMT");
+		}
+
+		return $this;
+
+	}
+
+	public function setContentType($type, $charset=NULL) {
+
+
+		if ( is_null($charset) ) $this->set("Content-type",strtolower($type));
+		else $this->set("Content-type",strtolower($type)."; charset=".$charset);
+
+		return $this;
 
 	}
 

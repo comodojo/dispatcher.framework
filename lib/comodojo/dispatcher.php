@@ -75,13 +75,6 @@ class dispatcher {
 
 		ob_start();
 
-		// Before building dispatcher instance, fire THE level1 event "dispatcher"
-		// This is the only way (out of dispatcher-config) to disable dispatcher
-
-		$fork = $this->events->fire("dispatcher", "DISPATCHER", $this->enabled);
-
-		if ( is_bool($fork)  ) $this->enabled = $fork;
-
 		// Now start to build dispatcher instance
 
 		$this->current_time = time();
@@ -113,6 +106,13 @@ class dispatcher {
 
 		debug('-----------------------------------------------------------','INFO','dispatcher');
 
+		// Before building dispatcher instance, fire THE level1 event "dispatcher"
+		// This is the only way (out of dispatcher-config) to disable dispatcher
+
+		$fork = $this->events->fire("dispatcher", "DISPATCHER", $this->enabled);
+
+		if ( is_bool($fork)  ) $this->enabled = $fork;
+
 		// Starts composing request object (ObjectRequest)
 
 		list($request_service,$request_attributes) = $this->url_interpreter($this->working_mode);
@@ -131,7 +131,7 @@ class dispatcher {
 			->setRawParameters($request_raw_parameters)
 			->setHeaders($request_headers);
 
-		debug(' * Requested service: '.$this->service_requested,'INFO','dispatcher');
+		debug(' * Requested service: '.$request_service,'INFO','dispatcher');
 		debug(' * Request HTTP method: '.$this->request_method,'INFO','dispatcher');
 		debug('-----------------------------------------------------------','INFO','dispatcher');
 
@@ -165,6 +165,8 @@ class dispatcher {
 
 			$return = $this->route($route);
 
+			ob_end_clean();
+
 			exit($return);
 
 		}
@@ -186,6 +188,11 @@ class dispatcher {
 			->setType($preroute["type"])
 			->setTarget($preroute["target"]);
 
+		if ( isset($preroute["parameters"]["class"]) ) {
+			$this->serviceroute->setClass($preroute["parameters"]["class"]);
+		} else {
+			$this->serviceroute->setClass($service);
+		}
 		if ( isset($preroute["parameters"]["redirectCode"]) ) $this->serviceroute->setRedirectCode($preroute["parameters"]["redirectCode"]);
 		if ( isset($preroute["parameters"]["errorCode"]) ) $this->serviceroute->setErrorCode($preroute["parameters"]["errorCode"]);
 		if ( isset($preroute["parameters"]["cache"]) ) $this->serviceroute->setCache($preroute["parameters"]["cache"]);
@@ -225,6 +232,8 @@ class dispatcher {
 
 				$return = $this->route($route);
 
+				ob_end_clean();
+
 				exit($return);
 
 			}
@@ -239,7 +248,7 @@ class dispatcher {
 				$route->setService($this->serviceroute->getService())
 					  ->setStatusCode($this->serviceroute->getErrorCode())
 					  ->setContent($this->serviceroute->getTarget())
-					  ->setHeaders($this->serviceroute->getHeaders);
+					  ->setHeaders($this->serviceroute->getHeaders());
 
 				break;
 
@@ -248,11 +257,11 @@ class dispatcher {
 				$route = new ObjectRedirect();
 				$route->setService($this->serviceroute->getService())
 					  ->setStatusCode($this->serviceroute->getRedirectCode())
-					  ->setHeaders($this->serviceroute->getHeaders);
+					  ->setHeaders($this->serviceroute->getHeaders());
 
 				break;
 
-			case "ROUTE"
+			case "ROUTE":
 
 				try {
 					
@@ -286,7 +295,7 @@ class dispatcher {
 
 	}
 
-	public final function setRoute($service, $type, $target, $parameters) {
+	public final function setRoute($service, $type, $target, $parameters=Array()) {
 
 		$this->routingtable->setRoute($service, $type, $target, $parameters);
 
@@ -428,8 +437,10 @@ class dispatcher {
 		// - start composing header
 		// - return result
 
+		$cache = $this->serviceroute->getCache();
+
 		if ( $this->request_method == "GET" AND 
-			( $this->serviceroute->getCache() == "SERVER" OR $this->serviceroute->getCache() == "BOTH" ) AND
+			( $cache == "SERVER" OR $cache == "BOTH" ) AND
 			$this->result_comes_from_cache == false AND 
 			$fork instanceof \comodojo\ObjectResult\ObjectSuccess )
 		{
@@ -440,6 +451,10 @@ class dispatcher {
 
 
 		$this->header->free();
+
+		if ( $cache == "CLIENT" OR $cache == "BOTH" ) $this->header->setClientCache($this->serviceroute->getTtl());
+
+		$this->header->setContentType($route->getContentType(), $route->getCharset());
 
 		foreach ($route->getHeaders() as $header => $value) {
 			
@@ -457,36 +472,21 @@ class dispatcher {
 
 	}
 
-	private function service_is_compliant() {
+	private function get_service_class($service) {
 
-	}
+		if ( class_exists('\comodojo\/'.$service) ) return $service;
 
-	private function get_service_class($service_file, $service_class) {
+		$classes = array_reverse(get_declared_classes());
 
-		$comodojo_classes = Array(
-			"Spyc",
-			"XML",
-			"cache",
-			"database",
-			"serialization",
-			"deserialization",
-			"event",
-			"Exception",
-			"header",
-			"http",
-			"trace",
-			"service"
-		);
+		foreach( $classes as $class ) {
 
-		foreach( get_declared_classes() as $class ) {
+			if( $class instanceof \comodojo\service ) return $class;
 
-			if ( in_array($class, $comodojo_classes) ) continue;
-
-			if( $class instanceof service ) return $class;
+			//if( '\comodojo'.$class instanceof service ) return $class;
 
 		}
 
-		throw new Exception("Invalid service class");
+		return false;
 		
 	}
 
@@ -521,9 +521,73 @@ class dispatcher {
 
 	}
 
-	private function set_client_cache() {
+	private function attributes_match($provided, $expected, $liked) {
 
+		if ( $this->working_mode == "STANDARD" ) return $this->parameters_match($provided, $expected, $liked);
 
+		$attributes = Array();
+
+		$psize = sizeof($provided);
+		$esize = sizeof($expected);
+		$lsize = sizeof($liked);
+
+		if ( $psize < $esize ) throw new DispatcherException("Conversation error", 400);
+
+		else if ( $psize == $esize ) {
+
+			$attributes = array_combine($expected, $provided);
+
+		}
+
+		else {
+
+			$pvalues = array_slice($provided, 0, $esize);
+
+			$e_attributes = array_combine($expected, $pvalues);
+
+			$lvalues = array_slice($provided, $esize);
+
+			$lvaluessize = sizeof($lvalues);
+
+			$l_attributes = Array();
+
+			if ( $lvaluessize < $lsize ) {
+
+				$l_attributes = array_combine(array_slice($liked, 0, $lvaluessize), $lvalues);
+
+			}
+			else if ( $lvaluessize == $lsize ) {
+
+				$l_attributes = array_combine($liked, $lvalues);
+
+			}
+			else {
+
+				$r_attributes = array_combine($liked, array_slice($lvalues, 0, $lsize));
+
+				$remaining_parameters = array_slice($lvalues, $lsize);
+
+				$l_attributes = array_merge($r_attributes, $remaining_parameters);
+
+			}
+
+			$attributes = array_merge($e_attributes, $l_attributes);
+
+		}
+		
+		return $attributes;
+
+	}
+
+	private function parameters_match($provided, $expected, $liked) {
+
+		foreach ($expected as $parameter) {
+			
+			if ( !isset($provided[$parameter]) ) throw new DispatcherException("Conversation error", 400);
+
+		}
+
+		return $provided;
 
 	}
 
@@ -533,6 +597,8 @@ class dispatcher {
 		$service = $route->getService();
 		$cache = $route->getCache();
 		$ttl = $route->getTtl();
+		$target = $route->getTarget();
+		$target_file = DISPATCHER_SERVICE_FOLDER.$target;
 
 		// First of all, check cache (in case of GET request)
 
@@ -562,6 +628,98 @@ class dispatcher {
 			}
 
 		}
+
+		// If there's no cache for this request, use routing information to find service
+
+		if ( (include($target_file)) === false ) throw new DispatcherException("Cannot run service", 500);
+
+		// Find a service implementation and try to init it
+
+		$service_class = $route->getClass();
+
+		if ( empty($service_class) ) throw new DispatcherException("Cannot run service", 500);
+	
+		$service_class = "\comodojo\\".$service_class;
+
+		$theservice = new $service_class();
+
+		// Setup service
+
+		try {
+		
+			$theservice->setup();
+
+		} catch (Exception $e) {
+			
+			throw $e;
+
+		}
+
+		// Check if service supports current HTTP method
+
+		if ( !in_array($method, explode(",", $theservice->getSupportedMethods())) ) {
+
+			throw new DispatcherException("Allow: ".$theservice->getSupportedMethods(), 405);
+
+		}
+
+		// Check if service implements current HTTP method
+
+		if ( !in_array($method, $theservice->getImplementedMethods()) ) {
+
+			throw new DispatcherException("Allow: ".implode(",",$theservice->getSupportedMethods()), 501);
+
+		}
+
+		// Match attributes and parameters
+
+		list($expected_attributes, $expected_parameters) = $theservice->getExpected($method);
+
+		list($liked_attributes, $liked_parameters) = $theservice->getLiked($method);
+
+		try {
+		
+			$validated_attributes = $this->attributes_match($request->getAttributes(), $expected_attributes, $liked_attributes);
+
+			$validated_parameters = $this->parameters_match($request->getParameters(), $expected_parameters, $liked_parameters);
+
+		} catch (DispatcherException $de) {
+			
+			throw $de;
+
+		}
+		
+		// Fill service with dispatcher pieces
+
+		$theservice->attributes = $validated_attributes;
+		$theservice->parameters = $validated_parameters;
+		$theservice->raw_parameters = $request->getRawParameters();
+
+		// Finally run service method and catch exceptions
+
+		try {
+
+			$result = $theservice->$method();
+
+			$return = new ObjectSuccess();
+			$return->setService($service)
+				->setStatusCode($theservice->getStatusCode())
+				->setContent($result)
+				->setHeaders($theservice->getHeaders())
+				->setContentType($theservice->getContentType())
+				->setCharset($theservice->getCharset());
+			
+		} catch (DispatcherException $de) {
+
+			throw $de;
+
+		} catch (Exception $e) {
+
+			throw $e;
+
+		}
+
+		return $return;
 
 	}
 

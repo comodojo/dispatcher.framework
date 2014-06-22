@@ -28,7 +28,7 @@ class ObjectRedirect implements ObjectResultInterface {
 
 	public function setStatusCode($code) {
 
-		$code = filer_var($code, FILTER_VALIDATE_INT);
+		$code = filter_var($code, FILTER_VALIDATE_INT);
 
 		$this->code = in_array($code, $this->supported_redirect_codes) ? $code : $this->code;
 
@@ -106,7 +106,7 @@ class ObjectRedirect implements ObjectResultInterface {
 	 *
 	 * @return 	string 	Header component in case of success, false otherwise
 	 */
-	public function getHeader($attribute) {
+	public function getHeader($header) {
 
 		if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
@@ -121,7 +121,7 @@ class ObjectRedirect implements ObjectResultInterface {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	public function setHeaders($attributes) {
+	public function setHeaders($headers) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 
@@ -156,6 +156,10 @@ class ObjectRedirect implements ObjectResultInterface {
 	public function setContentType($type) {}
 
 	public function getContentType() {}
+
+	public function setCharset($type) {}
+
+	public function getCharset() {}
 
 }
 

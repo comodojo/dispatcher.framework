@@ -14,6 +14,8 @@ class ObjectError implements ObjectResultInterface {
 
 	private $contentType = "text/plain";
 
+	private $charset = DISPATCHER_DEFAULT_ENCODING;
+
 	public function setService($service) {
 
 		$this->service = $service;
@@ -106,7 +108,7 @@ class ObjectError implements ObjectResultInterface {
 	 *
 	 * @return 	string 	Header component in case of success, false otherwise
 	 */
-	public function getHeader($attribute) {
+	public function getHeader($header) {
 
 		if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
@@ -121,7 +123,7 @@ class ObjectError implements ObjectResultInterface {
 	 *
 	 * @return 	ObjectRequest 	$this
 	 */
-	public function setHeaders($attributes) {
+	public function setHeaders($headers) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 
@@ -164,6 +166,20 @@ class ObjectError implements ObjectResultInterface {
 	public function getContentType() {
 
 		return $this->contentType;
+
+	}
+
+	public function setCharset($type) {
+
+		$this->charset = $type;
+
+		return $this;
+
+	}
+
+	public function getCharset() {
+
+		return $this->charset;
 
 	}
 
