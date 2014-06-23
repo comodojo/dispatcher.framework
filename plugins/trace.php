@@ -1,4 +1,4 @@
-<?php namespace comodojo;
+<?php namespace comodojo/plugin;
 
 /**
  * Produce request trace on file.
@@ -9,6 +9,8 @@
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
  */
+
+define("DISPATCHER_TRACES_PATH",DISPATCHER_REAL_PATH."/../../traces");
 
 class trace {
 

@@ -10,7 +10,8 @@ class serve extends service {
 
 	public function get() {
 
-		return $this->serialize->toDUMP($this->getAttributes());
+		//return $this->serialize->toDUMP($this->getAttributes());
+		return $this->serialize->toYAML($this->getAttributes());
 
 	}
 

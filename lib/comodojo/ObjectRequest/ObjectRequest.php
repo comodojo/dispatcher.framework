@@ -2,6 +2,8 @@
 
 class ObjectRequest {
 
+	private $current_time = NULL;
+
 	private $service = NULL;
 
 	private $method = NULL;
@@ -13,6 +15,20 @@ class ObjectRequest {
 	private $raw_parameters = NULL;
 
 	private $headers = Array();
+
+	public function setCurrentTime($time) {
+
+		$this->current_time = $time;
+
+		return $this;
+
+	}
+
+	public function getCurrentTime() {
+		
+		return $this->current_time;
+
+	}
 
 	public function setService($service) {
 

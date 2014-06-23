@@ -53,14 +53,6 @@
 * @default	declared example services
 */
 
-//global $dispatcher;
-
-//$dispatcher->setRoute("serve","ROUTE","serve.php");
-
-//$dispatcher->setRoute("default","ROUTE","serve.php");
-
-//$dispatcher->addHook("dispatcher.serviceroute", "comodojo\debug");
-
-
+$dispatcher->setRoute("test","ROUTE","serve.php");
 
 ?>

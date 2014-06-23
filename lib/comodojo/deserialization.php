@@ -38,7 +38,7 @@ class deserialization {
 
 		if ( !is_string($data) ) throw new Exception("Invalid data for XML deserialization");
 
-		require('XML.php');
+		require "XML.php";
 
 		$xmlEngine = new XML();
 		$xmlEngine->sourceString = $data;
@@ -51,9 +51,9 @@ class deserialization {
 
 		if ( !is_string($data) ) throw new Exception("Invalid data for YAML deserialization");
 
-		require('Spyc.php');
+		require DISPATCHER_REAL_PATH."/../spyc/Spyc.php";
 		
-		return Spyc::YAMLLoadString($data);
+		return \Spyc::YAMLLoadString($data);
 
 	}
 

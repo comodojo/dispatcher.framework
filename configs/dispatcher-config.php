@@ -1,9 +1,9 @@
 <?php
 
 /** 
- * 
+ * Main dispatcher configuration
  *
- * @package 	Comodojo Spare Parts
+ * @package 	Comodojo dispatcher (Spare Parts)
  * @author 		comodojo.org
  * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version 	__CURRENT_VERSION__
@@ -35,6 +35,8 @@ define('COMODOJO_GLOBAL_DEBUG_LEVEL', 'DEBUG');
 ######### END GLOBAL PROPERTIES #########
 
 ######## BEGIN DISPATCHER PROPERTIES ########
+
+define("DISPATCHER_REAL_PATH",realpath(dirname(__FILE__))."/../lib/comodojo");
 
 /**
 * If false, dispatcher will not route any request and will reply with an 503 Service 
@@ -124,150 +126,19 @@ define('DISPATCHER_SUPPORTED_METHODS', 'GET,PUT,POST,DELETE,ANY');
 define('DISPATCHER_CACHE_FOLDER', DISPATCHER_REAL_PATH."/../../cache/");
 
 /**
-* Log (traces) folder.
-* 
-* @static	string
-*/
-define('DISPATCHER_TRACE_FOLDER', DISPATCHER_REAL_PATH."/../../log/");
-
-/**
 * Services folder.
 * 
 * @static	string
 */
-define('DISPATCHER_SERVICE_FOLDER', DISPATCHER_REAL_PATH."/../../services/");
+define('DISPATCHER_SERVICES_FOLDER', DISPATCHER_REAL_PATH."/../../services/");
+
+/**
+* Plugins folder.
+* 
+* @static	string
+*/
+define('DISPATCHER_PLUGINS_FOLDER', DISPATCHER_REAL_PATH."/../../plugins/");
 
 ######### END DISPATCHER FOLDERS #########
-
-
-
-
-
-
-
-
-
-
-
-// /**
-//  * Enable tracing globally (this will override service specific config)
-//  */
-// define('GLOBAL_TRANSACTION_TRACING_ENABLED', false);
-
-// /**
-//  * Enable statistics/logging (not available for single service)
-//  */
-// define('GLOBAL_STATISTICS_ENABLED', true);
-
-
-
-
-
-
-
-// COMODOJO_DEFAULT_DB_DATA_MODEL
-// COMODOJO_DEFAULT_DB_HOST
-// COMODOJO_DEFAULT_DB_PORT
-// COMODOJO_DEFAULT_DB_NAME
-// COMODOJO_DEFAULT_DB_USER
-// COMODOJO_DEFAULT_DB_PASSWORD
-
-// COMODOJO_CACHE_TTL
-
-// COMODOJO_CACHE_FAIL_SILENTLY
-// COMODOJO_CACHE_FOLDER
-// COMODOJO_CACHE_ENABLED
-
-
-
-
-
-
-// //***********************************************//
-
-// /**
-//  * Default service name (if null passed).
-//  */
-// define('DEFAULT_SERVICE_NAME', "undefined");
-
-// /**
-//  * Path for traces .log files
-//  */
-// define('TRANSACTION_TRACES_PATH', 'logs/');
-
-// /**
-//  * Default log file.
-//  */
-// define('DEFAULT_LOG_FILE', "global.log");
-
-// //***********************************************//
-
-
-
-
-// /**
-//  * Statistics database host
-//  */
-// define('STATISTICS_DB_HOST', 'localhost');
-
-// *
-//  * Statistics database data model (database type)
- 
-// define('STATISTICS_DB_DATA_MODEL', 'MYSQLI');
-
-// /**
-//  * Statistics database port
-//  */
-// define('STATISTICS_DB_PORT', 3306);
-
-// /**
-//  * Statistics database name
-//  */
-// define('STATISTICS_DB_NAME', 'comodojo_services');
-
-// /**
-//  * Statistics database user
-//  */
-// define('STATISTICS_DB_USER', 'comodojo');
-
-// /**
-//  * Statistics database password
-//  */
-// define('STATISTICS_DB_PASSWORD', 'password');
-
-// /**
-//  * DEFAULT database host
-//  */
-// define('DEFAULT_DB_HOST', 'localhost');
-
-// /**
-//  * DEFAULT database port
-//  */
-// define('DEFAULT_DB_PORT', 3306);
-
-// /**
-//  * DEFAULT database data model (database type)
-//  */
-// define('DEFAULT_DB_DATA_MODEL', 'MYSQLI');
-
-// /**
-//  * DEFAULT database name
-//  */
-// define('DEFAULT_DB_NAME', 'comodojo_services');
-
-// /**
-//  * DEFAULT database user
-//  */
-// define('DEFAULT_DB_USER', 'comodojo');
-
-// /**
-//  * DEFAULT database password
-//  */
-// define('DEFAULT_DB_PASSWORD', 'password');
-
-// /**
-//  * DEFAULT database fetch method
-//  */
-// define('DEFAULT_DB_FETCH', 'ASSOC');
 
 ?>

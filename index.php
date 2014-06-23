@@ -3,7 +3,7 @@
 /**
  * Dispatcher frontend
  * 
- * @package 	Comodojo Spare Parts
+ * @package 	Comodojo dispatcher (Spare Parts)
  * @author 		comodojo.org
  * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version 	__CURRENT_VERSION__
@@ -24,20 +24,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Load dispatcher configuration
+require "configs/dispatcher-config.php";
+
+// Load main classes
 require "lib/comodojo/dispatcher.php";
 
+// Init a dispatcher instance
 $dispatcher = new dispatcher();
 
-require "configs/routing-table.php";
+// Load routing table
+require "configs/routing-config.php";
 
-//$dispatcher->set("param","value");
+// Load plugins
+require "configs/plugins-config.php";
 
-//$dispatcher->get("param");
-
-//$dispatcher->add($route);
-
-//$dispatcher->remove($route);
-
+// Dispatch!
 $dispatcher->dispatch();
 
 ?>

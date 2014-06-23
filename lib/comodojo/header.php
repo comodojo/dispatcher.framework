@@ -78,7 +78,7 @@ class header {
 			case 303: //See Other
 			case 307: //Temporary Redirect
 
-				header("Location: ".$value,true,$statusCode);
+				header("Location: ".$value,true,$status);
 				//if ($contentLength !== 0) header('Content-Length: '.$contentLength); //is it needed?
 
 				break;

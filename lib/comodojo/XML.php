@@ -36,7 +36,7 @@ class XML {
 	 * @var 	string
 	 * @default	UTF-8	
 	 */
-	public $xmlEncoding = COMODOJO_DEFAULT_ENCODING;
+	public $xmlEncoding = DISPATCHER_DEFAULT_ENCODING;
 	
 	/**
 	 * XML parent element (XML body)
@@ -68,7 +68,7 @@ class XML {
 	 * @var 	string
 	 * @default	UTF-8	
 	 */
-	public $sourceEncoding = COMODOJO_DEFAULT_ENCODING;
+	public $sourceEncoding = DISPATCHER_DEFAULT_ENCODING;
 	
 	/**
 	 * XML destination encoding 
@@ -76,7 +76,7 @@ class XML {
 	 * @var 	string
 	 * @default	UTF-8	
 	 */
-	public $destinationEncoding = COMODOJO_DEFAULT_ENCODING;
+	public $destinationEncoding = DISPATCHER_DEFAULT_ENCODING;
 	
 	public $caseFolding = 0;
 	public $skipWhite = 1;
@@ -107,7 +107,7 @@ class XML {
 		
 		$xmltext = ($this->includeHeader ? $this->_getHeader() : "") . /*($this->startFromParent ?*/ $this->_getParent() /*: "")*/; 
 		
-		$this->_xmlobj = new SimpleXMLElement($xmltext);
+		$this->_xmlobj = new \SimpleXMLElement($xmltext);
 	
 		$this->_encode($this->_xmlobj, $this->sourceArray);
 		

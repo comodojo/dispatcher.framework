@@ -1,35 +1,24 @@
 <?php namespace comodojo;
 
-define("DISPATCHER_REAL_PATH",realpath(dirname(__FILE__)));
-
-require(DISPATCHER_REAL_PATH."/../../configs/dispatcher-config.php");
-require(DISPATCHER_REAL_PATH."/Exception/DispatcherException.php");
-require(DISPATCHER_REAL_PATH."/Exception/DatabaseException.php");
-require(DISPATCHER_REAL_PATH."/Exception/IOException.php");
-require(DISPATCHER_REAL_PATH."/ObjectRequest/ObjectRequest.php");
-require(DISPATCHER_REAL_PATH."/ObjectRoutingTable/ObjectRoutingTable.php");
-require(DISPATCHER_REAL_PATH."/ObjectRoute/ObjectRoute.php");
-require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectResultInterface.php");
-require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectSuccess.php");
-require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectError.php");
-require(DISPATCHER_REAL_PATH."/ObjectResult/ObjectRedirect.php");
-require(DISPATCHER_REAL_PATH."/debug.php");
-require(DISPATCHER_REAL_PATH."/cache.php");
-require(DISPATCHER_REAL_PATH."/header.php");
-require(DISPATCHER_REAL_PATH."/events.php");
-require(DISPATCHER_REAL_PATH."/serialization.php");
-require(DISPATCHER_REAL_PATH."/deserialization.php");
-require(DISPATCHER_REAL_PATH."/service.php");
-
-//require("database.php");
-//require("trace.php");
-//require("statistic.php");
-//require("http.php");
-//require("random.php");
+require DISPATCHER_REAL_PATH."/Exception/DispatcherException.php";
+require DISPATCHER_REAL_PATH."/Exception/IOException.php";
+require DISPATCHER_REAL_PATH."/ObjectRequest/ObjectRequest.php";
+require DISPATCHER_REAL_PATH."/ObjectRoutingTable/ObjectRoutingTable.php";
+require DISPATCHER_REAL_PATH."/ObjectRoute/ObjectRoute.php";
+require DISPATCHER_REAL_PATH."/ObjectResult/ObjectResultInterface.php";
+require DISPATCHER_REAL_PATH."/ObjectResult/ObjectSuccess.php";
+require DISPATCHER_REAL_PATH."/ObjectResult/ObjectError.php";
+require DISPATCHER_REAL_PATH."/ObjectResult/ObjectRedirect.php";
+require DISPATCHER_REAL_PATH."/debug.php";
+require DISPATCHER_REAL_PATH."/cache.php";
+require DISPATCHER_REAL_PATH."/header.php";
+require DISPATCHER_REAL_PATH."/events.php";
+require DISPATCHER_REAL_PATH."/serialization.php";
+require DISPATCHER_REAL_PATH."/deserialization.php";
+require DISPATCHER_REAL_PATH."/service.php";
 
 use \comodojo\Exception\DispatcherException;
 use \comodojo\Exception\IOException;
-use \comodojo\Exception\DatabaseException;
 use \comodojo\ObjectRequest\ObjectRequest;
 use \comodojo\ObjectRoutingTable\ObjectRoutingTable;
 use \comodojo\ObjectRoute\ObjectRoute;
@@ -52,12 +41,6 @@ class dispatcher {
 	private $request_method = NULL;
 
 	private $routingtable = NULL;
-
-	//private $service_requested = NULL;
-
-	//private $service_attributes = NULL;
-
-	//private $service_parameters = NULL;
 
 	private $request = NULL;
 
@@ -124,8 +107,9 @@ class dispatcher {
 		$this->request = new ObjectRequest();
 
 		$this->request
-			->setMethod($this->request_method)
+			->setCurrentTime($this->current_time)
 			->setService($request_service)
+			->setMethod($this->request_method)
 			->setAttributes($request_attributes)
 			->setParameters($request_parameters)
 			->setRawParameters($request_raw_parameters)
@@ -191,7 +175,7 @@ class dispatcher {
 		if ( isset($preroute["parameters"]["class"]) ) {
 			$this->serviceroute->setClass($preroute["parameters"]["class"]);
 		} else {
-			$this->serviceroute->setClass($service);
+			$this->serviceroute->setClass(preg_replace('/\\.[^.\\s]{3,4}$/', '', $preroute["target"]));
 		}
 		if ( isset($preroute["parameters"]["redirectCode"]) ) $this->serviceroute->setRedirectCode($preroute["parameters"]["redirectCode"]);
 		if ( isset($preroute["parameters"]["errorCode"]) ) $this->serviceroute->setErrorCode($preroute["parameters"]["errorCode"]);
@@ -257,6 +241,7 @@ class dispatcher {
 				$route = new ObjectRedirect();
 				$route->setService($this->serviceroute->getService())
 					  ->setStatusCode($this->serviceroute->getRedirectCode())
+					  ->setLocation($this->serviceroute->getTarget())
 					  ->setHeaders($this->serviceroute->getHeaders());
 
 				break;
@@ -316,6 +301,12 @@ class dispatcher {
 	public final function removeHook($event, $callback=NULL) {
 
 		$this->events->remove($event, $callback);
+
+	}
+
+	public final function load($plugin) {
+
+		include DISPATCHER_PLUGINS_FOLDER.$plugin.".php";
 
 	}
 
@@ -418,13 +409,19 @@ class dispatcher {
 
 		}
 
-		// Fire first hook (level2), as specified above
+		// Fire first hook, a generic "dispatcher.result", Object Type independent
+
+		$fork = $this->events->fire("dispatcher.redirect", "RESULT", $route);
+
+		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
+
+		// Fire second hook (level2), as specified above
 
 		$fork = $this->events->fire($hook, "RESULT", $route);
 
 		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
 
-		// Now select and fire second hook (level3)
+		// Now select and fire last hook (level3)
 		// This means that event engine will fire something like "dispatcher.route.200"
 		// or "dispatcher.error.500"
 
@@ -598,7 +595,7 @@ class dispatcher {
 		$cache = $route->getCache();
 		$ttl = $route->getTtl();
 		$target = $route->getTarget();
-		$target_file = DISPATCHER_SERVICE_FOLDER.$target;
+		$target_file = DISPATCHER_SERVICES_FOLDER.$target;
 
 		// First of all, check cache (in case of GET request)
 
