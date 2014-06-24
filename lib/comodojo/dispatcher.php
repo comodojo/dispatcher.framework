@@ -1,22 +1,6 @@
 <?php namespace comodojo;
 
-// require DISPATCHER_REAL_PATH."/Exception/DispatcherException.php";
-// require DISPATCHER_REAL_PATH."/Exception/IOException.php";
-// require DISPATCHER_REAL_PATH."/ObjectRequest/ObjectRequest.php";
-// require DISPATCHER_REAL_PATH."/ObjectRoutingTable/ObjectRoutingTable.php";
-// require DISPATCHER_REAL_PATH."/ObjectRoute/ObjectRoute.php";
-// require DISPATCHER_REAL_PATH."/ObjectResult/ObjectResultInterface.php";
-// require DISPATCHER_REAL_PATH."/ObjectResult/ObjectSuccess.php";
-// require DISPATCHER_REAL_PATH."/ObjectResult/ObjectError.php";
-// require DISPATCHER_REAL_PATH."/ObjectResult/ObjectRedirect.php";
-// require DISPATCHER_REAL_PATH."/debug.php";
-// require DISPATCHER_REAL_PATH."/cache.php";
-// require DISPATCHER_REAL_PATH."/header.php";
-// require DISPATCHER_REAL_PATH."/events.php";
-// require DISPATCHER_REAL_PATH."/serialization.php";
-// require DISPATCHER_REAL_PATH."/deserialization.php";
-// require DISPATCHER_REAL_PATH."/service.php";
-
+use \comodojo\debug;
 use \comodojo\Exception\DispatcherException;
 use \comodojo\Exception\IOException;
 use \comodojo\ObjectRequest\ObjectRequest;

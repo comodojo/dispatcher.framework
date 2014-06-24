@@ -21,7 +21,18 @@
         }
     ],
      "autoload": {
-        "psr-4": {"comodojo\\": "lib/comodojo"}
+        "files": [
+            "/lib/comodojo/debug.php",
+            "/lib/spyc/Spyc.php",
+        ],
+        "psr-4": {
+            "comodojo\\Exception\\": "lib/comodojo/Exception",
+            "comodojo\\ObjectRequest\\": "lib/comodojo/ObjectRequest",
+            "comodojo\\ObjectRoutingTable\\": "lib/comodojo/ObjectRoutingTable",
+            "comodojo\\ObjectRoute\\": "lib/comodojo/ObjectRoute",
+            "comodojo\\ObjectResult\\": "lib/comodojo/ObjectResult",
+            "comodojo\\": "lib/comodojo"
+        }
     },
     "minimum-stability": "stable",
     "require": {

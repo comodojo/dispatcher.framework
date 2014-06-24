@@ -40,7 +40,7 @@ class serialization {
 
 		if ( is_object($data) ) $data = $this->stdObj2array($data);
 
-		require "XML.php";
+		//require "XML.php";
 
 		$xmlEngine = new XML();
 		$xmlEngine->sourceArray = $data;
@@ -73,7 +73,7 @@ class serialization {
 
 		if ( is_object($data) ) $data = $this->stdObj2array($data);
 
-		require DISPATCHER_REAL_PATH."/../spyc/Spyc.php";
+		//require DISPATCHER_REAL_PATH."/../spyc/Spyc.php";
 		
 		return \Spyc::YAMLDump($data);
 
