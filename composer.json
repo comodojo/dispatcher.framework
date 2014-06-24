@@ -1,0 +1,27 @@
+{
+    "name": "comodojo/dispatcher",
+    "description": "REST services microframework",
+    "license": "GPL-3.0+",
+    "type": "project",
+    "keywords": [
+        "REST",
+        "php",
+        "rest services",
+        "lframework",
+        "comodojo",
+    ],
+    "homepage": "http://dispatcher.comodojo.com",
+     "support": {
+        "issues": "https://github.com/comodojo/dispatcher.framework/issues"
+    },
+    "authors": [
+        {
+            "name": "comodojo",
+            "email": "info@comodojo.org"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+
+    }
+}

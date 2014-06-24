@@ -89,13 +89,6 @@ class dispatcher {
 
 		debug('-----------------------------------------------------------','INFO','dispatcher');
 
-		// Before building dispatcher instance, fire THE level1 event "dispatcher"
-		// This is the only way (out of dispatcher-config) to disable dispatcher
-
-		$fork = $this->events->fire("dispatcher", "DISPATCHER", $this->enabled);
-
-		if ( is_bool($fork)  ) $this->enabled = $fork;
-
 		// Starts composing request object (ObjectRequest)
 
 		list($request_service,$request_attributes) = $this->url_interpreter($this->working_mode);
@@ -119,6 +112,17 @@ class dispatcher {
 		debug(' * Request HTTP method: '.$this->request_method,'INFO','dispatcher');
 		debug('-----------------------------------------------------------','INFO','dispatcher');
 
+	}
+
+	public final function dispatch() {
+
+		// Before building dispatcher instance, fire THE level1 event "dispatcher"
+		// This is the only way (out of dispatcher-config) to disable dispatcher
+
+		$fork = $this->events->fire("dispatcher", "DISPATCHER", $this->enabled);
+
+		if ( is_bool($fork)  ) $this->enabled = $fork;
+
 		// After building dispatcher instance, fire THE level2 event "dispatcher.request"
 		// This default hook will expose current request (ObjectRequest) to callbacks
 
@@ -134,13 +138,11 @@ class dispatcher {
 
 		// Fire level3 event "dispatcher.request.[service]"
 		
-		$fork = $this->events->fire("dispatcher.request.".$request_service, "REQUEST", $this->request);
+		$fork = $this->events->fire("dispatcher.request.".$this->request->getService(), "REQUEST", $this->request);
 
 		if ( $fork instanceof \comodojo\ObjectRequest\ObjectRequest ) $this->request = $fork;
 
-	}
-
-	public final function dispatch() {
+		// Check if dispatcher is enabled
 
 		if ( $this->enabled === false ) {
 
@@ -177,12 +179,35 @@ class dispatcher {
 		} else {
 			$this->serviceroute->setClass(preg_replace('/\\.[^.\\s]{3,4}$/', '', $preroute["target"]));
 		}
-		if ( isset($preroute["parameters"]["redirectCode"]) ) $this->serviceroute->setRedirectCode($preroute["parameters"]["redirectCode"]);
-		if ( isset($preroute["parameters"]["errorCode"]) ) $this->serviceroute->setErrorCode($preroute["parameters"]["errorCode"]);
-		if ( isset($preroute["parameters"]["cache"]) ) $this->serviceroute->setCache($preroute["parameters"]["cache"]);
-		if ( isset($preroute["parameters"]["ttl"]) ) $this->serviceroute->setTtl($preroute["parameters"]["ttl"]);
-		if ( isset($preroute["parameters"]["headers"]) ) $this->serviceroute->setHeaders($preroute["parameters"]["headers"]);
-		if ( isset($preroute["parameters"]["accessControl"]) ) $this->serviceroute->setRedirectCode($preroute["parameters"]["accessControl"]);
+		
+		if ( isset($preroute["parameters"]["redirectCode"]) ) {
+			$this->serviceroute->setRedirectCode($preroute["parameters"]["redirectCode"]);
+			unset($preroute["parameters"]["redirectCode"]);
+		}
+		if ( isset($preroute["parameters"]["errorCode"]) ) {
+			$this->serviceroute->setErrorCode($preroute["parameters"]["errorCode"]);
+			unset($preroute["parameters"]["errorCode"]);
+		}
+		if ( isset($preroute["parameters"]["cache"]) ) {
+			$this->serviceroute->setCache($preroute["parameters"]["cache"]);
+			unset($preroute["parameters"]["cache"]);
+		}
+		if ( isset($preroute["parameters"]["ttl"]) ) {
+			$this->serviceroute->setTtl($preroute["parameters"]["ttl"]);
+			unset($preroute["parameters"]["ttl"]);
+		}
+		if ( isset($preroute["parameters"]["headers"]) ) {
+			$this->serviceroute->setHeaders($preroute["parameters"]["headers"]);
+			unset($preroute["parameters"]["headers"]);
+		}
+		if ( isset($preroute["parameters"]["accessControl"]) ) {
+			$this->serviceroute->setRedirectCode($preroute["parameters"]["accessControl"]);
+			unset($preroute["parameters"]["accessControl"]);
+		}
+
+		foreach ($preroute["parameters"] as $parameter => $value) {
+			$this->serviceroute->setParameter($parameter, $value);
+		}
 
 		// Now that we have a route, fire the level2 event "dispatcher.serviceroute"
 		// and level3 events:
@@ -292,9 +317,9 @@ class dispatcher {
 
 	}
 
-	public final function addHook($event, $callback) {
+	public final function addHook($event, $callback, $method=NULL) {
 
-		$this->events->add($event, $callback);
+		$this->events->add($event, $callback, $method);
 
 	}
 
@@ -307,6 +332,12 @@ class dispatcher {
 	public final function load($plugin) {
 
 		include DISPATCHER_PLUGINS_FOLDER.$plugin.".php";
+
+	}
+
+	public final function getCurrentTime() {
+
+		return $this->current_time;
 
 	}
 
@@ -411,7 +442,7 @@ class dispatcher {
 
 		// Fire first hook, a generic "dispatcher.result", Object Type independent
 
-		$fork = $this->events->fire("dispatcher.redirect", "RESULT", $route);
+		$fork = $this->events->fire("dispatcher.result", "RESULT", $route);
 
 		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
 

@@ -53,6 +53,6 @@
 * @default	declared example services
 */
 
-$dispatcher->setRoute("test","ROUTE","serve.php");
+$dispatcher->setRoute("default","ROUTE","serve.php");
 
 ?>

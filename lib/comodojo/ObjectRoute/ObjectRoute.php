@@ -22,6 +22,8 @@ class ObjectRoute {
 
 	private $access_control = NULL;
 
+	private $parameters = Array();
+
 	private $supported_route_types = Array("ROUTE","REDIRECT","ERROR");
 
 	private $supported_redirect_codes = Array(201,301,302,303,307);
@@ -260,6 +262,43 @@ class ObjectRoute {
 	public function getHeaders() {
 
 		return $this->headers;
+
+	}
+
+	/**
+	 * Set extra parameter
+	 *
+	 * @return 	ObjectRequest 	$this
+	 */
+	public function setParameter($parameter, $value=NULL) {
+
+		$this->parameters[$parameter] = $value;
+
+		return $this;
+
+	}
+
+	/**
+	 * Get extra parameter
+	 *
+	 * @return 	Array 	Headers array
+	 */
+	public function getParameter($parameter) {
+
+		if ( isset($this->parameters[$parameter]) ) return $this->parameters[$parameter];
+
+		else return NULL;
+
+	}
+
+	/**
+	 * Get extra parameters
+	 *
+	 * @return 	Array 	Headers array
+	 */
+	public function getParameters() {
+
+		return $this->parameters;
 
 	}
 

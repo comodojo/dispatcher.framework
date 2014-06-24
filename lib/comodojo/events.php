@@ -34,11 +34,23 @@ class events {
 
 	}
 
-	public final function add($event, $callback) {
+	public final function add($event, $callback, $method=NULL) {
 
-		if ( isset($this->hooks[$event]) ) array_push($this->hooks[$event], $callback);
+		if ( is_null($method) ) {
 
-		else $this->hooks[$event] = Array($callback);
+			if ( isset($this->hooks[$event]) ) array_push($this->hooks[$event], $callback);
+
+			else $this->hooks[$event] = Array($callback);
+
+		}
+
+		else {
+
+			if ( isset($this->hooks[$event]) ) array_push($this->hooks[$event], Array($callback, $method));
+
+			else $this->hooks[$event] = Array(Array($callback, $method));
+
+		}
 
 	}
 
@@ -54,17 +66,46 @@ class events {
 
 		else if ( isset($this->hooks[$event]) ) {
 
-			$callback_position = array_search($callback, $this->hooks[$event]);
+			foreach ($this->hooks[$event] as $key => $hook) {
+				
+				if ( is_array($hook) ) {
 
-			if ( $callback_position === false ) return false;
+					if ( $hook[0] == $callback ) {
 
-			else {
+						unset($this->hooks[$event][$key]);
 
-				unset($this->hooks[$event][$callback_position]);
+						return true;
 
-				return true;
+					}
+
+				}
+				else {
+
+					if ( $hook == $callback ) {
+
+						unset($this->hooks[$event][$key]);
+
+						return true;
+
+					}
+
+				}
 
 			}
+
+			return false;
+
+			// $callback_position = array_search($callback, $this->hooks[$event]);
+
+			// if ( $callback_position === false ) return false;
+
+			// else {
+
+			// 	unset($this->hooks[$event][$callback_position]);
+
+			// 	return true;
+
+			// }
 
 		}
 
@@ -74,6 +115,8 @@ class events {
 
 	public final function fire($event, $type, $data) {
 
+		debug("Firing event ".$event, "DEBUG", "events");
+
 		$value = $data;
 
 		if ( isset($this->hooks[$event]) ) {
@@ -82,15 +125,25 @@ class events {
 
 				$return_value = NULL;
 
-				if ( is_callable($callback) ) {
+				if ( is_array($callback) ) {
 
-					try {
-						
-						$return_value = call_user_func($callback, $value);
+					if ( is_callable(Array($callback[0], $callback[1])) ) {
 
-					} catch (Exception $e) {
-						
-						debug("Error running hook ".$event." - ".$e->getMessage(), "ERROR", "events");
+						try {
+							
+							$return_value = call_user_func(Array($callback[0], $callback[1]), $value);
+
+						} catch (Exception $e) {
+							
+							debug("Error running hook ".$event." - ".$e->getMessage(), "ERROR", "events");
+							continue;
+
+						}
+
+					}
+					else {
+
+						debug("Skipping not-callable hook ".$event."::".$callback[0].":".$callback[1], "WARNING", "events");
 						continue;
 
 					}
@@ -98,8 +151,26 @@ class events {
 				}
 				else {
 
-					debug("Skipping not-callable hook ".$event."::".$callback, "WARNING", "events");
-					continue;
+					if ( is_callable($callback) ) {
+
+						try {
+							
+							$return_value = call_user_func($callback, $value);
+
+						} catch (Exception $e) {
+							
+							debug("Error running hook ".$event." - ".$e->getMessage(), "ERROR", "events");
+							continue;
+
+						}
+
+					}
+					else {
+
+						debug("Skipping not-callable hook ".$event."::".$callback, "WARNING", "events");
+						continue;
+
+					}
 
 				}
 
