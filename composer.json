@@ -23,7 +23,7 @@
      "autoload": {
         "files": [
             "/lib/comodojo/debug.php",
-            "/lib/spyc/Spyc.php",
+            "/lib/spyc/Spyc.php"
         ],
         "psr-4": {
             "comodojo\\Exception\\": "lib/comodojo/Exception",
