@@ -10,7 +10,7 @@
         "lframework",
         "comodojo"
     ],
-    "homepage": "http://dispatcher.comodojo.com",
+    "homepage": "http://dispatcher.comodojo.org",
      "support": {
         "issues": "https://github.com/comodojo/dispatcher.framework/issues"
     },
@@ -20,6 +20,9 @@
             "email": "info@comodojo.org"
         }
     ],
+     "autoload": {
+        "psr-4": {"comodojo\\": "lib/comodojo"}
+    },
     "minimum-stability": "stable",
     "require": {
 

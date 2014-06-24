@@ -48,11 +48,8 @@
 * redirect status code (Multiple Choises), could generate sometimes a browser
 * error or require a user action (confirmation dialog).
 * 
-* 
+* 	
 * @static	ARRAY
 * @default	declared example services
 */
 
-$dispatcher->setRoute("default","ROUTE","serve.php");
-
-?>

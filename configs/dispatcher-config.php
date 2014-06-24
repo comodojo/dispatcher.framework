@@ -36,7 +36,7 @@ define('COMODOJO_GLOBAL_DEBUG_LEVEL', 'DEBUG');
 
 ######## BEGIN DISPATCHER PROPERTIES ########
 
-define("DISPATCHER_REAL_PATH",realpath(dirname(__FILE__))."/../lib/comodojo");
+define("DISPATCHER_REAL_PATH",realpath(dirname(__FILE__))."/../");
 
 /**
 * If false, dispatcher will not route any request and will reply with an 503 Service 
@@ -123,21 +123,21 @@ define('DISPATCHER_SUPPORTED_METHODS', 'GET,PUT,POST,DELETE,ANY');
 * 
 * @static	string
 */
-define('DISPATCHER_CACHE_FOLDER', DISPATCHER_REAL_PATH."/../../cache/");
+define('DISPATCHER_CACHE_FOLDER', DISPATCHER_REAL_PATH."cache/");
 
 /**
 * Services folder.
 * 
 * @static	string
 */
-define('DISPATCHER_SERVICES_FOLDER', DISPATCHER_REAL_PATH."/../../services/");
+define('DISPATCHER_SERVICES_FOLDER', DISPATCHER_REAL_PATH."services/");
 
 /**
 * Plugins folder.
 * 
 * @static	string
 */
-define('DISPATCHER_PLUGINS_FOLDER', DISPATCHER_REAL_PATH."/../../plugins/");
+define('DISPATCHER_PLUGINS_FOLDER', DISPATCHER_REAL_PATH."plugins/");
 
 ######### END DISPATCHER FOLDERS #########
 

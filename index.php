@@ -27,8 +27,11 @@
 // Load dispatcher configuration
 require "configs/dispatcher-config.php";
 
+// Autoload classes
+require 'vendor/autoload.php';
+
 // Load main classes
-require "lib/comodojo/dispatcher.php";
+//require "lib/comodojo/dispatcher.php";
 
 // Init a dispatcher instance
 $dispatcher = new dispatcher();

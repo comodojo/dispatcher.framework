@@ -13,6 +13,3 @@
  * @version     __CURRENT_VERSION__
  */
 
-//$dispatcher->load("trace");
-
-?>
