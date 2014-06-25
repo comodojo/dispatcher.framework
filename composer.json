@@ -32,16 +32,7 @@
             "comodojo\\ObjectRoute\\": "lib/comodojo/ObjectRoute",
             "comodojo\\ObjectResult\\": "lib/comodojo/ObjectResult",
             "comodojo\\": "lib/comodojo"
-        },
-        "psr-0": { "comodojo\\composer": "composer" }
-    },
-    "scripts": {
-        "post-root-package-install": [
-            "comodojo\\composer\\DispatcherInstallActions::postRootInstall"
-        ],
-        "post-update-cmd": [
-            "comodojo\\composer\\DispatcherInstallActions::postUpdate"
-        ]
+        }
     },
     "minimum-stability": "stable",
     "require": {
