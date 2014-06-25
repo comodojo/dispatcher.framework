@@ -32,7 +32,8 @@
             "comodojo\\ObjectRoute\\": "lib/comodojo/ObjectRoute",
             "comodojo\\ObjectResult\\": "lib/comodojo/ObjectResult",
             "comodojo\\": "lib/comodojo"
-        }
+        },
+        "psr-0": { "comodojo\\composer": "" }
     },
     "scripts": {
         "post-root-package-install": [
