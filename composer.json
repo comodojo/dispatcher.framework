@@ -33,7 +33,7 @@
             "comodojo\\ObjectResult\\": "lib/comodojo/ObjectResult",
             "comodojo\\": "lib/comodojo"
         },
-        "psr-0": { "comodojo\\composer": "" }
+        "psr-0": { "comodojo\\composer": "composer" }
     },
     "scripts": {
         "post-root-package-install": [
