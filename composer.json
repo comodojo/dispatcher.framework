@@ -22,8 +22,8 @@
     ],
      "autoload": {
         "files": [
-            "/lib/comodojo/debug.php",
-            "/lib/spyc/Spyc.php"
+            "lib/comodojo/debug.php",
+            "lib/spyc/Spyc.php"
         ],
         "psr-4": {
             "comodojo\\Exception\\": "lib/comodojo/Exception",
@@ -31,8 +31,17 @@
             "comodojo\\ObjectRoutingTable\\": "lib/comodojo/ObjectRoutingTable",
             "comodojo\\ObjectRoute\\": "lib/comodojo/ObjectRoute",
             "comodojo\\ObjectResult\\": "lib/comodojo/ObjectResult",
-            "comodojo\\": "lib/comodojo"
+            "comodojo\\": "lib/comodojo",
+            "DispatcherInstaller\\": "DispatcherInstaller"
         }
+    },
+    "scripts": {
+        "post-package-install": [
+            "DispatcherInstaller\\DispatcherInstallerActions::postPackageInstall"
+        ],
+        "post-package-uninstall": [
+            "DispatcherInstaller\\DispatcherInstallerActions::postPackageUninstall"
+        ]
     },
     "minimum-stability": "stable",
     "require": {
