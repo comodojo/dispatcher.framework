@@ -94,7 +94,7 @@ class DispatcherInstallerActions {
 
 		}
 		else {
-			$line_load = '$dispatcher->load("'.$plugin_path.$package_loader.'");';
+			$line_load = '$dispatcher->load("' . $package_loader . '", "' . $plugin_path . '");';
 		}
 		
 		$to_append = "\n\n".$line_mark."\n".$line_load."\n".$line_mark;

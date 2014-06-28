@@ -313,9 +313,9 @@ class dispatcher {
 
 	}
 
-	public final function load($plugin) {
+	public final function load($plugin, $folder=DISPATCHER_PLUGINS_FOLDER) {
 
-		include DISPATCHER_PLUGINS_FOLDER.$plugin.".php";
+		include $folder.$plugin.".php";
 
 	}
 

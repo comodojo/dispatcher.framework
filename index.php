@@ -1,13 +1,12 @@
 <?php use comodojo\dispatcher;
 
 /**
- * Dispatcher frontend
+ * Comodojo dispatcher - REST services microframework
  * 
  * @package 	Comodojo dispatcher (Spare Parts)
- * @author 		comodojo.org
- * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
- * @version 	__CURRENT_VERSION__
- * 
+ * @author		comodojo <info@comodojo.org>
+ * @license 	GPL-3.0+
+ *
  * LICENSE:
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -24,22 +23,67 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Load dispatcher configuration
+/*
+ |--------------------------------
+ | Load dispatcher configuration
+ |--------------------------------
+ |
+ | Load defined constants via dispatcher-config
+ |
+ */
 require "configs/dispatcher-config.php";
 
-// Autoload classes
+/*
+ |--------------------------------
+ | Autoloader
+ |--------------------------------
+ |
+ | Register the autoloader, located in vendor
+ | directory. In a composer installation, this
+ | will be handled directly with composer.
+ |
+ */
 require 'vendor/autoload.php';
 
-// Init a dispatcher instance
+/*
+ |--------------------------------
+ | Init a dispatcher instance
+ |--------------------------------
+ |
+ | Create the dispatcher instance
+ |
+ */
 $dispatcher = new dispatcher();
 
-// Load routing table
+/*
+ |--------------------------------
+ | Load routing table
+ |--------------------------------
+ |
+ | Load site-specific routing options from
+ | routing configuration.
+ |
+ */
 require "configs/routing-config.php";
 
-// Load plugins
+/*
+ |--------------------------------
+ | Load plugins
+ |--------------------------------
+ |
+ | Load installed plugins
+ |
+ */
 require "configs/plugins-config.php";
 
-// Dispatch!
+/*
+ |--------------------------------
+ | Dispatch!
+ |--------------------------------
+ |
+ | Handle request, dispatch result :)
+ |
+ */
 $dispatcher->dispatch();
 
 ?>
