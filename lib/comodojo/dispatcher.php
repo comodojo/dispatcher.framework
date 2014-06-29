@@ -161,7 +161,8 @@ class dispatcher {
 		if ( isset($preroute["parameters"]["class"]) ) {
 			$this->serviceroute->setClass($preroute["parameters"]["class"]);
 		} else {
-			$this->serviceroute->setClass(preg_replace('/\\.[^.\\s]{3,4}$/', '', $preroute["target"]));
+			$t = pathinfo($preroute["target"]);
+			$this->serviceroute->setClass(preg_replace('/\\.[^.\\s]{3,4}$/', '', $t["filename"]));
 		}
 		
 		if ( isset($preroute["parameters"]["redirectCode"]) ) {
@@ -289,9 +290,17 @@ class dispatcher {
 
 	}
 
-	public final function setRoute($service, $type, $target, $parameters=Array()) {
+	public final function setRoute($service, $type, $target, $parameters=Array(), $relative=true) {
 
-		$this->routingtable->setRoute($service, $type, $target, $parameters);
+		if ( strtoupper($type) == "ROUTE" ) {
+
+			if ( $relative ) $this->routingtable->setRoute($service, $type, DISPATCHER_SERVICES_FOLDER.$target, $parameters);
+
+			else $this->routingtable->setRoute($service, $type, $target, $parameters);
+
+		}
+
+		else $this->routingtable->setRoute($service, $type, $target, $parameters);
 
 	}
 
@@ -313,9 +322,13 @@ class dispatcher {
 
 	}
 
-	public final function load($plugin, $folder=DISPATCHER_PLUGINS_FOLDER) {
+	public final function loadPlugin($plugin, $folder=DISPATCHER_PLUGINS_FOLDER) {
 
 		include $folder.$plugin.".php";
+
+	}
+
+	public final function provideTemplate($template, $target, $relative=true) {
 
 	}
 
@@ -484,24 +497,6 @@ class dispatcher {
 
 	}
 
-	private function get_service_class($service) {
-
-		if ( class_exists('\comodojo\/'.$service) ) return $service;
-
-		$classes = array_reverse(get_declared_classes());
-
-		foreach( $classes as $class ) {
-
-			if( $class instanceof \comodojo\service ) return $class;
-
-			//if( '\comodojo'.$class instanceof service ) return $class;
-
-		}
-
-		return false;
-		
-	}
-
 	private function get_working_mode() {
 
 		return DISPATCHER_USE_REWRITE ? "REWRITE" : "STANDARD";
@@ -610,7 +605,6 @@ class dispatcher {
 		$cache = $route->getCache();
 		$ttl = $route->getTtl();
 		$target = $route->getTarget();
-		$target_file = DISPATCHER_SERVICES_FOLDER.$target;
 
 		// First of all, check cache (in case of GET request)
 
@@ -643,7 +637,7 @@ class dispatcher {
 
 		// If there's no cache for this request, use routing information to find service
 
-		if ( (include($target_file)) === false ) throw new DispatcherException("Cannot run service", 500);
+		if ( (include($target)) === false ) throw new DispatcherException("Cannot run service", 500);
 
 		// Find a service implementation and try to init it
 

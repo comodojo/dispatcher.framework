@@ -139,6 +139,14 @@ define('DISPATCHER_SERVICES_FOLDER', DISPATCHER_REAL_PATH."services/");
 */
 define('DISPATCHER_PLUGINS_FOLDER', DISPATCHER_REAL_PATH."plugins/");
 
+/**
+* Templates folder.
+* 
+* @static	string
+*/
+define('DISPATCHER_TEMPLATES_FOLDER', DISPATCHER_REAL_PATH."templates/");
+
+
 ######### END DISPATCHER FOLDERS #########
 
 ?>

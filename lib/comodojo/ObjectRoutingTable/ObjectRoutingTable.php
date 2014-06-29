@@ -148,7 +148,7 @@ class ObjectRoutingTable {
 
 	private function routable($target) {
 
-		return is_readable(DISPATCHER_SERVICES_FOLDER.$target) ? true : false;
+		return is_readable($target) ? true : false;
 
 	}
 
