@@ -1,8 +1,7 @@
-<?php namespace comodojo\Exception;
+<?php namespace comodojo\Template;
 
 /**
- * IOException handler; nothing special, just an implementation of
- * standard Exception class.
+ * A simple interface for dispatcher templates
  *
  * @package 	Comodojo dispatcher (Spare Parts)
  * @author		comodojo <info@comodojo.org>
@@ -24,6 +23,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class IOException extends \Exception {}
+interface TemplateInterface {
 
-?>
+	public function replace($data, $tag);
+
+	public function serialize();
+
+}

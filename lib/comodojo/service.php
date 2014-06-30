@@ -1,36 +1,115 @@
 <?php namespace comodojo;
 
+/**
+ * The Service base class, feel free to extend
+ * 
+ * @package 	Comodojo dispatcher (Spare Parts)
+ * @author		comodojo <info@comodojo.org>
+ * @license 	GPL-3.0+
+ *
+ * LICENSE:
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 use \comodojo\Exception\DispatcherException;
-//use \comodojo\Exception\IOException;
-//use \comodojo\Exception\DatabaseException;
+use \comodojo\Exception\IOException;
 
 class service {
 
-	// Things a service should define:
+	//###### Things a service should define ######//
 
+	/**
+	 * The content type that service will return.
+	 * Default content is "text/plain"; each service can override,
+	 * both in setup phase or in method declaration.
+	 *
+	 * @var 	string
+	 */
 	private $content_type = "text/plain";
 
+	/**
+	 * St status code that service will return (in case of no exceptions).
+	 * Default content is 200 - OK; each service can override,
+	 * both in setup phase or in method declaration.
+	 *
+	 * @var 	integer
+	 */
 	private $status_code = 200;
 
+	/**
+	 * An array of headers that will be returned. This value is initially populated
+	 * with headers declared in routing phase (if any).
+	 *
+	 * @var 	array
+	 */
 	private $headers = Array();
 
+	/**
+	 * Supported HTTP methods (comma separated, not spaced)
+	 *
+	 * @var 	string
+	 * @see 	dispatcher-config.php
+	 */
 	private $supported_http_methods = DISPATCHER_SUPPORTED_METHODS;
 
+	/**
+	 * Result charset 
+	 *
+	 * @var 	string
+	 * @see 	dispatcher-config.php
+	 */
 	private $charset = DISPATCHER_DEFAULT_ENCODING;
 
-	// Thins a service could use for free
+	//###### Thins a service could use for free ######//
 
+	/**
+	 * Request attributes, populated at runtime by dispatcher 
+	 *
+	 * @var 	array
+	 */
 	public $attributes = Array();
 
+	/**
+	 * Request parameters, populated at runtime by dispatcher 
+	 *
+	 * @var 	array
+	 */
 	public $parameters = Array();
 
+	/**
+	 * Request raw parameters (php://input), populated at runtime by dispatcher 
+	 *
+	 * @var 	array
+	 */
 	public $raw_parameters = Array();
 
+	/**
+	 * An instance of dispatcher serializer
+	 *
+	 * @var 	Object
+	 */
 	public $serialize = NULL;
 
+	/**
+	 * An instance of dispatcher deserializer
+	 *
+	 * @var 	Object
+	 */
 	public $deserialize = NULL;
 
-	// Things a service may define
+	//###### Things a service may define ######//
 
 	// Expected attributes
 	private $expected_attributes = Array(
@@ -68,8 +147,13 @@ class service {
 		"ANY"	=>	Array()
 	);
 
-	// Things dedicated to internal use
+	//###### Things dedicated to internal use ######//
 
+	/**
+	 * Supported success code (as defined in ObjectSuccess)
+	 *
+	 * @var 	Array
+	 */
 	private $supported_success_codes = Array(200,202,204);
 
 	/*************** HTTP METHODS IMPLEMENTATIONS **************/
@@ -102,19 +186,39 @@ class service {
 	 * Implement this method if your service should support
 	 * any HTTP requests (it's quite a wildcard, please be careful...)
 	 */
-	// public function logic() {}
+	// public function any() {}
 	
 	/*************** HTTP METHODS IMPLEMENTATIONS **************/
 	
 	/******************* OVERRIDABLE METHODS *******************/
 
+	/**
+	 * Service setup.
+	 *
+	 * It is the first method that dispatcher will call and could be used
+	 * to define service parameters in global scope, such as contentType or
+	 * success HTTP code.
+	 *
+	 * PLEASE REMEMBER: setting same parameters in method declaration will
+	 * override first ones.
+	 *
+	 * @return null
+	 */
 	public function setup() {
 
 	}
 
-	/******************* OVERRIDABLE METHODS *******************/
-
-	public final function __construct() {
+	/**
+	 * Service constructor.
+	 *
+	 * Currently, only for init serialized/deserialized but can be extended to
+	 * do anything service needs.
+	 *
+	 * PLEASE REMEMBER to call parent::__construct() at the end of your method
+	 *
+	 * @return null
+	 */
+	public function __construct() {
 
 		$this->serialize = new serialization();
 
@@ -122,11 +226,14 @@ class service {
 
 	}
 
+	/******************* OVERRIDABLE METHODS *******************/
+
 	/**
 	 * Expected attributes (i.e. ones that will build the URI)
 	 *
 	 * @param 	string 	$method 	HTTP method for punctual attributes rematch or ANY
 	 * @param 	array 	$parameters An array of parameters, with or without compliance check
+	 * @return 	Object 	$this
 	 */
 	public final function expects($method, $attributes, $parameters=Array()) {
 
@@ -144,6 +251,7 @@ class service {
 	 *
 	 * @param 	string 	$method 	HTTP method for punctual attributes rematch or ANY
 	 * @param 	array 	$parameters An array of parameters, with or without compliance check
+	 * @return 	Object 	$this
 	 */
 	public final function likes($method, $attributes, $parameters=Array()) {
 
@@ -156,6 +264,21 @@ class service {
 
 	}
 
+	/**
+	 * Set methods service will support.
+	 *
+	 * In can be misleading, but supported HTTP methods and implemented HTTP methods 
+	 * are not the same thing.
+	 *
+	 * - If method is not SUPPORTED, service will not be initiated and a 405 - Not Allowed
+	 *   error will be returned.
+	 * - If method is not IMPLEMENTED - i.e. get() method is not defined - service will not
+	 *   be initiated and a 501 - Not Implemented error will be returned
+	 *
+	 * @param 	string 	$method 	HTTP method for punctual attributes rematch or ANY
+	 * @param 	array 	$parameters An array of parameters, with or without compliance check
+	 * @return 	Object 	$this
+	 */
 	public final function setSupportedMethods($methods) {
 
 		$methods = preg_replace('/\s+/', '', $methods);
@@ -175,6 +298,12 @@ class service {
 
 	}
 
+	/**
+	 * Set service content type
+	 *
+	 * @param 	string 	$type 	Content Type
+	 * @return 	Object 	$this
+	 */
 	public final function setContentType($type) {
 
 		$this->content_type = $type;
@@ -183,26 +312,48 @@ class service {
 
 	}
 
+	/**
+	 * Get service declared content type
+	 *
+	 * @return 	string 	Content Type
+	 */
 	public final function getContentType() {
 
 		return $this->content_type;
 
 	}
 
-	public final function setCharset($type) {
+	/**
+	 * Set service charset
+	 *
+	 * @param 	string 	$type 	Charset
+	 * @return 	Object 	$this
+	 */
+	public final function setCharset($charset) {
 
-		$this->charset = $type;
+		$this->charset = $charset;
 
 		return $this;
 
 	}
 
+	/**
+	 * Get service declared charset
+	 *
+	 * @return 	string 	Charset
+	 */
 	public final function getCharset() {
 
 		return $this->charset;
 
 	}
 
+	/**
+	 * Set success status code
+	 *
+	 * @param 	integer	$code 	HTTP status code (in case of success)
+	 * @return 	Object 	$this
+	 */
 	public final function setStatusCode($code) {
 
 		$code = filter_var($code, FILTER_VALIDATE_INT);
@@ -213,6 +364,11 @@ class service {
 
 	}
 
+	/**
+	 * Get service-defined status code
+	 *
+	 * @return 	integer 	HTTP status code (in case of success)
+	 */
 	public final function getStatusCode() {
 
 		return $this->status_code;
@@ -225,9 +381,9 @@ class service {
 	 * @param 	string 	$header 	Header name
 	 * @param 	string 	$value 		Header content (optional)
 	 *
-	 * @return 	ObjectRequest 	$this
+	 * @return 	Object 	$this
 	 */
-	public function setHeader($header, $value=NULL) {
+	public final function setHeader($header, $value=NULL) {
 
 		$this->headers[$header] = $value;
 
@@ -242,7 +398,7 @@ class service {
 	 *
 	 * @return 	bool
 	 */
-	public function unsetHeader($header) {
+	public final function unsetHeader($header) {
 
 		if ( isset($this->headers[$header]) ) {
 
@@ -263,7 +419,7 @@ class service {
 	 *
 	 * @return 	string 	Header component in case of success, false otherwise
 	 */
-	public function getHeader($header) {
+	public final function getHeader($header) {
 
 		if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
@@ -276,9 +432,9 @@ class service {
 	 *
 	 * @param 	array 	$headers 	Headers array
 	 *
-	 * @return 	ObjectRequest 	$this
+	 * @return 	Object 	$this
 	 */
-	public function setHeaders($headers) {
+	public final function setHeaders($headers) {
 
 		$this->headers = is_array($headers) ? $headers : $this->header;
 
@@ -289,9 +445,9 @@ class service {
 	/**
 	 * Unset headers
 	 *
-	 * @return 	ObjectRequest 	$this
+	 * @return 	Object 	$this
 	 */
-	public function unsetHeaders() {
+	public final function unsetHeaders() {
 
 		$this->headers = Array();
 
@@ -304,18 +460,28 @@ class service {
 	 *
 	 * @return 	Array 	Headers array
 	 */
-	public function getHeaders() {
+	public final function getHeaders() {
 
 		return $this->headers;
 
 	}
 
+	/**
+	 * Get service-supported HTTP methods
+	 *
+	 * @return 	Array 	Headers array
+	 */
 	public final function getSupportedMethods() {
 
 		return $this->supported_http_methods;
 
 	}
 
+	/**
+	 * Get service-implemented HTTP methods
+	 *
+	 * @return 	Array 	Headers array
+	 */
 	public final function getImplementedMethods() {
 
 		$supported_methods = explode(',',$this->supported_http_methods);
@@ -332,6 +498,11 @@ class service {
 
 	}
 
+	/**
+	 * Get attributes and parameters that service expects
+	 *
+	 * @return 	Array 
+	 */
 	public final function getExpected($method) {
 
 		$method = strtoupper($method);
@@ -346,6 +517,11 @@ class service {
 
 	}
 
+	/**
+	 * Get attributes and parameters that service likes
+	 *
+	 * @return 	Array 
+	 */
 	public final function getLiked($method) {
 
 		$method = strtoupper($method);
@@ -360,12 +536,22 @@ class service {
 
 	}
 
+	/**
+	 * Get request attributes, populated by dispatcher
+	 *
+	 * @return 	Array 
+	 */
 	public final function getAttributes() {
 
 		return $this->attributes;
 
 	}
 
+	/**
+	 * Get request parameters, populated by dispatcher
+	 *
+	 * @return 	Array 
+	 */
 	public final function getParameters($raw=false) {
 
 		return $raw ? $this->rawparameters : $this->parameters;

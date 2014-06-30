@@ -6,7 +6,6 @@
  * It currently support:
  * - dispatcher-plugin - generic plugins such as tracer, database, ...
  * - dispatcher-service-bundle - service bundles
- * - dispatcher-template-bundle - template bundles
  * 
  * @package 	Comodojo dispatcher (Spare Parts)
  * @author		comodojo <info@comodojo.org>
@@ -32,7 +31,7 @@ use Composer\Script\Event;
 
 class DispatcherInstallerActions {
 
-	private static $services_folder = 'service';
+	private static $services_folder = 'services';
 
 	private static $plugins_folder = 'plugins';
 
@@ -80,23 +79,6 @@ class DispatcherInstallerActions {
 			echo "Service added in plugin-config\n";
 
 		}
-		elseif ( $type == "dispatcher-template-bundle" ) {
-
-			$loaders = isset($extra["comodojo-template-provide"]) ? $extra["comodojo-services-route"] : Array();
-
-			try {
-			
-				self::loadTemplate($name, $loaders);
-
-			} catch (Exception $e) {
-				
-				throw $e;
-				
-			}
-
-			echo "Template added in plugin-config\n";
-
-		}
 		else {
 			echo "DispatcherInstaller has nothing to do\n";
 		}
@@ -137,21 +119,6 @@ class DispatcherInstallerActions {
 			}
 
 			echo "Service removed from plugins-config\n";
-
-		}
-		elseif ( $type == "dispatcher-template-bundle" ) {
-
-			try {
-			
-				self::unloadTemplate($name);
-
-			} catch (Exception $e) {
-				
-				throw $e;
-				
-			}
-
-			echo "Template removed from plugins-config\n";
 
 		}
 		else {
@@ -257,14 +224,8 @@ class DispatcherInstallerActions {
 
 	public static function unloadService() {
 
-	
-
-	public static function loadTemplate() {
-
-	}
-
-	public static function unloadTemplate() {
-
 	}
 
 }
+
+?>

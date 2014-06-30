@@ -1,12 +1,12 @@
 <?php namespace comodojo\Exception;
 
 /**
- * Dispatcher exception handler
- * 
- * @package 	Comodojo Spare Parts
- * @author		comodojo.org
- * @copyright 	__COPYRIGHT__ comodojo.org (info@comodojo.org)
- * @version 	__CURRENT_VERSION__
+ * DispatcherException handler; nothing special, just an implementation of
+ * standard Exception class.
+ *
+ * @package 	Comodojo dispatcher (Spare Parts)
+ * @author		comodojo <info@comodojo.org>
+ * @license 	GPL-3.0+
  *
  * LICENSE:
  * 
