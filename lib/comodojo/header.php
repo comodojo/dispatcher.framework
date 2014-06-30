@@ -173,7 +173,7 @@ class header {
 		$ttl = filter_var($ttl, FILTER_VALIDATE_INT);
 
 		if ( $ttl > 0 ) {
-			$this->set("Cache-Control","max-age=".$this->headers["ttl"].", must-revalidate");
+			$this->set("Cache-Control","max-age=".$ttl.", must-revalidate");
 			$this->set("Expires",gmdate("D, d M Y H:i:s", $this->current_time + $ttl)." GMT");
 		}
 		else {

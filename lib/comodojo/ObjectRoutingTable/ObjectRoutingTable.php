@@ -67,6 +67,16 @@ class ObjectRoutingTable {
 
 	}
 
+	/**
+	 * Set punctual route for a service
+	 *
+	 * @param 	string 	$service 	The service name
+	 * @param 	string 	$type 		The route type
+	 * @param 	string 	$target 	The target (php file for a service, content for error, location for redirect)
+	 * @param 	string 	$parameters (optional) array of parameters such as cache, ttl, ...
+	 *
+	 * @return 	Object 	$this
+	 */
 	public function setRoute($service, $type, $target, $parameters=Array()) {
 
 		$this->table[$service] = Array(
@@ -79,6 +89,13 @@ class ObjectRoutingTable {
 
 	}
 
+	/**
+	 * Unset a punctual route
+	 *
+	 * @param 	string 	$service 	The service name
+	 *
+	 * @return 	bool
+	 */
 	public function unsetRoute($service) {
 
 		if ( isset($this->table[$service]) ) {
@@ -94,8 +111,11 @@ class ObjectRoutingTable {
 	}
 
 	/**
-	 * The routing logic
+	 * Get route depending on $service (aka the router logic)
 	 *
+	 * @param 	string 	$service 	The service name
+	 *
+	 * @return 	array 	The route array
 	 */
 	public function getRoute($service) {
 
@@ -140,18 +160,35 @@ class ObjectRoutingTable {
 
 	}
 
+	/**
+	 * Get entire routing table
+	 *
+	 * @return 	array 	The current routing table
+	 */
 	public function getRoutes() {
 
 		return $this->table;
 
 	}
 
+	/**
+	 * Check if target is routable (it exsists?)
+	 *
+	 * @param 	string 	$target 	The target file
+	 *
+	 * @return 	bool
+	 */
 	private function routable($target) {
 
 		return is_readable($target) ? true : false;
 
 	}
 
+	/**
+	 * Route to landing page (i.e. no service)
+	 *
+	 * @return 	array 	The route array
+	 */
 	private function route_to_landing() {
 
 		if ( isset($this->table[""]) ) {
@@ -164,6 +201,11 @@ class ObjectRoutingTable {
 
 	}
 
+	/**
+	 * Route to default
+	 *
+	 * @return 	array 	The route array
+	 */
 	private function route_to_default() {
 
 		if ( isset($this->table["default"]) ) {
@@ -176,6 +218,11 @@ class ObjectRoutingTable {
 
 	}
 
+	/**
+	 * Route to not found (404)
+	 *
+	 * @return 	array 	The route array
+	 */
 	private function route_to_notfound() {
 
 		return Array(
@@ -188,6 +235,11 @@ class ObjectRoutingTable {
 
 	}
 
+	/**
+	 * Route to service error (nowhere)
+	 *
+	 * @return 	array 	The route array
+	 */
 	private function route_to_nowhere() {
 
 		return Array(

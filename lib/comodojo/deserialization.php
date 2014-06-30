@@ -25,6 +25,17 @@
 
 class deserialization {
 
+	/**
+	 * Convert JSON to Array using PHP json_decode func
+	 *
+	 * Setting $raw to true, JSON objects will be converted into PHP
+	 * objects; if false, to array.
+	 *
+	 * @param 	string 	$data 	Data to convert
+	 * @param 	bool 	$raw 	Raw conversion
+	 *
+	 * @return 	array
+	 */
 	public final function fromJSON($data, $raw=false) {
 
 		if ( !is_string($data) ) throw new Exception("Invalid data for JSON deserialization");
@@ -33,11 +44,16 @@ class deserialization {
 
 	}
 
+	/**
+	 * Convert XML to Array using comodojo XML converter
+	 *
+	 * @param 	string 	$data 	Data to convert
+	 *
+	 * @return 	array
+	 */
 	public final function fromXML($data) {
 
 		if ( !is_string($data) ) throw new Exception("Invalid data for XML deserialization");
-
-		//require "XML.php";
 
 		$xmlEngine = new XML();
 		$xmlEngine->sourceString = $data;
@@ -46,16 +62,28 @@ class deserialization {
 
 	}
 
+	/**
+	 * Convert YAML to Array using Spyc converter
+	 *
+	 * @param 	string 	$data 	Data to convert
+	 *
+	 * @return 	array
+	 */
 	public final function fromYAML($data) {
 
 		if ( !is_string($data) ) throw new Exception("Invalid data for YAML deserialization");
 
-		//require DISPATCHER_REAL_PATH."/../spyc/Spyc.php";
-		
 		return \Spyc::YAMLLoadString($data);
 
 	}
 
+	/**
+	 * Convert serialized export Array using PHP unserialize
+	 *
+	 * @param 	string 	$data 	Data to convert
+	 *
+	 * @return 	array
+	 */
 	public final function fromEXPORT($data) {
 
 		if ( !is_string($data) ) throw new Exception("Invalid data for EXPORT deserialization");

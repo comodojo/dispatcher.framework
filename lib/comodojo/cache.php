@@ -29,14 +29,30 @@ class cache {
 	
 	/**
 	 * If true, cache methods will not throw exception in case of error.
+	 *
 	 * @var	bool
 	 */
 	private $fail_silently = DISPATCHER_CACHE_FAIL_SILENTLY;
 	
+	/**
+	 * Path for cache files
+	 *
+	 * @var	bool
+	 */
 	private $cache_path = DISPATCHER_CACHE_FOLDER;
 
+	/**
+	 * Current time, as provided by dispatcher
+	 *
+	 * @var	bool
+	 */
 	private $current_time = NULL;
 
+	/**
+	 * Constructor class. It only acquire current time and notify that cache is ready
+	 *
+	 * @param 	string 	$time 	Dispatcher time
+	 */
 	public final function __construct($time=false) {
 
 		$this->current_time = $time !== false ? $time : time();
@@ -48,15 +64,8 @@ class cache {
 	/**
 	 * Set cache.
 	 * 
-	 * Cache requires $data, that could be an array or a string.
-	 * 
-	 * If $data is an array, it will be encoded in JSON (default), XML or JAML, depending on $format parameter.
-	 * If it's a string, it will be cached like plaintext.
-	 *
-	 * @param	string	$data			Data to cache.
-	 * @param	string	$request		The request to associate the cache to.
-	 * @param	string	$format			[optional] Format to encode data to (JSON, XML, YAML). Default JSON.
-	 * @param	bool	$userDependent	[optional] If true, cache access will be limited to logged user.
+	 * @param	string	$request	The GET request
+	 * @param	string	$data		The data to cache
 	 * 
 	 * @return	bool
 	 */
@@ -111,14 +120,10 @@ class cache {
 	/**
 	 * Get cache
 	 * 
-	 * If $format parameter is not false, cache will be decoded according to format specified.
-	 * If it's true, cache will try to decode data from JSON
-	 *
-	 * @param	string	$request		The request to associate the cache to.
-	 * @param	string	$decode			[optional] Decode cache from specified format to array (JSON,XML,YAML); if false, disable decoding (will return the plain text).
-	 * @param	bool	$userDependent	[optional] If true, cache access will be limited to logged user.
+	 * @param	string	$request		The request to retrieve
+	 * @param	string	$ttl			[optional] The cache time-to-live
 	 * 
-	 * @return	array|string|bool		Data cached, in array or plaintext, or false if no cache saved.
+	 * @return	array 	An array containing maxage, bestbefore, object (data)
 	 */
 	public final function get($request, $ttl=DISPATCHER_CACHE_TTL) {
 		

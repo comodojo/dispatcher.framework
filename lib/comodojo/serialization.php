@@ -25,6 +25,16 @@
 
 class serialization {
 
+	/**
+	 * Convert Array to JSON using PHP json_encode func
+	 *
+	 * Second parameters may contain flags passed to encoder
+	 *
+	 * @param 	array 	$data 	Data to convert
+	 * @param 	integer $flags 	Flags for json_encode
+	 *
+	 * @return 	string 	JSON encoded data
+	 */
 	public final function toJSON($data, $flags=NULL) {
 
 		if ( !( is_array($data) OR is_object($data) ) ) throw new Exception("Invalid data for JSON serialization");
@@ -33,26 +43,36 @@ class serialization {
 
 	}
 
-	public final function toXML($data, $prettfy=false) {
+	/**
+	 * Convert Array to XML using comodojo XML class
+	 *
+	 * Second parameters, if true, will try to prettify xml output
+	 *
+	 * @param 	array 	$data 		Data to convert
+	 * @param 	string 	$prettify	HTML || TXT (alias true) || false
+	 *
+	 * @return 	string 	XML encoded data
+	 */
+	public final function toXML($data, $prettify=false) {
 
 		if ( !( is_array($data) OR is_object($data) ) ) throw new Exception("Invalid data for XML serialization");
 
 		if ( is_object($data) ) $data = $this->stdObj2array($data);
-
-		//require "XML.php";
 
 		$xmlEngine = new XML();
 		$xmlEngine->sourceArray = $data;
 
 		$encoded = $xmlEngine->encode();
 
-		switch ($prettfy) {
+		switch ($prettify) {
 			
 			case 'HTML':
+			case 'html':
 				$return = htmlspecialchars($this->xml2txt($encoded), ENT_QUOTES);
 				break;
 
 			case 'TXT':
+			case 'txt':
 			case true:
 				$return = $this->xml2txt($encoded);
 				break;
@@ -66,24 +86,43 @@ class serialization {
 
 	}
 
+	/**
+	 * Convert Array to YAML using Spyc converter
+	 *
+	 * @param 	array 	$data 		Data to convert
+	 *
+	 * @return 	string 	YAML encoded data
+	 */
 	public final function toYAML($data) {
 
 		if ( !( is_array($data) OR is_object($data) ) ) throw new Exception("Invalid data for XML serialization");
 
 		if ( is_object($data) ) $data = $this->stdObj2array($data);
 
-		//require DISPATCHER_REAL_PATH."/../spyc/Spyc.php";
-		
 		return \Spyc::YAMLDump($data);
 
 	}
 
+	/**
+	 * Convert data (almost any kind) to human readable export using var_export
+	 *
+	 * @param 	serial|array|object 	$data 		Data to convert
+	 *
+	 * @return 	string 	exported data
+	 */
 	public final function toDUMP($data) {
 
 		return var_export($data, true);
 
 	}
 
+	/**
+	 * Convert data (almost any kind) to PHP machine readable export using serialize
+	 *
+	 * @param 	serial|array|object 	$data 		Data to convert
+	 *
+	 * @return 	string 	serialized data
+	 */
 	public final function toEXPORT($data) {
 
 		return serialize($data);
@@ -137,10 +176,10 @@ class serialization {
 	}
 
 	/**
-	 * Transform stdObject string into array 
+	 * Transform stdObject into array 
 	 * 
-	 * @param	string/stdObject		$string			The string to decode
-	 * @return	array									The decoded array
+	 * @param	stdObject	$stdObj
+	 * @return	array		The decoded array
 	 */
 	private function stdObj2array($stdObj) {
 	
@@ -157,6 +196,7 @@ class serialization {
 			return $array;
 
 		}
+		
 		else return $stdObj;
 
 	}
