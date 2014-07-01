@@ -1,15 +1,31 @@
 <?php
 
-/** 
- * Plugins manager
+/**
+ * This is the plugin configuration file
  *
- * To add new plugin, simply declare something like:
+ * It should contains method invocations like:
  *
- *  $dispatcher->load("[PLUGIN_NAME]");
+ *  $dispatcher->loadPlugin("[PLUGIN_NAME]", (optional)"[PLUGIN_FOLDER]");
  *
- * @package     Comodojo dispatcher (Spare Parts)
- * @author      comodojo.org
- * @copyright   __COPYRIGHT__ comodojo.org (info@comodojo.org)
- * @version     __CURRENT_VERSION__
+ * WARNING: DO NOT close PHP tag in this file!
+ *
+ * @package 	Comodojo dispatcher (Spare Parts)
+ * @author		comodojo <info@comodojo.org>
+ * @license 	GPL-3.0+
+ *
+ * LICENSE:
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 

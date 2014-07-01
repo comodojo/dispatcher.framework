@@ -39,6 +39,13 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	private $supported_success_codes = Array(200,202,204);
 
+	/**
+	 * Set service name
+	 *
+	 * @param	string	$service	The service name
+	 *
+	 * @return	Object	$this
+	 */
 	public function setService($service) {
 
 		$this->service = $service;
@@ -47,12 +54,24 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * Get service name
+	 *
+	 * @return	string
+	 */
 	public function getService() {
 
 		return $this->service;
 
 	}
 
+	/**
+	 * Set status code
+	 *
+	 * @param	integer	$code
+	 *
+	 * @return	Object	$this
+	 */
 	public function setStatusCode($code) {
 
 		$code = filter_var($code, FILTER_VALIDATE_INT);
@@ -63,12 +82,24 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * Get status code
+	 *
+	 * @return	integer
+	 */
 	public function getStatusCode() {
 
 		return $this->code;
 
 	}
 
+	/**
+	 * Set result content (http body)
+	 *
+	 * @param	string	$message
+	 *
+	 * @return	Object	$this
+	 */
 	public function setContent($message) {
 
 		$this->content = $message;
@@ -77,14 +108,25 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * Get result content
+	 *
+	 * @return	string
+	 */
 	public function getContent() {
 
 		return $this->content;
 
 	}
 
+	/**
+	 * STUB method: no location in success!
+	 */
 	public function setLocation($location) {}
 
+	/**
+	 * STUB method: no location in success!
+	 */
 	public function getLocation() {}
 
 	/**
@@ -178,6 +220,13 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * Set content type
+	 *
+	 * @param	string	$type
+	 *
+	 * @return	Object	$this
+	 */
 	public function setContentType($type) {
 
 		$this->contentType = $type;
@@ -186,12 +235,24 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * Get content type
+	 *
+	 * @return	strinng
+	 */
 	public function getContentType() {
 
 		return $this->contentType;
 
 	}
 
+	/**
+	 * Set charset
+	 *
+	 * @param	string	$type
+	 *
+	 * @return	Object	$this
+	 */
 	public function setCharset($type) {
 
 		$this->charset = $type;
@@ -200,6 +261,11 @@ class ObjectSuccess implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * Get charset 
+	 *
+	 * @return	string
+	 */
 	public function getCharset() {
 
 		return $this->charset;

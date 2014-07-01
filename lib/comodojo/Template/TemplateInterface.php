@@ -25,8 +25,21 @@
 
 interface TemplateInterface {
 
-	public function replace($data, $tag);
+	/**
+	 * This method is intended to be a string replace, using special tags in template
+	 * to be substituted by service content
+	 *
+	 * @param	string	$tag	The tag to replace
+	 * @param	string	$data	The data to inject
+	 */
+	public function replace($tag, $data);
 
+	/**
+	 * This method is intended to be the end method for template, returning back the complete
+	 * content.
+	 *
+	 * @return	string
+	 */
 	public function serialize();
 
 }

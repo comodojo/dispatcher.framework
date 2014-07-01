@@ -3,6 +3,9 @@
 /**
  * The Object request class
  *
+ * This is the class use to model the request and exposed by level2(/3) event(s)
+ * "dispatcher.request(.*)"
+ *
  * @package 	Comodojo dispatcher (Spare Parts)
  * @author		comodojo <info@comodojo.org>
  * @license 	GPL-3.0+
@@ -25,20 +28,62 @@
 
 class ObjectRequest {
 
+	/**
+	 * Current time, as provided by dispatcher
+	 *
+	 * @var	integer
+	 */
 	private $current_time = NULL;
 
+	/**
+	 * Service name (first sub in querystring or "service=" in standard operational mode)
+	 *
+	 * @var	string
+	 */
 	private $service = NULL;
 
+	/**
+	 * The HTTP method (GET,POST,...) 
+	 *
+	 * @var	string
+	 */
 	private $method = NULL;
 
+	/**
+	 * Attributes (querystring) 
+	 *
+	 * @var	array
+	 */
 	private $attributes = Array();
 
+	/**
+	 * Parameters (POST) 
+	 *
+	 * @var	array
+	 */
 	private $parameters = Array();
 
+	/**
+	 * Raw parameters (php://input) 
+	 *
+	 * @var	array
+	 */
 	private $raw_parameters = NULL;
 
+	/**
+	 * Request headers
+	 *
+	 * @var	array
+	 */
 	private $headers = Array();
 
+	/**
+	 * Set current time
+	 *
+	 * @param	integer	$time	
+	 *
+	 * @return	Object	$this
+	 */
 	public function setCurrentTime($time) {
 
 		$this->current_time = $time;
@@ -47,12 +92,24 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Get current time
+	 *
+	 * @return	integer
+	 */
 	public function getCurrentTime() {
 		
 		return $this->current_time;
 
 	}
 
+	/**
+	 * Set service 
+	 *
+	 * @param	strinng	$service	
+	 *
+	 * @return	Object	$this
+	 */
 	public function setService($service) {
 
 		$this->service = is_string($service) ? $service : $this->service;
@@ -61,12 +118,24 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Get service name
+	 *
+	 * @return	string
+	 */
 	public function getService() {
 		
 		return $this->service;
 
 	}
 
+	/**
+	 * Set HTTP method
+	 *
+	 * @param	string	$method
+	 *
+	 * @return	Object	$this
+	 */
 	public function setMethod($method) {
 		
 		$this->method = is_string($method) ? strtoupper($method) : $this->method;
@@ -75,12 +144,25 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Get HTTP method
+	 *
+	 * @return	string	
+	 */
 	public function getMethod() {
 		
 		return $this->method;
 
 	}
 
+	/**
+	 * Set single attribute
+	 *
+	 * @param	string	$name
+	 * @param	scalar	$value
+	 *
+	 * @return	Object	$this
+	 */
 	public function setAttribute($name=NULL, $value) {
 
 		if ( is_null($name) ) array_push($this->attributes, $value);
@@ -91,6 +173,13 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Unset single attribute
+	 *
+	 * @param	string	$attribute
+	 *
+	 * @return	Object	$this
+	 */
 	public function unsetAttribute($attribute) {
 
 		if ( array_key_exists($attribute, $this->attributes) ) {
@@ -105,6 +194,13 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Get single attribute
+	 *
+	 * @param	string	$attribute
+	 *
+	 * @return	scalar|NULL	Attribute value or NULL if not found
+	 */
 	public function getAttribute($attribute) {
 
 		if ( array_key_exists($attribute, $this->attributes) ) {
@@ -117,6 +213,13 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Set attributes (all in one shot)
+	 *
+	 * @param	array	$attributes
+	 *
+	 * @return	Object	$this
+	 */
 	public function setAttributes($attributes) {
 
 		$this->attributes = is_array($attributes) ? $attributes : $this->attributes;
@@ -125,6 +228,11 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Unset attributes
+	 *
+	 * @return	bool
+	 */
 	public function unsetAttributes() {
 
 		$this->attributes = Array();
@@ -133,12 +241,25 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Get attributes
+	 *
+	 * @return	array
+	 */
 	public function getAttributes() {
 
 		return $this->attributes;
 
 	}
 
+	/**
+	 * Set single parameter
+	 *
+	 * @param	string	$name
+	 * @param	scalar	$value
+	 *
+	 * @return	Object	$this
+	 */
 	public function setParameter($name, $value) {
 
 		$this->parameters[$name] = $value;
@@ -147,6 +268,13 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Unset single parameter
+	 *
+	 * @param	string	$parameter
+	 *
+	 * @return	Object	$this
+	 */
 	public function unsetParameter($parameter) {
 
 		if ( array_key_exists($parameter, $this->parameters) ) {
@@ -161,6 +289,13 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Get single parameter
+	 *
+	 * @param	string	$parameter
+	 *
+	 * @return	scalar|NULL	Parameter value or NULL if not found
+	 */
 	public function getParameter($parameter) {
 
 		if ( array_key_exists($parameter, $this->parameters) ) {
@@ -173,6 +308,13 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Set parameters (all in one shot)
+	 *
+	 * @param	array	$parameters
+	 *
+	 * @return	Object	$this
+	 */
 	public function setParameters($parameters) {
 
 		$this->parameters = is_array($parameters) ? $parameters : $this->parameters;
@@ -181,6 +323,11 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Unset parameters
+	 *
+	 * @return	bool
+	 */
 	public function unsetParameters() {
 
 		$this->parameters = Array();
@@ -189,12 +336,22 @@ class ObjectRequest {
 
 	}
 
+	/**
+	 * Get parameters
+	 *
+	 * @return	array
+	 */
 	public function getParameters() {
 
 		return $this->parameters;
 
 	}
 
+	/**
+	 * Set raw parameters
+	 *
+	 * @return	Object	$this
+	 */
 	public function setRawParameters($parameters) {
 
 		$this->raw_parameters = $parameters;
@@ -203,6 +360,11 @@ class ObjectRequest {
 
 	}
 	
+	/**
+	 * Get raw parameters
+	 *
+	 * @return	string
+	 */
 	public function getRawParameters() {
 
 		return $this->raw_parameters;

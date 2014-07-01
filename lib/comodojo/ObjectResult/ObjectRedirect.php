@@ -35,6 +35,13 @@ class ObjectRedirect implements ObjectResultInterface {
 
 	private $headers = Array();
 
+	/**
+	 * Set service name
+	 *
+	 * @param	string	$service	The service name
+	 *
+	 * @return	Object	$this
+	 */
 	public function setService($service) {
 
 		$this->service = $service;
@@ -43,12 +50,24 @@ class ObjectRedirect implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * Get service name
+	 *
+	 * @return	string
+	 */
 	public function getService() {
 
 		return $this->service;
 
 	}
 
+	/**
+	 * Set status code
+	 *
+	 * @param	integer	$code
+	 *
+	 * @return	Object	$this
+	 */
 	public function setStatusCode($code) {
 
 		$code = filter_var($code, FILTER_VALIDATE_INT);
@@ -59,16 +78,34 @@ class ObjectRedirect implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * Get status code
+	 *
+	 * @return	integer
+	 */
 	public function getStatusCode() {
 
 		return $this->code;
 
 	}
 
+	/**
+	 * STUB method: no content in a redirect!
+	 */
 	public function setContent($message) {}
 
+	/**
+	 * STUB method: no content in a redirect!
+	 */
 	public function getContent() {}
 
+	/**
+	 * Set location for REDIRECT
+	 *
+	 * @param	string	$location
+	 *
+	 * @return	Object	$this
+	 */
 	public function setLocation($location) {
 
 		$location = filter_var($location, FILTER_VALIDATE_URL);
@@ -79,6 +116,11 @@ class ObjectRedirect implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * Get location (in redirect)
+	 *
+	 * @return	string
+	 */
 	public function getLocation() {
 
 		return $this->location;
@@ -176,12 +218,24 @@ class ObjectRedirect implements ObjectResultInterface {
 
 	}
 
+	/**
+	 * STUB method: no content type in a redirect!
+	 */
 	public function setContentType($type) {}
 
+	/**
+	 * STUB method: no content type in a redirect!
+	 */
 	public function getContentType() {}
 
+	/**
+	 * STUB method: no charset in a redirect!
+	 */
 	public function setCharset($type) {}
 
+	/**
+	 * STUB method: no charset in a redirect!
+	 */
 	public function getCharset() {}
 
 }

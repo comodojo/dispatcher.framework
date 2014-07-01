@@ -29,6 +29,7 @@ use \comodojo\Exception\IOException;
 use \comodojo\ObjectRequest\ObjectRequest;
 use \comodojo\ObjectRoutingTable\ObjectRoutingTable;
 use \comodojo\ObjectRoute\ObjectRoute;
+use \comodojo\ObjectResult\ObjectResultInterface;
 use \comodojo\ObjectResult\ObjectSuccess;
 use \comodojo\ObjectResult\ObjectError;
 use \comodojo\ObjectResult\ObjectRedirect;
@@ -118,6 +119,50 @@ class dispatcher {
 		debug(' * Requested service: '.$request_service,'INFO','dispatcher');
 		debug(' * Request HTTP method: '.$this->request_method,'INFO','dispatcher');
 		debug('-----------------------------------------------------------','INFO','dispatcher');
+
+	}
+
+	public final function setRoute($service, $type, $target, $parameters=Array(), $relative=true) {
+
+		if ( strtoupper($type) == "ROUTE" ) {
+
+			if ( $relative ) $this->routingtable->setRoute($service, $type, DISPATCHER_SERVICES_FOLDER.$target, $parameters);
+
+			else $this->routingtable->setRoute($service, $type, $target, $parameters);
+
+		}
+
+		else $this->routingtable->setRoute($service, $type, $target, $parameters);
+
+	}
+
+	public final function unsetRoute($service) {
+
+		$this->routingtable->unsetRoute($service);
+
+	}
+
+	public final function addHook($event, $callback, $method=NULL) {
+
+		$this->events->add($event, $callback, $method);
+
+	}
+
+	public final function removeHook($event, $callback=NULL) {
+
+		$this->events->remove($event, $callback);
+
+	}
+
+	public final function loadPlugin($plugin, $folder=DISPATCHER_PLUGINS_FOLDER) {
+
+		include $folder.$plugin.".php";
+
+	}
+
+	public final function getCurrentTime() {
+
+		return $this->current_time;
 
 	}
 
@@ -313,50 +358,6 @@ class dispatcher {
 
 	}
 
-	public final function setRoute($service, $type, $target, $parameters=Array(), $relative=true) {
-
-		if ( strtoupper($type) == "ROUTE" ) {
-
-			if ( $relative ) $this->routingtable->setRoute($service, $type, DISPATCHER_SERVICES_FOLDER.$target, $parameters);
-
-			else $this->routingtable->setRoute($service, $type, $target, $parameters);
-
-		}
-
-		else $this->routingtable->setRoute($service, $type, $target, $parameters);
-
-	}
-
-	public final function unsetRoute($service) {
-
-		$this->routingtable->unsetRoute($service);
-
-	}
-
-	public final function addHook($event, $callback, $method=NULL) {
-
-		$this->events->add($event, $callback, $method);
-
-	}
-
-	public final function removeHook($event, $callback=NULL) {
-
-		$this->events->remove($event, $callback);
-
-	}
-
-	public final function loadPlugin($plugin, $folder=DISPATCHER_PLUGINS_FOLDER) {
-
-		include $folder.$plugin.".php";
-
-	}
-
-	public final function getCurrentTime() {
-
-		return $this->current_time;
-
-	}
-
 	/**
 	 * Url interpreter
 	 *
@@ -429,6 +430,11 @@ class dispatcher {
 
 	}
 
+	/**
+	 * Return current request url
+	 *
+	 * @return uri 	The request uri
+	 */
 	private function url_url() {
 
 		return $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
@@ -436,92 +442,21 @@ class dispatcher {
 	}
 
 	/**
-	 * Route request handling ObjectResult hooks
+	 * Get current working mode
 	 *
-	 * @param 	ObjectResult 	$route 	An implementation of ObjectResultInterface
-	 * @return 	string 					Content (stuff that will go on screen)
+	 * @return	string	"REWRITE" or "STANDARD"
 	 */
-	private function route(\comodojo\ObjectResult\ObjectResultInterface $route) {
-
-		// Starting from the routing instance, select the relative level2 hook
-		// This means event engine will fire a dispatcher.[routetype] event
-		// In case of wrong instance, create an ObjectError (500, NULL) instance
-
-		if ( $route instanceof ObjectSuccess ) $hook = "dispatcher.route";
-		else if ( $route instanceof ObjectError ) $hook = "dispatcher.error";
-		else if ( $route instanceof ObjectRedirect ) $hook = "dispatcher.redirect";
-		else {
-
-			$route = new ObjectError();
-
-		}
-
-		// Fire first hook, a generic "dispatcher.result", Object Type independent
-
-		$fork = $this->events->fire("dispatcher.result", "RESULT", $route);
-
-		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
-
-		// Fire second hook (level2), as specified above
-
-		$fork = $this->events->fire($hook, "RESULT", $route);
-
-		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
-
-		// Now select and fire last hook (level3)
-		// This means that event engine will fire something like "dispatcher.route.200"
-		// or "dispatcher.error.500"
-
-		$fork = $this->events->fire($hook.".".$route->getStatusCode(), "RESULT", $route);
-
-		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;		
-
-		// After hooks:
-		// - store cache
-		// - start composing header
-		// - return result
-
-		$cache = $this->serviceroute->getCache();
-
-		if ( $this->request_method == "GET" AND 
-			( $cache == "SERVER" OR $cache == "BOTH" ) AND
-			$this->result_comes_from_cache == false AND 
-			$fork instanceof \comodojo\ObjectResult\ObjectSuccess )
-		{
-
-			$this->cacher->set($this->service_url, $route);
-
-		}
-
-
-		$this->header->free();
-
-		if ( $cache == "CLIENT" OR $cache == "BOTH" ) $this->header->setClientCache($this->serviceroute->getTtl());
-
-		$this->header->setContentType($route->getContentType(), $route->getCharset());
-
-		foreach ($route->getHeaders() as $header => $value) {
-			
-			$this->header->set($header, $value);
-
-		}
-
-		$message = $route->getContent();
-
-		$this->header->compose($route->getStatusCode(), strlen($message), $route->getLocation()); # ><!/\!°>
-
-		// Return the content (stuff that will go on screen)
-
-		return $message;
-
-	}
-
 	private function get_working_mode() {
 
 		return DISPATCHER_USE_REWRITE ? "REWRITE" : "STANDARD";
 
 	}
 
+	/**
+	 * Retrieve parameters from input
+	 *
+	 * @return	array
+	 */
 	private function deserialize_parameters($method) {
 
 		$parameters = Array();
@@ -617,7 +552,7 @@ class dispatcher {
 
 	}
 
-	private function run_service($request, $route) {
+	private function run_service(ObjectRequest $request, ObjectRoute $route) {
 
 		$method = $request->getMethod();
 		$service = $route->getService();
@@ -730,7 +665,8 @@ class dispatcher {
 			$return->setService($service)
 				->setStatusCode($theservice->getStatusCode())
 				->setContent($result)
-				->setHeaders($theservice->getHeaders())
+				//->setHeaders($theservice->getHeaders())
+				->setHeaders( array_merge($theservice->getHeaders(), $route->getHeaders()) )
 				->setContentType($theservice->getContentType())
 				->setCharset($theservice->getCharset());
 			
@@ -745,6 +681,87 @@ class dispatcher {
 		}
 
 		return $return;
+
+	}
+
+	/**
+	 * Route request handling ObjectResult hooks
+	 *
+	 * @param 	ObjectResult 	$route 	An implementation of ObjectResultInterface
+	 * @return 	string 					Content (stuff that will go on screen)
+	 */
+	private function route(ObjectResultInterface $route) {
+
+		// Starting from the routing instance, select the relative level2 hook
+		// This means event engine will fire a dispatcher.[routetype] event
+		// In case of wrong instance, create an ObjectError (500, NULL) instance
+
+		if ( $route instanceof ObjectSuccess ) $hook = "dispatcher.route";
+		else if ( $route instanceof ObjectError ) $hook = "dispatcher.error";
+		else if ( $route instanceof ObjectRedirect ) $hook = "dispatcher.redirect";
+		else {
+
+			$route = new ObjectError();
+
+		}
+
+		// Fire first hook, a generic "dispatcher.result", Object Type independent
+
+		$fork = $this->events->fire("dispatcher.result", "RESULT", $route);
+
+		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
+
+		// Fire second hook (level2), as specified above
+
+		$fork = $this->events->fire($hook, "RESULT", $route);
+
+		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
+
+		// Now select and fire last hook (level3)
+		// This means that event engine will fire something like "dispatcher.route.200"
+		// or "dispatcher.error.500"
+
+		$fork = $this->events->fire($hook.".".$route->getStatusCode(), "RESULT", $route);
+
+		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;		
+
+		// After hooks:
+		// - store cache
+		// - start composing header
+		// - return result
+
+		$cache = $this->serviceroute->getCache();
+
+		if ( $this->request_method == "GET" AND 
+			( $cache == "SERVER" OR $cache == "BOTH" ) AND
+			$this->result_comes_from_cache == false AND 
+			$fork instanceof \comodojo\ObjectResult\ObjectSuccess )
+		{
+
+			$this->cacher->set($this->service_url, $route);
+
+		}
+
+
+		$this->header->free();
+
+		if ( $cache == "CLIENT" OR $cache == "BOTH" ) $this->header->setClientCache($this->serviceroute->getTtl());
+
+		$this->header->setContentType($route->getContentType(), $route->getCharset());
+
+		foreach ($route->getHeaders() as $header => $value) {
+			
+			$this->header->set($header, $value);
+
+		}
+
+		$message = $route->getContent();
+
+		$this->header->compose($route->getStatusCode(), strlen($message), $route->getLocation()); # ><!/\!°>
+
+		// Return the content (stuff that will go on screen)
+
+		return $message;
 
 	}
 

@@ -49,7 +49,7 @@ class cache {
 	private $current_time = NULL;
 
 	/**
-	 * Constructor class. It only acquire current time and notify that cache is ready
+	 * Constructor method. It only acquire current time and notify that cache is ready
 	 *
 	 * @param 	string 	$time 	Dispatcher time
 	 */
