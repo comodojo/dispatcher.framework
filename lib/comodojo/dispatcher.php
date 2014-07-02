@@ -36,32 +36,111 @@ use \comodojo\ObjectResult\ObjectRedirect;
 
 class dispatcher {
 
+	// ###### Parameters ###### //
+
+	/**
+	 * Is dispatcher enabled?
+	 *
+	 * @var bool
+	 */
 	private $enabled = DISPATCHER_ENABLED;
 
+	/**
+	 * Time at the time of request
+	 *
+	 * @var integer
+	 */
 	private $current_time = NULL;
 
+	/**
+	 * Working mode (rewrite/standard)
+	 *
+	 * @var string
+	 */
 	private $working_mode = 'STANDARD';
 
+	/**
+	 * Service URI
+	 *
+	 * @var string
+	 */
 	private $service_uri = NULL;
 
+	/**
+	 * Service URL
+	 *
+	 * @var string
+	 */
 	private $service_url = NULL;
 
+	/**
+	 * Request method (HTTP)
+	 *
+	 * @var string
+	 */
 	private $request_method = NULL;
 
-	private $routingtable = NULL;
-
-	private $request = NULL;
-
-	private $serviceroute = NULL;
-
-	private $cacher = NULL;
-
-	private $header = NULL;
-
-	private $events = NULL;
-
+	/**
+	 * Cache switcher: if true, cacher will not re-cache current response
+	 *
+	 * @var bool
+	 */
 	private $result_comes_from_cache = false;
 
+	// ###### Objects ###### //
+
+	/**
+	 * Container for ObjectRequest
+	 *
+	 * @var Object|NULL
+	 */
+	private $request = NULL;
+
+	/**
+	 * Container for ObjectRoutingTable
+	 *
+	 * @var Object|NULL
+	 */
+	private $routingtable = NULL;
+
+	/**
+	 * Container for ObjectRoute
+	 *
+	 * @var Object|NULL
+	 */
+	private $serviceroute = NULL;
+
+	// ###### Helpers ###### //
+
+	/**
+	 * Do server-side caching
+	 *
+	 * @var Object|NULL
+	 */
+	private $cacher = NULL;
+
+	/**
+	 * Do headers manipulations
+	 *
+	 * @var Object|NULL
+	 */
+	private $header = NULL;
+
+	/**
+	 * Dispatch events
+	 *
+	 * @var Object|NULL
+	 */
+	private $events = NULL;
+
+	
+	/**
+	 * Constructor method
+	 *
+	 * It reads request and transforms it in a modeled ObjectRequest.
+	 *
+	 * @return null
+	 */
 	public final function __construct() {
 
 		ob_start();
@@ -122,35 +201,100 @@ class dispatcher {
 
 	}
 
+	/**
+	 * Set punctual service route
+	 *
+	 * @param	string	$service	Service name (src)
+	 * @param	string	$type		Route type (ROUTE, REDIRECT or ERROR)
+	 * @param	string	$target		Service target (dst)
+	 * @param	array	$parameters	(optional) Service options (cache, ...)
+	 * @param	bool	$relative	(optional) If true, target will be assumed in default service directory
+	 */
 	public final function setRoute($service, $type, $target, $parameters=Array(), $relative=true) {
 
-		if ( strtoupper($type) == "ROUTE" ) {
+		try {
+			
+			if ( strtoupper($type) == "ROUTE" ) {
 
-			if ( $relative ) $this->routingtable->setRoute($service, $type, DISPATCHER_SERVICES_FOLDER.$target, $parameters);
+				if ( $relative ) $this->routingtable->setRoute($service, $type, DISPATCHER_SERVICES_FOLDER.$target, $parameters);
+
+				else $this->routingtable->setRoute($service, $type, $target, $parameters);
+
+			}
 
 			else $this->routingtable->setRoute($service, $type, $target, $parameters);
 
+		} catch (Exception $e) {
+			
+			//debug error but do not stop dispatcher
+			debug(' :( - Unable to set route for service $service','ERROR','dispatcher');
+
 		}
 
-		else $this->routingtable->setRoute($service, $type, $target, $parameters);
-
 	}
 
+	/**
+	 * Unset punctual service route
+	 *
+	 * @param	string	$service	Service name (src)
+	 *
+	 * @return null
+	 */
 	public final function unsetRoute($service) {
 
-		$this->routingtable->unsetRoute($service);
+		try {
+			
+			$this->routingtable->unsetRoute($service);
+
+		} catch (Exception $e) {
+		
+			//debug error but do not stop dispatcher
+			debug(' :( - Unable to unset route for service $service','ERROR','dispatcher');
+
+		}
 
 	}
 
+	/**
+	 * Add hook for an event
+	 *
+	 * @param	string	$event		The event name
+	 * @param	string	$callback	The callback (or class if $method is specified)
+	 * @param	string	$method		(optional) Method for $callback
+	 */
 	public final function addHook($event, $callback, $method=NULL) {
 
-		$this->events->add($event, $callback, $method);
+		try {
+			
+			$this->events->add($event, $callback, $method);
+
+		} catch (Exception $e) {
+			
+			//debug error but do not stop dispatcher
+			debug(' :( - Unable to add hook $callback::$method for event $event','ERROR','dispatcher');
+
+		}
 
 	}
 
+	/**
+	 * Remove an hook
+	 *
+	 * @param	string	$event		The event name
+	 * @param	string	$callback	The callback (or class if $method is specified)
+	 */
 	public final function removeHook($event, $callback=NULL) {
 
-		$this->events->remove($event, $callback);
+		try {
+		
+			$this->events->remove($event, $callback);
+
+		} catch (Exception $e) {
+			
+			//debug error but do not stop dispatcher
+			debug(' :( - Unable to remove hook $callback for event $event','ERROR','dispatcher');
+
+		}
 
 	}
 
