@@ -1,7 +1,7 @@
 <?php namespace DispatcherInstaller;
 
 /**
- * Dispatcher installer - a simple class to manage plugin installations
+ * Dispatcher installer - a simple class (static methods) to manage plugin installations
  *
  * It currently support:
  * - dispatcher-plugin - generic plugins such as tracer, database, ...
@@ -31,11 +31,11 @@ use Composer\Script\Event;
 
 class DispatcherInstallerActions {
 
-	private static $services_folder = 'services';
-
-	private static $plugins_folder = 'plugins';
+	private static $vendor = 'vendor/';
 
 	private static $plugins_cfg = 'configs/plugins-config.php';
+
+	private static $routing_cfg = 'configs/routing-config.php';
 
 	public static function postPackageInstall(Event $event) {
 
@@ -45,45 +45,34 @@ class DispatcherInstallerActions {
 
 		$extra = $event->getOperation()->getPackage()->getExtra();
 
-		if ( $type == "dispatcher-plugin" ) {
+		$plugins_loaders = isset($extra["comodojo-plugin-load"]) ? $extra["comodojo-load"] : Array();
 
-			$loaders = isset($extra["comodojo-plugin-load"]) ? $extra["comodojo-load"] : Array();
+		$services_loaders = isset($extra["comodojo-service-route"]) ? $extra["comodojo-services-route"] : Array();
 
-			try {
+		// $folders_to_create = isset($extra["comodojo-folders-create"]) ? $extra["comodojo-folders-create"] : Array();
+
+		// $files_to_create = isset($extra["comodojo-files-create"]) ? $extra["comodojo-files-create"] : Array();
+
+		try {
 			
-				self::loadPlugin($name, $loaders);
+			if ( $type == "dispatcher-plugin" ) self::loadPlugin($name, $plugins_loaders);
 
-			} catch (Exception $e) {
-				
-				throw $e;
-				
-			}
+			if ( $type == "dispatcher-service-bundle" ) self::loadServices($name, $services_loaders);
 
-			echo "Plugin added in plugin-config\n";
+			// self::create_folders($folders_to_create);
 
-		}
-		elseif ( $type == "dispatcher-service-bundle" ) {
+			// self::create_files($files_to_create);
 
-			$loaders = isset($extra["comodojo-service-route"]) ? $extra["comodojo-services-route"] : Array();
 
-			try {
+		} catch (Exception $e) {
 			
-				self::loadServices($name, $loaders);
-
-			} catch (Exception $e) {
-				
-				throw $e;
-				
-			}
-
-			echo "Service added in plugin-config\n";
-
-		}
-		else {
-			echo "DispatcherInstaller has nothing to do\n";
+			throw $e;
+			
 		}
 
-    }
+		echo "DispatcherInstaller install tasks completed\n";
+
+	}
 
 	public static function postPackageUninstall(Event $event) {
 
@@ -91,39 +80,30 @@ class DispatcherInstallerActions {
 
 		$name = $event->getOperation()->getPackage()->getName();
 
-		if ( $type == "dispatcher-plugin" ) {
+		$extra = $event->getOperation()->getPackage()->getExtra();
 
-			try {
+		// $folders_to_delete = isset($extra["comodojo-folders-create"]) ? $extra["comodojo-folders-create"] : Array();
+
+		// $files_to_delete = isset($extra["comodojo-files-create"]) ? $extra["comodojo-files-create"] : Array();
+
+		try {
 			
-				self::unloadPlugin($name);
+			if ( $type == "dispatcher-plugin" ) self::unloadPlugin($name, $plugins_loaders);
 
-			} catch (Exception $e) {
-				
-				throw $e;
-				
-			}
+			if ( $type == "dispatcher-service-bundle" ) self::unloadServices($name, $services_loaders);
 
-			echo "Plugin removed from plugins-config\n";
+			// self::delete_folders($folders_to_create);
 
-		}
-		elseif ( $type == "dispatcher-services-bundle" ) {
+			// self::delete_files($files_to_create);
 
-			try {
+
+		} catch (Exception $e) {
 			
-				self::unloadService($name);
-
-			} catch (Exception $e) {
-				
-				throw $e;
-				
-			}
-
-			echo "Service removed from plugins-config\n";
-
+			throw $e;
+			
 		}
-		else {
-			echo "DispatcherInstaller has nothing to do\n";
-		}
+
+		echo "DispatcherInstaller uninstall tasks completed\n";
 
 	}
 
@@ -131,26 +111,22 @@ class DispatcherInstallerActions {
 
 		$line_mark = "/****** PLUGIN - ".$package_name." - PLUGIN ******/";
 
-		list($vendor,$name) = explode("/", $package_name);
+		list($author,$name) = explode("/", $package_name);
 
-		$root_path = "vendor/";
-
-		$vendor_path = $root_path.$vendor."/";
-
-		$plugin_path = $vendor_path.$name."/";
+		$plugin_path = self::$vendor.$author."/".$name."/";
 
 		if ( is_array($package_loader) ) {
 
 			$line_load = "";
 
-			foreach ($package_loader as $loader) $line_load .= '$dispatcher->loadPlugin("'.$plugin_path.$line_load.'");';
+			foreach ($package_loader as $loader) $line_load .= '$dispatcher->loadPlugin("$package_loader", "$plugin_path");'."\n";
 
 		}
 		else {
-			$line_load = '$dispatcher->load("' . $package_loader . '", "' . $plugin_path . '");';
+			$line_load = '$dispatcher->loadPlugin("$package_loader", "$plugin_path");'."\n";
 		}
 		
-		$to_append = "\n\n".$line_mark."\n".$line_load."\n".$line_mark;
+		$to_append = "\n\n".$line_mark."\n".$line_load.$line_mark;
 
 		$action = file_put_contents(self::$plugins_cfg, $to_append, FILE_APPEND | LOCK_EX);
 
@@ -187,7 +163,7 @@ class DispatcherInstallerActions {
 
 		$action = file_put_contents(self::$plugins_cfg, implode("\n", array_values($cfg)), LOCK_EX);
 
-		if ( $action === false ) throw new Exception("Cannot activate plugin");
+		if ( $action === false ) throw new Exception("Cannot deactivate plugin");
 
 	}
 
@@ -195,34 +171,72 @@ class DispatcherInstallerActions {
 
 		$line_mark = "/****** SERVICE - ".$package_name." - SERVICE ******/";
 
-		list($vendor,$name) = explode("/", $package_name);
+		$line_load = "";
 
-		$root_path = "vendor/";
+		list($author,$name) = explode("/", $package_name);
 
-		$vendor_path = $root_path.$vendor."/";
-
-		$plugin_path = $vendor_path.$name."/";
+		$service_path = self::$vendor.$author."/".$name."/";
 
 		if ( is_array($package_loader) ) {
 
-			$line_load = "";
+			foreach ($package_loader as $service) {
 
-			foreach ($package_loader as $loader) $line_load .= '$dispatcher->setRoute("'.$plugin_path.$line_load.'");';
+				if ( !isset($service["service"]) OR !isset($service["type"]) OR !isset($service["target"]) ) throw new Exception("Wrong service route");
+
+				$service = $service["service"];
+				$type = $service["type"];
+				$target = service_path.$service["target"];
+
+				if ( isset($service["parameters"]) AND @is_array($service["parameters"]) ) {
+					$line_load .= '$dispatcher->setRoute("$service", "$type", "$target", ' . var_export($service["parameters"], true) . ', false);'."\n";
+				}
+				else {
+					$line_load .= '$dispatcher->setRoute("$service", "$type", "$target", Array(), false);'."\n";
+				}
+
+			}
 
 		}
-		else {
-			$line_load = '$dispatcher->load("' . $package_loader . '", "' . $plugin_path . '");';
-		}
+		else throw new Exception("Wrong service loader");
 		
-		$to_append = "\n\n".$line_mark."\n".$line_load."\n".$line_mark;
+		$to_append = "\n\n".$line_mark."\n".$line_load.$line_mark;
 
-		$action = file_put_contents(self::$plugins_cfg, $to_append, FILE_APPEND | LOCK_EX);
+		$action = file_put_contents(self::$routing_cfg, $to_append, FILE_APPEND | LOCK_EX);
 
-		if ( $action === false ) throw new Exception("Cannot activate plugin");
+		if ( $action === false ) throw new Exception("Cannot activate service route");
 
 	}
 
-	public static function unloadService() {
+	public static function unloadService(package_name) {
+
+		$line_mark = "/****** SERVICE - ".$package_name." - SERVICE ******/";
+
+		$cfg = file(self::$routing_cfg, FILE_IGNORE_NEW_LINES);
+
+		$found = false;
+
+		foreach ($cfg as $position => $line) {
+			
+			if ( stristr($line, $line_mark) ) {
+
+				unset($cfg[$position]);
+
+				$found = !$found;
+
+			}
+
+			else {
+
+				if ( $found ) unset($cfg[$position]);
+				else continue;
+
+			}
+
+		}
+
+		$action = file_put_contents(self::$routing_cfg, implode("\n", array_values($cfg)), LOCK_EX);
+
+		if ( $action === false ) throw new Exception("Cannot deactivate route");
 
 	}
 
