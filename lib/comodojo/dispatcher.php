@@ -338,6 +338,10 @@ class dispatcher {
 
 		if ( $fork instanceof \comodojo\ObjectRequest\ObjectRequest ) $this->request = $fork;
 
+		// Fire special event, it will not modify request
+
+		$this->events->fire("dispatcher.request.#", "VOID", $this->request);
+
 		// Check if dispatcher is enabled
 
 		if ( $this->enabled === false ) {
@@ -422,6 +426,10 @@ class dispatcher {
 		$fork = $this->events->fire("dispatcher.serviceroute.".$this->serviceroute->getService(), "ROUTE", $this->serviceroute);
 
 		if ( $fork instanceof \comodojo\ObjectRoute\ObjectRoute ) $this->serviceroute = $fork;
+
+		// Fire special event, it will not modify route
+
+		$this->events->fire("dispatcher.serviceroute.#", "VOID", $this->serviceroute);
 
 		// Before using route to handle request, check if access control should block instance
 
@@ -868,6 +876,10 @@ class dispatcher {
 		$fork = $this->events->fire($hook.".".$route->getStatusCode(), "RESULT", $route);
 
 		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;		
+
+		// Fire special event, it will not modify result
+
+		$this->events->fire("dispatcher.result.#", "VOID", $route);
 
 		// After hooks:
 		// - store cache

@@ -28,7 +28,7 @@
 /**
  * Enable debug globally
  */
-define('COMODOJO_GLOBAL_DEBUG_ENABLED', true);
+define('COMODOJO_GLOBAL_DEBUG_ENABLED', false);
 
 /**
  * Debug log file (NULL will log to error_log)

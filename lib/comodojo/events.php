@@ -13,24 +13,34 @@
  * There is only one level 1 event, the "dispatcher". It can be used, for example,
  * to close dispatcher for a particular kind of request.
  *
- * Level 2 events are stage-dependent. A complete, time based, list could be:
- * << something was requested
- *   -> "dispatcher.request" - exposing request
- * << an instance of routingtable was initiated
- *   -> "dispatcher.routingtable" - exposing routingtable
- * << routing table called to find a route
- *   -> "dispatcher.serviceroute" - exposing serive route
- * << service runs and return a result >>
- *   -> "dispatcher.result" - exposing result
- * << result acquired, now returning
- *   -> "dispatcher.route" || "dispatcher.redirect" || "dispatcher.error"
- * 
- * Level 3 events are more specialized, like:
- * - "dispatcher.request.GET" for the request method
- * - "dispatcher.route.200" for the status code returned
+ * Level 2/3 events are stage-dependent. A complete, time based, list could be:
  *
- * For a complete list of events, please refer to official documentation available
- * at [link]
+ * << dispatcher receive a request, so starts modelling it in ObjectRequest
+ *
+ * -->> "dispatcher.request"
+ * ---->> "dispatcher.request.[METHOD]"
+ * ---->> "dispatcher.request.[SERVICE]"
+ * -->> "dispatcher.request.#" (special event, for tracing or timing funcs; fires after every other callback and cannot modify request)
+ *
+ * >< an instance of routingtable was initiated
+ *
+ * -->> "dispatcher.routingtable" - exposing routingtable
+ *
+ * >< ask routing table for a route
+ *
+ * -->> "dispatcher.serviceroute" - exposing serive route
+ * ---->> "dispatcher.serviceroute.[TYPE]"
+ * ---->> "dispatcher.serviceroute.[SERVICE]"
+ * -->> "dispatcher.serviceroute.#" (special event, for tracing or timing funcs; fires after every other callback and cannot modify route)
+ *
+ * >< service runs and return a result || route is a REDIRECT || route is a ERROR
+ *
+ * -->> "dispatcher.result" - exposing result
+ * -->> "dispatcher.route|redirect|error"
+ * ---->> "dispatcher.route|redirect|error.[STATUSCODE]"
+ * -->> "dispatcher.result.#" (special event, for tracing or timing funcs; fires after every other callback and cannot modify result)
+ *
+ * >> result to requestor
  *
  * @package 	Comodojo dispatcher (Spare Parts)
  * @author		comodojo <info@comodojo.org>
@@ -271,6 +281,7 @@ class events {
 
 						break;
 					
+					case 'VOID':
 					default:
 						
 						$value = $value;

@@ -28,6 +28,7 @@
  */
 
 use Composer\Script\Event;
+use \Exception;
 
 class DispatcherInstallerActions {
 
@@ -37,6 +38,10 @@ class DispatcherInstallerActions {
 
 	private static $routing_cfg = 'configs/routing-config.php';
 
+	private static $reserved_folders = Array('DispatcherInstaller','cache','configs','lib','plugins','services','templates','vendor');
+
+	private static $mask = 0644;
+
 	public static function postPackageInstall(Event $event) {
 
 		$type = $event->getOperation()->getPackage()->getType();
@@ -45,24 +50,19 @@ class DispatcherInstallerActions {
 
 		$extra = $event->getOperation()->getPackage()->getExtra();
 
-		$plugins_loaders = isset($extra["comodojo-plugin-load"]) ? $extra["comodojo-load"] : Array();
+		$plugin_loaders = isset($extra["comodojo-plugin-load"]) ? $extra["comodojo-plugin-load"] : Array();
 
-		$services_loaders = isset($extra["comodojo-service-route"]) ? $extra["comodojo-services-route"] : Array();
+		$service_loaders = isset($extra["comodojo-service-route"]) ? $extra["comodojo-service-route"] : Array();
 
-		// $folders_to_create = isset($extra["comodojo-folders-create"]) ? $extra["comodojo-folders-create"] : Array();
-
-		// $files_to_create = isset($extra["comodojo-files-create"]) ? $extra["comodojo-files-create"] : Array();
+		$folders_to_create = isset($extra["comodojo-folders-create"]) ? $extra["comodojo-folders-create"] : Array();
 
 		try {
 			
-			if ( $type == "dispatcher-plugin" ) self::loadPlugin($name, $plugins_loaders);
+			if ( $type == "dispatcher-plugin" ) self::loadPlugin($name, $plugin_loaders);
 
-			if ( $type == "dispatcher-service-bundle" ) self::loadServices($name, $services_loaders);
+			if ( $type == "dispatcher-service-bundle" ) self::loadService($name, $service_loaders);
 
-			// self::create_folders($folders_to_create);
-
-			// self::create_files($files_to_create);
-
+			self::create_folders($folders_to_create);
 
 		} catch (Exception $e) {
 			
@@ -82,20 +82,15 @@ class DispatcherInstallerActions {
 
 		$extra = $event->getOperation()->getPackage()->getExtra();
 
-		// $folders_to_delete = isset($extra["comodojo-folders-create"]) ? $extra["comodojo-folders-create"] : Array();
-
-		// $files_to_delete = isset($extra["comodojo-files-create"]) ? $extra["comodojo-files-create"] : Array();
+		$folders_to_delete = isset($extra["comodojo-folders-create"]) ? $extra["comodojo-folders-create"] : Array();
 
 		try {
 			
-			if ( $type == "dispatcher-plugin" ) self::unloadPlugin($name, $plugins_loaders);
+			if ( $type == "dispatcher-plugin" ) self::unloadPlugin($name);
 
-			if ( $type == "dispatcher-service-bundle" ) self::unloadServices($name, $services_loaders);
+			if ( $type == "dispatcher-service-bundle" ) self::unloadService($name);
 
-			// self::delete_folders($folders_to_create);
-
-			// self::delete_files($files_to_create);
-
+			self::delete_folders($folders_to_create);
 
 		} catch (Exception $e) {
 			
@@ -107,7 +102,7 @@ class DispatcherInstallerActions {
 
 	}
 
-	public static function loadPlugin($package_name, $package_loader) {
+	private static function loadPlugin($package_name, $package_loader) {
 
 		$line_mark = "/****** PLUGIN - ".$package_name." - PLUGIN ******/";
 
@@ -126,7 +121,7 @@ class DispatcherInstallerActions {
 			$line_load = '$dispatcher->loadPlugin("$package_loader", "$plugin_path");'."\n";
 		}
 		
-		$to_append = "\n\n".$line_mark."\n".$line_load.$line_mark;
+		$to_append = "\n".$line_mark."\n".$line_load.$line_mark."\n";
 
 		$action = file_put_contents(self::$plugins_cfg, $to_append, FILE_APPEND | LOCK_EX);
 
@@ -134,7 +129,7 @@ class DispatcherInstallerActions {
 
 	}
 
-	public static function unloadPlugin($package_name) {
+	private static function unloadPlugin($package_name) {
 
 		$line_mark = "/****** PLUGIN - ".$package_name." - PLUGIN ******/";
 
@@ -167,7 +162,7 @@ class DispatcherInstallerActions {
 
 	}
 
-	public static function loadService($package_name, $package_loader) {
+	private static function loadService($package_name, $package_loader) {
 
 		$line_mark = "/****** SERVICE - ".$package_name." - SERVICE ******/";
 
@@ -179,19 +174,19 @@ class DispatcherInstallerActions {
 
 		if ( is_array($package_loader) ) {
 
-			foreach ($package_loader as $service) {
+			foreach ($package_loader as $pload) {
 
-				if ( !isset($service["service"]) OR !isset($service["type"]) OR !isset($service["target"]) ) throw new Exception("Wrong service route");
+				if ( !array_key_exists("service",$pload) OR !array_key_exists("type",$pload) OR !array_key_exists("target",$pload) ) throw new Exception("Wrong service route");
 
-				$service = $service["service"];
-				$type = $service["type"];
-				$target = service_path.$service["target"];
+				$service = $pload["service"];
+				$type = $pload["type"];
+				$target = $service_path.$pload["target"];
 
-				if ( isset($service["parameters"]) AND @is_array($service["parameters"]) ) {
-					$line_load .= '$dispatcher->setRoute("$service", "$type", "$target", ' . var_export($service["parameters"], true) . ', false);'."\n";
+				if ( isset($pload["parameters"]) AND @is_array($pload["parameters"]) ) {
+					$line_load .= '$dispatcher->setRoute("'.$service.'", "'.$type.'", "'.$target.'", ' . var_export($pload["parameters"], true) . ', false);'."\n";
 				}
 				else {
-					$line_load .= '$dispatcher->setRoute("$service", "$type", "$target", Array(), false);'."\n";
+					$line_load .= '$dispatcher->setRoute("'.$service.'", "'.$type.'", "'.$target.'", Array(), false);'."\n";
 				}
 
 			}
@@ -199,7 +194,7 @@ class DispatcherInstallerActions {
 		}
 		else throw new Exception("Wrong service loader");
 		
-		$to_append = "\n\n".$line_mark."\n".$line_load.$line_mark;
+		$to_append = "\n".$line_mark."\n".$line_load.$line_mark."\n";
 
 		$action = file_put_contents(self::$routing_cfg, $to_append, FILE_APPEND | LOCK_EX);
 
@@ -207,7 +202,7 @@ class DispatcherInstallerActions {
 
 	}
 
-	public static function unloadService(package_name) {
+	private static function unloadService($package_name) {
 
 		$line_mark = "/****** SERVICE - ".$package_name." - SERVICE ******/";
 
@@ -237,6 +232,101 @@ class DispatcherInstallerActions {
 		$action = file_put_contents(self::$routing_cfg, implode("\n", array_values($cfg)), LOCK_EX);
 
 		if ( $action === false ) throw new Exception("Cannot deactivate route");
+
+	}
+
+	private static function create_folders($folders) {
+
+		if ( is_array($folders) ) {
+
+			foreach ($folders as $folder) {
+				
+				if ( in_array($folder, self::$reserved_folders) ) throw new Exception("Cannot overwrite reserved folder!");
+
+				$action = mkdir($folder, self::$mask, true);
+
+				if ( $action === false ) throw new Exception("Error creating folder ".$folder);
+
+			}
+
+		}
+
+		else {
+
+			if ( in_array($folders, self::$reserved_folders) ) throw new Exception("Cannot overwrite reserved folder!");
+
+			$action = mkdir($folders, self::$mask, true);
+
+			if ( $action === false ) throw new Exception("Error creating folder ".$folders);
+
+		}
+
+	}
+
+	private static function delete_folders($folders) {
+		
+		if ( is_array($folders) ) {
+
+			foreach ($folders as $folder) {
+				
+				if ( in_array($folder, self::$reserved_folders) ) throw new Exception("Cannot delete reserved folder!");
+
+				try {
+
+					self::recursive_unlink($folder);
+					
+				} catch (Exception $e) {
+					
+					throw $e;
+
+				}
+
+			}
+
+		}
+
+		else {
+
+			if ( in_array($folders, self::$reserved_folders) ) throw new Exception("Cannot overwrite reserved folder!");
+
+			try {
+
+				self::recursive_unlink($folders);
+				
+			} catch (Exception $e) {
+				
+				throw $e;
+
+			}
+
+		}
+
+	}
+
+	private static function recursive_unlink($folder) {
+
+		foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $path) {
+			
+			$pathname = $path->getPathname();
+
+			if ( $path->isDir() ) {
+
+				$action = rmdir($pathname)
+
+			} 
+			else {
+
+				$action = unlink($pathname);
+
+			}
+
+			if ( $action === false ) throw new Exception("Error deleting ".$pathname." during recursive unlink of folder ".$folder);
+
+		}
+
+		$action = rmdir($folder);
+
+		if ( $action === false ) throw new Exception("Error deleting folder ".$folder);
 
 	}
 
