@@ -184,6 +184,12 @@ class dispatcher {
 
 		$request_headers = $this->header->get_request_headers();
 
+		// Before composing the object request, remember to define the current (absolute) dispatcher baseurl
+		// (if not specified in dispatcher-config)
+		if ( !defined("DISPATCHER_BASEURL") ) define("DISPATCHER_BASEURL",$this->url_absolute($request_service));
+
+		// Now let's compose request object
+
 		$this->request = new ObjectRequest();
 
 		$this->request
@@ -590,6 +596,29 @@ class dispatcher {
 	private function url_url() {
 
 		return $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+
+	}
+
+	/**
+	 * Return dispatcher baseurl, no matter the request
+	 *
+	 * @return uri 	The baseurl
+	 */
+	private function url_absolute($service=NULL) {
+
+		$http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
+
+		if ( is_null($service) ) $uri = "";
+
+		else {
+
+			$self = $_SERVER['PHP_SELF'];
+
+			$uri = preg_replace("/\/index.php(.*?)$/i","",$self);
+
+		}
+
+		return ( $http . $_SERVER['HTTP_HOST'] . $uri . "/" );
 
 	}
 

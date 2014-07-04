@@ -41,6 +41,9 @@
         ],
         "post-package-uninstall": [
             "DispatcherInstaller\\DispatcherInstallerActions::postPackageUninstall"
+        ],
+        "post-package-update": [
+            "DispatcherInstaller\\DispatcherInstallerActions::postPackageUpdate"
         ]
     },
     "minimum-stability": "stable",

@@ -50,6 +50,65 @@ class DispatcherInstallerActions {
 
 		$extra = $event->getOperation()->getPackage()->getExtra();
 
+		try {
+			
+			self::packageInstall($type, $name, $extra);
+
+		} catch (Exception $e) {
+
+			throw $e;
+			
+		}
+
+		echo "DispatcherInstaller install task completed\n";
+
+	}
+
+	public static function postPackageUninstall(Event $event) {
+
+		$type = $event->getOperation()->getPackage()->getType();
+
+		$name = $event->getOperation()->getPackage()->getName();
+
+		$extra = $event->getOperation()->getPackage()->getExtra();
+
+		try {
+			
+			self::packageUninstall($type, $name, $extra);
+
+		} catch (Exception $e) {
+
+			throw $e;
+			
+		}
+
+		echo "DispatcherInstaller uninstall task completed\n";
+
+	}
+
+	public static function postPackageUpdate(Event $event) {
+
+		$initial_package = $event->getOperation()->getInitialPackage();
+		$target_package  = $event->getOperation()->getTargetPackage();
+
+		try {
+			
+			self::packageUninstall($initial_package->getType(), $initial_package->getName(), $initial_package->getExtra());
+
+			self::packageInstall($target_package->getType(), $target_package->getName(), $target_package->getExtra());
+
+		} catch (Exception $e) {
+			
+			throw $e;
+
+		}
+
+		echo "DispatcherInstaller update task completed\n";
+
+	}
+
+	private static function packageInstall($type, $name, $extra) {
+
 		$plugin_loaders = isset($extra["comodojo-plugin-load"]) ? $extra["comodojo-plugin-load"] : Array();
 
 		$service_loaders = isset($extra["comodojo-service-route"]) ? $extra["comodojo-service-route"] : Array();
@@ -70,18 +129,10 @@ class DispatcherInstallerActions {
 			
 		}
 
-		echo "DispatcherInstaller install tasks completed\n";
-
 	}
 
-	public static function postPackageUninstall(Event $event) {
-
-		$type = $event->getOperation()->getPackage()->getType();
-
-		$name = $event->getOperation()->getPackage()->getName();
-
-		$extra = $event->getOperation()->getPackage()->getExtra();
-
+	private static function packageUninstall($type, $name, $extra) {
+		
 		$folders_to_delete = isset($extra["comodojo-folders-create"]) ? $extra["comodojo-folders-create"] : Array();
 
 		try {
@@ -90,15 +141,13 @@ class DispatcherInstallerActions {
 
 			if ( $type == "dispatcher-service-bundle" ) self::unloadService($name);
 
-			self::delete_folders($folders_to_create);
+			self::delete_folders($folders_to_delete);
 
 		} catch (Exception $e) {
 			
 			throw $e;
 			
 		}
-
-		echo "DispatcherInstaller uninstall tasks completed\n";
 
 	}
 
@@ -311,7 +360,7 @@ class DispatcherInstallerActions {
 
 			if ( $path->isDir() ) {
 
-				$action = rmdir($pathname)
+				$action = rmdir($pathname);
 
 			} 
 			else {

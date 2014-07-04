@@ -52,6 +52,15 @@ define('COMODOJO_GLOBAL_DEBUG_LEVEL', 'DEBUG');
 
 define("DISPATCHER_REAL_PATH",realpath(dirname(__FILE__))."/../");
 
+
+/**
+* Uncomment and fill this constant if you want define manually the dispatcher baseurl.
+* If not defined, dispatcher will try to resolve absolute base url itself.
+* 
+* @static	string
+*/
+#define("DISPATCHER_BASEURL","");
+
 /**
 * If false, dispatcher will not route any request and will reply with an 503 Service 
 * Temporarily Unavailable status code
