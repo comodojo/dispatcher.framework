@@ -1,8 +1,8 @@
 {
-    "name": "comodojo/dispatcher",
+    "name": "comodojo/dispatcher.framework",
     "description": "REST services microframework",
     "license": "GPL-3.0+",
-    "type": "project",
+    "type": "library",
     "keywords": [
         "REST",
         "php",
@@ -20,34 +20,22 @@
             "email": "info@comodojo.org"
         }
     ],
-     "autoload": {
+    "autoload": {
         "files": [
-            "lib/comodojo/debug.php",
-            "lib/spyc/Spyc.php"
+            "src/debug.php"
         ],
         "psr-4": {
-            "comodojo\\Exception\\": "lib/comodojo/Exception",
-            "comodojo\\ObjectRequest\\": "lib/comodojo/ObjectRequest",
-            "comodojo\\ObjectRoutingTable\\": "lib/comodojo/ObjectRoutingTable",
-            "comodojo\\ObjectRoute\\": "lib/comodojo/ObjectRoute",
-            "comodojo\\ObjectResult\\": "lib/comodojo/ObjectResult",
-            "comodojo\\": "lib/comodojo",
-            "DispatcherInstaller\\": "DispatcherInstaller"
+            "comodojo\\Exception\\": "src/Exception",
+            "comodojo\\Dispatcher\\ObjectRequest\\": "src/ObjectRequest",
+            "comodojo\\Dispatcher\\ObjectRoutingTable\\": "src/ObjectRoutingTable",
+            "comodojo\\Dispatcher\\ObjectRoute\\": "src/ObjectRoute",
+            "comodojo\\Dispatcher\\ObjectResult\\": "src/ObjectResult",
+            "comodojo\\Dispatcher\\": "src"
         }
     },
-    "scripts": {
-        "post-package-install": [
-            "DispatcherInstaller\\DispatcherInstallerActions::postPackageInstall"
-        ],
-        "post-package-uninstall": [
-            "DispatcherInstaller\\DispatcherInstallerActions::postPackageUninstall"
-        ],
-        "post-package-update": [
-            "DispatcherInstaller\\DispatcherInstallerActions::postPackageUpdate"
-        ]
-    },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "mustangostang/spyc": "0.5.1"
     }
 }
