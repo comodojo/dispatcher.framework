@@ -31,7 +31,7 @@ class ObjectRequest {
 	/**
 	 * Current time, as provided by dispatcher
 	 *
-	 * @var	integer
+	 * @var	float
 	 */
 	private $current_time = NULL;
 
@@ -80,7 +80,7 @@ class ObjectRequest {
 	/**
 	 * Set current time
 	 *
-	 * @param	integer	$time	
+	 * @param	float	$time	
 	 *
 	 * @return	Object	$this
 	 */
@@ -95,7 +95,7 @@ class ObjectRequest {
 	/**
 	 * Get current time
 	 *
-	 * @return	integer
+	 * @return	float	time in microsec
 	 */
 	public function getCurrentTime() {
 		

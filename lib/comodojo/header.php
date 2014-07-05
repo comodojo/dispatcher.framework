@@ -38,7 +38,7 @@ class header {
 	/**
 	 * Current time, as provided by dispatcher
 	 *
-	 * @var	bool
+	 * @var	float
 	 */
 	private $current_time = NULL;
 
@@ -238,7 +238,7 @@ class header {
 
 		if ( $ttl > 0 ) {
 			$this->set("Cache-Control","max-age=".$ttl.", must-revalidate");
-			$this->set("Expires",gmdate("D, d M Y H:i:s", $this->current_time + $ttl)." GMT");
+			$this->set("Expires",gmdate("D, d M Y H:i:s", (int)$this->current_time + $ttl)." GMT");
 		}
 		else {
 			$this->set("Cache-Control","no-cache, must-revalidate");

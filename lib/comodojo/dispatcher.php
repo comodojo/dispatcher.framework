@@ -147,7 +147,7 @@ class dispatcher {
 
 		// Now start to build dispatcher instance
 
-		$this->current_time = time();
+		$this->current_time = microtime(true);
 
 		$this->working_mode = $this->get_working_mode();
 
@@ -304,12 +304,23 @@ class dispatcher {
 
 	}
 
+	/**
+	 * Include a plugin
+	 *
+	 * @param	string	$plugin		The plugin name
+	 * @param	string	$folder		(optional) plugin folder (if omitted, dispatcher will use default one)
+	 */
 	public final function loadPlugin($plugin, $folder=DISPATCHER_PLUGINS_FOLDER) {
 
 		include $folder.$plugin.".php";
 
 	}
 
+	/**
+	 * Get current time (time at the time of the request)
+	 *
+	 * @return	float	time in microsec
+	 */
 	public final function getCurrentTime() {
 
 		return $this->current_time;
@@ -904,11 +915,13 @@ class dispatcher {
 
 		$fork = $this->events->fire($hook.".".$route->getStatusCode(), "RESULT", $route);
 
-		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;		
+		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
 
-		// Fire special event, it will not modify result
+		// Fire special event, it may modify result
 
-		$this->events->fire("dispatcher.result.#", "VOID", $route);
+		$fork = $this->events->fire("dispatcher.result.#", "RESULT", $route);
+
+		if ( $fork instanceof \comodojo\ObjectResult\ObjectResultInterface ) $route = $fork;
 
 		// After hooks:
 		// - store cache

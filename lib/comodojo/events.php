@@ -38,7 +38,7 @@
  * -->> "dispatcher.result" - exposing result
  * -->> "dispatcher.route|redirect|error"
  * ---->> "dispatcher.route|redirect|error.[STATUSCODE]"
- * -->> "dispatcher.result.#" (special event, for tracing or timing funcs; fires after every other callback and cannot modify result)
+ * -->> "dispatcher.result.#" (special event, for tracing or timing funcs; fires after every other callback and can modify result)
  *
  * >> result to requestor
  *

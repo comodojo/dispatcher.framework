@@ -44,7 +44,7 @@ class cache {
 	/**
 	 * Current time, as provided by dispatcher
 	 *
-	 * @var	bool
+	 * @var	float
 	 */
 	private $current_time = NULL;
 
@@ -132,7 +132,7 @@ class cache {
 			return false;
 		}
 		
-		$last_time_limit = $this->current_time - $ttl;
+		$last_time_limit = (int)$this->current_time - $ttl;
 		
 		$cacheTag = md5($request) . ".cache";
 
@@ -142,7 +142,7 @@ class cache {
 
 		if (is_readable($cacheFile) AND $cache_time >= $last_time_limit) {
 			
-			$max_age = $cache_time + $ttl - $this->current_time;
+			$max_age = $cache_time + $ttl - (int)$this->current_time;
 
 			$best_before = gmdate("D, d M Y H:i:s", $cache_time + $ttl) . " GMT";
 			
