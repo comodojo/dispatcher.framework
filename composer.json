@@ -30,6 +30,7 @@
             "comodojo\\Dispatcher\\ObjectRoutingTable\\": "src/ObjectRoutingTable",
             "comodojo\\Dispatcher\\ObjectRoute\\": "src/ObjectRoute",
             "comodojo\\Dispatcher\\ObjectResult\\": "src/ObjectResult",
+            "comodojo\\Dispatcher\\Service\\": "src/Service",
             "comodojo\\Dispatcher\\": "src"
         }
     },

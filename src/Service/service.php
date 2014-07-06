@@ -1,4 +1,4 @@
-<?php namespace comodojo\Dispatcher;
+<?php namespace comodojo\Dispatcher\Service;
 
 /**
  * The Service base class, feel free to extend
@@ -25,6 +25,9 @@
 
 use \comodojo\Exception\DispatcherException;
 use \comodojo\Exception\IOException;
+use \comodojo\Dispatcher\serialization;
+use \comodojo\Dispatcher\deserialization;
+
 
 class service {
 
