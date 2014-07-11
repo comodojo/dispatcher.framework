@@ -553,7 +553,10 @@ class dispatcher {
 			if (isset($service_matrix[0])) {
 
 				$service_requested = $service_matrix[0];
-				$service_attributes = array_slice($service_matrix,1);
+
+				$last = $service_matrix[sizeof($service_matrix)-1];
+
+				$service_attributes = empty($last) ? array_slice($service_matrix, 1, -1) : array_slice($service_matrix, 1);
 
 			}
 			else {
@@ -847,11 +850,15 @@ class dispatcher {
 		$theservice->parameters = $validated_parameters;
 		$theservice->raw_parameters = $request->getRawParameters();
 
+		// Requesto to service the callable method (just to handle any method)
+
+		$current_method = $theservice->getCallableMethod($method);
+
 		// Finally run service method and catch exceptions
 
 		try {
 
-			$result = $theservice->$method();
+			$result = $theservice->$current_method();
 
 			$return = new ObjectSuccess();
 			$return->setService($service)

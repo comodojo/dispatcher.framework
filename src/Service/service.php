@@ -487,17 +487,32 @@ class service {
 	 */
 	public final function getImplementedMethods() {
 
+		if ( method_exists($this, 'any') ) return explode(",",$this->supported_http_methods);
+
 		$supported_methods = explode(',',$this->supported_http_methods);
 
 		$implemented_methods = Array();
 
 		foreach ( $supported_methods as $method ) {
 
-			if (method_exists($this, strtolower($method))) array_push($implemented_methods,$method);
+			if ( method_exists($this, strtolower($method)) ) array_push($implemented_methods,$method);
 
 		}
 
 		return $implemented_methods;
+
+	}
+
+	/**
+	 * Return the callable class method that reflect the requested one
+	 *
+	 * @return 	Array 	Headers array
+	 */
+	public final function getCallableMethod($method) {
+
+		if ( method_exists($this, strtolower($method)) ) return strtolower($method);
+
+		else return "any";
 
 	}
 
@@ -557,7 +572,7 @@ class service {
 	 */
 	public final function getParameters($raw=false) {
 
-		return $raw ? $this->rawparameters : $this->parameters;
+		return $raw ? $this->raw_parameters : $this->parameters;
 		
 	}
 
