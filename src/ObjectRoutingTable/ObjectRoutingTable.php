@@ -144,11 +144,11 @@ class ObjectRoutingTable {
 		// If autoroute is enabled, try to match service name with a service file.
 		// If true, try to route request
 
-		else if ( DISPATCHER_AUTO_ROUTE AND $this->routable($service.".php") ) {
+		else if ( DISPATCHER_AUTO_ROUTE AND $this->routable($service.".php", true) ) {
 
 			return Array(
 				"type"			=>	"ROUTE",
-				"target"		=>	$service.".php",
+				"target"		=>	DISPATCHER_SERVICES_FOLDER.$service.".php",
 				"parameters"	=>	Array()
 			);
 
@@ -178,9 +178,11 @@ class ObjectRoutingTable {
 	 *
 	 * @return 	bool
 	 */
-	private function routable($target) {
+	private function routable($target, $relative=false) {
 
-		return is_readable($target) ? true : false;
+		if ( $relative ) return is_readable(DISPATCHER_SERVICES_FOLDER.$target) ? true : false;
+
+		else return is_readable($target) ? true : false;
 
 	}
 
