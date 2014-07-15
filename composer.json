@@ -8,7 +8,8 @@
         "php",
         "rest services",
         "lframework",
-        "comodojo"
+        "comodojo",
+        "services"
     ],
     "homepage": "http://dispatcher.comodojo.org",
      "support": {
@@ -16,7 +17,7 @@
     },
     "authors": [
         {
-            "name": "comodojo",
+            "name": "Marco Giovinazzi",
             "email": "info@comodojo.org"
         }
     ],
