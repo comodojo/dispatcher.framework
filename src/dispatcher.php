@@ -228,6 +228,14 @@ class dispatcher {
 
 			}
 
+			else if ( strtoupper($type) == "REDIRECT" ) {
+
+				if ( $relative ) $this->routingtable->setRoute($service, $type, DISPATCHER_BASEURL.$target, $parameters);
+
+				else $this->routingtable->setRoute($service, $type, $target, $parameters);
+
+			}
+
 			else $this->routingtable->setRoute($service, $type, $target, $parameters);
 
 		} catch (Exception $e) {
