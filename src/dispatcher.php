@@ -369,7 +369,7 @@ class dispatcher {
 
 		// Check if dispatcher is enabled
 
-		if ( $this->enabled === false ) {
+		if ( $this->enabled == false ) {
 
 			$route = new ObjectError();
 			$route->setStatusCode(503);
@@ -943,12 +943,12 @@ class dispatcher {
 		// - start composing header
 		// - return result
 
-		$cache = $this->serviceroute->getCache();
+		$cache = $route instanceof \comodojo\Dispatcher\ObjectResult\ObjectSuccess ? $this->serviceroute->getCache() : NULL;
 
 		if ( $this->request_method == "GET" AND 
 			( $cache == "SERVER" OR $cache == "BOTH" ) AND
 			$this->result_comes_from_cache == false AND 
-			$fork instanceof \comodojo\Dispatcher\ObjectResult\ObjectSuccess )
+			$route instanceof \comodojo\Dispatcher\ObjectResult\ObjectSuccess )
 		{
 
 			$this->cacher->set($this->service_url, $route);
