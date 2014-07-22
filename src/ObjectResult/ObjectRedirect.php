@@ -1,11 +1,11 @@
-<?php namespace comodojo\Dispatcher\ObjectResult;
+<?php namespace Comodojo\Dispatcher\ObjectResult;
 
 /**
  * The Object redirect class, an implementation of ObjectResultInterface
  *
- * @package		Comodojo dispatcher (Spare Parts)
- * @author		comodojo <info@comodojo.org>
- * @license		GPL-3.0+
+ * @package     Comodojo dispatcher (Spare Parts)
+ * @author      Marco Giovinazzi <info@comodojo.org>
+ * @license     GPL-3.0+
  *
  * LICENSE:
  * 
@@ -25,219 +25,217 @@
 
 class ObjectRedirect implements ObjectResultInterface {
 
-	private $service = NULL;
+    private $service = null;
 
-	private $code = 307;
+    private $code = 307;
 
-	private $supported_redirect_codes = Array(201,301,302,303,307);
+    private $supported_redirect_codes = Array(201,301,302,303,307);
 
-	private $location = NULL;
+    private $location = null;
 
-	private $headers = Array();
+    private $headers = Array();
 
-	/**
-	 * Set service name
-	 *
-	 * @param	string	$service	The service name
-	 *
-	 * @return	Object	$this
-	 */
-	public function setService($service) {
+    /**
+     * Set service name
+     *
+     * @param   string  $service    The service name
+     *
+     * @return  Object  $this
+     */
+    public function setService($service) {
 
-		$this->service = $service;
+        $this->service = $service;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get service name
-	 *
-	 * @return	string
-	 */
-	public function getService() {
+    /**
+     * Get service name
+     *
+     * @return  string
+     */
+    public function getService() {
 
-		return $this->service;
+        return $this->service;
 
-	}
+    }
 
-	/**
-	 * Set status code
-	 *
-	 * @param	integer	$code
-	 *
-	 * @return	Object	$this
-	 */
-	public function setStatusCode($code) {
+    /**
+     * Set status code
+     *
+     * @param   integer $code
+     *
+     * @return  Object  $this
+     */
+    public function setStatusCode($code) {
 
-		$code = filter_var($code, FILTER_VALIDATE_INT);
+        $code = filter_var($code, FILTER_VALIDATE_INT);
 
-		$this->code = in_array($code, $this->supported_redirect_codes) ? $code : $this->code;
+        $this->code = in_array($code, $this->supported_redirect_codes) ? $code : $this->code;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get status code
-	 *
-	 * @return	integer
-	 */
-	public function getStatusCode() {
+    /**
+     * Get status code
+     *
+     * @return  integer
+     */
+    public function getStatusCode() {
 
-		return $this->code;
+        return $this->code;
 
-	}
+    }
 
-	/**
-	 * STUB method: no content in a redirect!
-	 */
-	public function setContent($message) {}
+    /**
+     * STUB method: no content in a redirect!
+     */
+    public function setContent($message) {}
 
-	/**
-	 * STUB method: no content in a redirect!
-	 */
-	public function getContent() {}
+    /**
+     * STUB method: no content in a redirect!
+     */
+    public function getContent() {}
 
-	/**
-	 * Set location for REDIRECT
-	 *
-	 * @param	string	$location
-	 *
-	 * @return	Object	$this
-	 */
-	public function setLocation($location) {
+    /**
+     * Set location for REDIRECT
+     *
+     * @param   string  $location
+     *
+     * @return  Object  $this
+     */
+    public function setLocation($location) {
 
-		$location = filter_var($location, FILTER_VALIDATE_URL);
+        $location = filter_var($location, FILTER_VALIDATE_URL);
 
-		$this->location = $location !== false ? $location : $this->location;
+        $this->location = $location !== false ? $location : $this->location;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get location (in redirect)
-	 *
-	 * @return	string
-	 */
-	public function getLocation() {
+    /**
+     * Get location (in redirect)
+     *
+     * @return  string
+     */
+    public function getLocation() {
 
-		return $this->location;
+        return $this->location;
 
-	}
+    }
 
-	/**
-	 * Set header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 * @param 	string 	$value 		Header content (optional)
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeader($header, $value=NULL) {
+    /**
+     * Set header component
+     *
+     * @param   string  $header     Header name
+     * @param   string  $value      Header content (optional)
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeader($header, $value=null) {
 
-		$this->headers[$header] = $value;
+        $this->headers[$header] = $value;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	bool
-	 */
-	public function unsetHeader($header) {
+    /**
+     * Unset header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  bool
+     */
+    public function unsetHeader($header) {
 
-		if ( isset($this->headers[$header]) ) {
+        if ( isset($this->headers[$header]) ) {
 
-			unset($this->headers[$header]); 
+            unset($this->headers[$header]); 
 
-			return true;
+            return true;
 
-		}
+        }
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Get header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	string 	Header component in case of success, false otherwise
-	 */
-	public function getHeader($header) {
+    /**
+     * Get header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  string  Header component in case of success, false otherwise
+     */
+    public function getHeader($header) {
 
-		if ( isset($this->headers[$header]) ) return $this->headers[$header];
+        if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Set headers
-	 *
-	 * @param 	array 	$headers 	Headers array
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeaders($headers) {
+    /**
+     * Set headers
+     *
+     * @param   array   $headers    Headers array
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeaders($headers) {
 
-		$this->headers = is_array($headers) ? $headers : $this->header;
+        $this->headers = is_array($headers) ? $headers : $this->header;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset headers
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function unsetHeaders() {
+    /**
+     * Unset headers
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function unsetHeaders() {
 
-		$this->headers = Array();
+        $this->headers = Array();
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get headers
-	 *
-	 * @return 	Array 	Headers array
-	 */
-	public function getHeaders() {
+    /**
+     * Get headers
+     *
+     * @return  Array   Headers array
+     */
+    public function getHeaders() {
 
-		return $this->headers;
+        return $this->headers;
 
-	}
+    }
 
-	/**
-	 * STUB method: no content type in a redirect!
-	 */
-	public function setContentType($type) {}
+    /**
+     * STUB method: no content type in a redirect!
+     */
+    public function setContentType($type) {}
 
-	/**
-	 * STUB method: no content type in a redirect!
-	 */
-	public function getContentType() {}
+    /**
+     * STUB method: no content type in a redirect!
+     */
+    public function getContentType() {}
 
-	/**
-	 * STUB method: no charset in a redirect!
-	 */
-	public function setCharset($type) {}
+    /**
+     * STUB method: no charset in a redirect!
+     */
+    public function setCharset($type) {}
 
-	/**
-	 * STUB method: no charset in a redirect!
-	 */
-	public function getCharset() {}
+    /**
+     * STUB method: no charset in a redirect!
+     */
+    public function getCharset() {}
 
 }
-
-?>

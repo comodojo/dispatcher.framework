@@ -4,10 +4,12 @@ comodojo\dispatcher.framework changelog
 # 3.0.0-beta.1
 -------------
 
+- Monolog as default log library
+- (almost) compatible with fig standards
 - Project name changed from "simpleDataRestDispatcher" to "dispatcher"
 - Semantic versioning (2.0.0) and codenames
 - Complete rewrite
-- Plugin/library/servicebundle architecture
+- Plugin/servicebundle architecture
 - Installation/update via composer/Packagist
 - Event engine & routing
 - Lots more...

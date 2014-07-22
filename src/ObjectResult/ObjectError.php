@@ -1,11 +1,11 @@
-<?php namespace comodojo\Dispatcher\ObjectResult;
+<?php namespace Comodojo\Dispatcher\ObjectResult;
 
 /**
  * The Object error class, an implementation of ObjectResultInterface
  *
- * @package		Comodojo dispatcher (Spare Parts)
- * @author		comodojo <info@comodojo.org>
- * @license		GPL-3.0+
+ * @package     Comodojo dispatcher (Spare Parts)
+ * @author      Marco Giovinazzi <info@comodojo.org>
+ * @license     GPL-3.0+
  *
  * LICENSE:
  * 
@@ -25,253 +25,251 @@
 
 class ObjectError implements ObjectResultInterface {
 
-	private $service = NULL;
+    private $service = null;
 
-	private $code = 500;
+    private $code = 500;
 
-	private $supported_error_codes = Array(400,403,404,405,500,501,503);
+    private $supported_error_codes = Array(400,403,404,405,500,501,503);
 
-	private $content = NULL;
+    private $content = null;
 
-	private $headers = Array();
+    private $headers = Array();
 
-	private $contentType = "text/plain";
+    private $contentType = "text/plain";
 
-	private $charset = DISPATCHER_DEFAULT_ENCODING;
+    private $charset = DISPATCHER_DEFAULT_ENCODING;
 
-	/**
-	 * Set service name
-	 *
-	 * @param	string	$service	The service name
-	 *
-	 * @return	Object	$this
-	 */
-	public function setService($service) {
+    /**
+     * Set service name
+     *
+     * @param   string  $service    The service name
+     *
+     * @return  Object  $this
+     */
+    public function setService($service) {
 
-		$this->service = $service;
+        $this->service = $service;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get service name
-	 *
-	 * @return	string
-	 */
-	public function getService() {
+    /**
+     * Get service name
+     *
+     * @return  string
+     */
+    public function getService() {
 
-		return $this->service;
+        return $this->service;
 
-	}
+    }
 
-	/**
-	 * Set status code
-	 *
-	 * @param	integer	$code
-	 *
-	 * @return	Object	$this
-	 */
-	public function setStatusCode($code) {
+    /**
+     * Set status code
+     *
+     * @param   integer $code
+     *
+     * @return  Object  $this
+     */
+    public function setStatusCode($code) {
 
-		$code = filter_var($code, FILTER_VALIDATE_INT);
+        $code = filter_var($code, FILTER_VALIDATE_INT);
 
-		$this->code = in_array($code, $this->supported_error_codes) ? $code : $this->code;
+        $this->code = in_array($code, $this->supported_error_codes) ? $code : $this->code;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get status code
-	 *
-	 * @return	integer
-	 */
-	public function getStatusCode() {
+    /**
+     * Get status code
+     *
+     * @return  integer
+     */
+    public function getStatusCode() {
 
-		return $this->code;
+        return $this->code;
 
-	}
+    }
 
-	/**
-	 * Set result content (http body)
-	 *
-	 * @param	string	$message
-	 *
-	 * @return	Object	$this
-	 */
-	public function setContent($message) {
+    /**
+     * Set result content (http body)
+     *
+     * @param   string  $message
+     *
+     * @return  Object  $this
+     */
+    public function setContent($message) {
 
-		$this->content = $message;
+        $this->content = $message;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get result content
-	 *
-	 * @return	string
-	 */
-	public function getContent() {
+    /**
+     * Get result content
+     *
+     * @return  string
+     */
+    public function getContent() {
 
-		return $this->content;
+        return $this->content;
 
-	}
+    }
 
-	/**
-	 * StUB method: no location in error!
-	 */
-	public function setLocation($location) {}
+    /**
+     * StUB method: no location in error!
+     */
+    public function setLocation($location) {}
 
-	/**
-	 * StUB method: no location in error!
-	 */
-	public function getLocation() {}
+    /**
+     * StUB method: no location in error!
+     */
+    public function getLocation() {}
 
-	/**
-	 * Set header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 * @param 	string 	$value 		Header content (optional)
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeader($header, $value=NULL) {
+    /**
+     * Set header component
+     *
+     * @param   string  $header     Header name
+     * @param   string  $value      Header content (optional)
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeader($header, $value=null) {
 
-		$this->headers[$header] = $value;
+        $this->headers[$header] = $value;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	bool
-	 */
-	public function unsetHeader($header) {
+    /**
+     * Unset header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  bool
+     */
+    public function unsetHeader($header) {
 
-		if ( isset($this->headers[$header]) ) {
+        if ( isset($this->headers[$header]) ) {
 
-			unset($this->headers[$header]); 
+            unset($this->headers[$header]); 
 
-			return true;
+            return true;
 
-		}
+        }
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Get header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	string 	Header component in case of success, false otherwise
-	 */
-	public function getHeader($header) {
+    /**
+     * Get header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  string  Header component in case of success, false otherwise
+     */
+    public function getHeader($header) {
 
-		if ( isset($this->headers[$header]) ) return $this->headers[$header];
+        if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Set headers
-	 *
-	 * @param 	array 	$headers 	Headers array
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeaders($headers) {
+    /**
+     * Set headers
+     *
+     * @param   array   $headers    Headers array
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeaders($headers) {
 
-		$this->headers = is_array($headers) ? $headers : $this->header;
+        $this->headers = is_array($headers) ? $headers : $this->header;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset headers
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function unsetHeaders() {
+    /**
+     * Unset headers
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function unsetHeaders() {
 
-		$this->headers = Array();
+        $this->headers = Array();
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get headers
-	 *
-	 * @return 	Array 	Headers array
-	 */
-	public function getHeaders() {
+    /**
+     * Get headers
+     *
+     * @return  Array   Headers array
+     */
+    public function getHeaders() {
 
-		return $this->headers;
+        return $this->headers;
 
-	}
+    }
 
-	/**
-	 * Set content type
-	 *
-	 * @param	string	$type
-	 *
-	 * @return	Object	$this
-	 */
-	public function setContentType($type) {
+    /**
+     * Set content type
+     *
+     * @param   string  $type
+     *
+     * @return  Object  $this
+     */
+    public function setContentType($type) {
 
-		$this->contentType = $type;
+        $this->contentType = $type;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get content type
-	 *
-	 * @return	strinng
-	 */
-	public function getContentType() {
+    /**
+     * Get content type
+     *
+     * @return  strinng
+     */
+    public function getContentType() {
 
-		return $this->contentType;
+        return $this->contentType;
 
-	}
+    }
 
-	/**
-	 * Set charset
-	 *
-	 * @param	string	$type
-	 *
-	 * @return	Object	$this
-	 */
-	public function setCharset($type) {
+    /**
+     * Set charset
+     *
+     * @param   string  $type
+     *
+     * @return  Object  $this
+     */
+    public function setCharset($type) {
 
-		$this->charset = $type;
+        $this->charset = $type;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get charset 
-	 *
-	 * @return	string
-	 */
-	public function getCharset() {
+    /**
+     * Get charset 
+     *
+     * @return  string
+     */
+    public function getCharset() {
 
-		return $this->charset;
+        return $this->charset;
 
-	}
+    }
 
 }
-
-?>

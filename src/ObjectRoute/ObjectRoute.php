@@ -1,11 +1,11 @@
-<?php namespace comodojo\Dispatcher\ObjectRoute;
+<?php namespace Comodojo\Dispatcher\ObjectRoute;
 
 /**
  * The ObjectRoute class
  *
- * @package		Comodojo dispatcher (Spare Parts)
- * @author		comodojo <info@comodojo.org>
- * @license		GPL-3.0+
+ * @package     Comodojo dispatcher (Spare Parts)
+ * @author      Marco Giovinazzi <info@comodojo.org>
+ * @license     GPL-3.0+
  *
  * LICENSE:
  * 
@@ -25,306 +25,340 @@
 
 class ObjectRoute {
 
-	private $service = NULL;
+    private $service = null;
 
-	private $target = NULL;
+    private $target = null;
 
-	private $class = NULL;
+    private $class = null;
 
-	private $type = "ERROR";
+    private $type = "ERROR";
 
-	private $redirect_code = 307;
+    private $redirect_code = 307;
 
-	private $error_code = 503;
+    private $error_code = 503;
 
-	private $cache = false;
+    private $cache = false;
 
-	private $ttl = false;
+    private $ttl = false;
 
-	private $headers = Array();
+    private $headers = Array();
 
-	private $access_control = NULL;
+    private $access_control = null;
 
-	private $parameters = Array();
+    private $parameters = Array();
 
-	private $supported_route_types = Array("ROUTE","REDIRECT","ERROR");
+    private $supported_route_types = Array("ROUTE","REDIRECT","ERROR");
 
-	private $supported_redirect_codes = Array(201,301,302,303,307);
+    private $supported_redirect_codes = Array(201,301,302,303,307);
 
-	private $supported_error_codes = Array(400,403,404,405,500,501,503);
+    private $supported_error_codes = Array(400,403,404,405,500,501,503);
 
-	private $supported_cache_modes = Array("SERVER","CLIENT","BOTH");
+    private $supported_cache_modes = Array("SERVER","CLIENT","BOTH");
 
-	public function setService($service) {
+    /**
+     * Set service name
+     *
+     * @param   string  $service    The service name
+     *
+     * @return  Object  $this
+     */
+    public function setService($service) {
 
-		$this->service = $service;
+        $this->service = $service;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	public function getService() {
+    /**
+     * Get service name
+     *
+     * @return  string
+     */
+    public function getService() {
 
-		return $this->service;
-	}
+        return $this->service;
+    }
 
-	public function setType($type) {
+    /**
+     * Set route type
+     *
+     * @param   string  $type
+     *
+     * @return  Object  $this
+     */
+    public function setType($type) {
 
-		$type = strtoupper($type);
+        $type = strtoupper($type);
 
-		$this->type = in_array($type, $this->supported_route_types) ? $type : $this->type;
+        $this->type = in_array($type, $this->supported_route_types) ? $type : $this->type;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	public function getType() {
+    /**
+     * Get route type
+     *
+     * @return  string
+     */
+    public function getType() {
 
-		return $this->type;
+        return $this->type;
 
-	}
+    }
 
-	public function setTarget($target) {
+    /**
+     * Set route target
+     *
+     * @param   string  $target
+     *
+     * @return  Object  $this
+     */
+    public function setTarget($target) {
 
-		$this->target = $target;
+        $this->target = $target;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	public function getTarget() {
+    /**
+     * Get route target
+     *
+     * @return  string
+     */
+    public function getTarget() {
 
-		return $this->target;
+        return $this->target;
 
-	}
+    }
 
-	public function setClass($class) {
+    public function setClass($class) {
 
-		$this->class = $class;
+        $this->class = $class;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	public function getClass() {
+    public function getClass() {
 
-		return $this->class;
+        return $this->class;
 
-	}
+    }
 
-	public function setRedirectCode($code) {
+    public function setRedirectCode($code) {
 
-		$code = filter_var($code, FILTER_VALIDATE_INT);
+        $code = filter_var($code, FILTER_VALIDATE_INT);
 
-		$this->redirect_code = in_array($code, $this->supported_redirect_codes) ? $code : $this->redirect_code;
+        $this->redirect_code = in_array($code, $this->supported_redirect_codes) ? $code : $this->redirect_code;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	public function getRedirectCode() {
+    public function getRedirectCode() {
 
-		return $this->redirect_code;
+        return $this->redirect_code;
 
-	}
+    }
 
-	public function setErrorCode($code) {
+    public function setErrorCode($code) {
 
-		$code = filter_var($code, FILTER_VALIDATE_INT);
+        $code = filter_var($code, FILTER_VALIDATE_INT);
 
-		$this->error_code = in_array($code, $this->supported_error_codes) ? $code : $this->error_code;
+        $this->error_code = in_array($code, $this->supported_error_codes) ? $code : $this->error_code;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	public function getErrorCode() {
+    public function getErrorCode() {
 
-		return $this->error_code;
+        return $this->error_code;
 
-	}
+    }
 
-	public function setCache($cache) {
+    public function setCache($cache) {
 
-		if ($cache == false) {
+        if ($cache == false) {
 
-			$this->cache = false;
+            $this->cache = false;
 
-		}
-		else {
+        }
+        else {
 
-			$cache = strtoupper($cache);
+            $cache = strtoupper($cache);
 
-			$this->cache = in_array($cache, $this->supported_cache_modes) ? $cache : $this->cache;
+            $this->cache = in_array($cache, $this->supported_cache_modes) ? $cache : $this->cache;
 
-		}
+        }
 
-		return $this;
-		
-	}
+        return $this;
+        
+    }
 
-	public function getCache() {
+    public function getCache() {
 
-		return $this->cache;
-	}
+        return $this->cache;
+    }
 
-	public function setTtl($ttl) {
+    public function setTtl($ttl) {
 
-		$ttl = filter_var($ttl, FILTER_VALIDATE_INT);
+        $ttl = filter_var($ttl, FILTER_VALIDATE_INT);
 
-		$this->ttl = is_int($ttl) ? $ttl : $this->ttl;
+        $this->ttl = is_int($ttl) ? $ttl : $this->ttl;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	public function getTtl() {
+    public function getTtl() {
 
-		return $this->ttl;
+        return $this->ttl;
 
-	}
+    }
 
-	public function setAccessControl($control) {
+    public function setAccessControl($control) {
 
-		$this->access_control = $control;
+        $this->access_control = $control;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function getAccessControl() {
+    public function getAccessControl() {
 
-		return $this->access_control;
+        return $this->access_control;
 
-	}
+    }
 
-	/**
-	 * Set header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 * @param 	string 	$value 		Header content (optional)
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeader($header, $value=NULL) {
+    /**
+     * Set header component
+     *
+     * @param   string  $header     Header name
+     * @param   string  $value      Header content (optional)
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeader($header, $value=null) {
 
-		$this->headers[$header] = $value;
+        $this->headers[$header] = $value;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	bool
-	 */
-	public function unsetHeader($header) {
+    /**
+     * Unset header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  bool
+     */
+    public function unsetHeader($header) {
 
-		if ( isset($this->headers[$header]) ) {
+        if ( isset($this->headers[$header]) ) {
 
-			unset($this->headers[$header]); 
+            unset($this->headers[$header]); 
 
-			return true;
+            return true;
 
-		}
+        }
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Get header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	string 	Header component in case of success, false otherwise
-	 */
-	public function getHeader($header) {
+    /**
+     * Get header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  string  Header component in case of success, false otherwise
+     */
+    public function getHeader($header) {
 
-		if ( isset($this->headers[$header]) ) return $this->headers[$header];
+        if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Set headers
-	 *
-	 * @param 	array 	$headers 	Headers array
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeaders($headers) {
+    /**
+     * Set headers
+     *
+     * @param   array   $headers    Headers array
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeaders($headers) {
 
-		$this->headers = is_array($headers) ? $headers : $this->header;
+        $this->headers = is_array($headers) ? $headers : $this->header;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset headers
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function unsetHeaders() {
+    /**
+     * Unset headers
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function unsetHeaders() {
 
-		$this->headers = Array();
+        $this->headers = Array();
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get headers
-	 *
-	 * @return 	Array 	Headers array
-	 */
-	public function getHeaders() {
+    /**
+     * Get headers
+     *
+     * @return  Array   Headers array
+     */
+    public function getHeaders() {
 
-		return $this->headers;
+        return $this->headers;
 
-	}
+    }
 
-	/**
-	 * Set extra parameter
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setParameter($parameter, $value=NULL) {
+    /**
+     * Set extra parameter
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setParameter($parameter, $value=null) {
 
-		$this->parameters[$parameter] = $value;
+        $this->parameters[$parameter] = $value;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get extra parameter
-	 *
-	 * @return 	Array 	Headers array
-	 */
-	public function getParameter($parameter) {
+    /**
+     * Get extra parameter
+     *
+     * @return  Array   Headers array
+     */
+    public function getParameter($parameter) {
 
-		if ( isset($this->parameters[$parameter]) ) return $this->parameters[$parameter];
+        if ( isset($this->parameters[$parameter]) ) return $this->parameters[$parameter];
 
-		else return NULL;
+        else return null;
 
-	}
+    }
 
-	/**
-	 * Get extra parameters
-	 *
-	 * @return 	Array 	Headers array
-	 */
-	public function getParameters() {
+    /**
+     * Get extra parameters
+     *
+     * @return  Array   Headers array
+     */
+    public function getParameters() {
 
-		return $this->parameters;
+        return $this->parameters;
 
-	}
+    }
 
 }
-
-?>

@@ -22,22 +22,20 @@
         }
     ],
     "autoload": {
-        "files": [
-            "src/debug.php"
-        ],
         "psr-4": {
-            "comodojo\\Exception\\": "src/Exception",
-            "comodojo\\Dispatcher\\ObjectRequest\\": "src/ObjectRequest",
-            "comodojo\\Dispatcher\\ObjectRoutingTable\\": "src/ObjectRoutingTable",
-            "comodojo\\Dispatcher\\ObjectRoute\\": "src/ObjectRoute",
-            "comodojo\\Dispatcher\\ObjectResult\\": "src/ObjectResult",
-            "comodojo\\Dispatcher\\Service\\": "src/Service",
-            "comodojo\\Dispatcher\\": "src"
+            "Comodojo\\Exception\\": "src/Exception",
+            "Comodojo\\Dispatcher\\ObjectRequest\\": "src/ObjectRequest",
+            "Comodojo\\Dispatcher\\ObjectRoutingTable\\": "src/ObjectRoutingTable",
+            "Comodojo\\Dispatcher\\ObjectRoute\\": "src/ObjectRoute",
+            "Comodojo\\Dispatcher\\ObjectResult\\": "src/ObjectResult",
+            "Comodojo\\Dispatcher\\Service\\": "src/Service",
+            "Comodojo\\Dispatcher\\": "src"
         }
     },
     "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.0",
-        "mustangostang/spyc": "0.5.1"
+        "mustangostang/spyc": "~0.5.1",
+        "monolog/monolog": "~1.10"
     }
 }

@@ -1,11 +1,11 @@
-<?php namespace comodojo\Dispatcher\Template;
+<?php namespace Comodojo\Dispatcher\Template;
 
 /**
  * A simple interface for dispatcher templates
  *
- * @package		Comodojo dispatcher (Spare Parts)
- * @author		comodojo <info@comodojo.org>
- * @license		GPL-3.0+
+ * @package     Comodojo dispatcher (Spare Parts)
+ * @author      Marco Giovinazzi <info@comodojo.org>
+ * @license     GPL-3.0+
  *
  * LICENSE:
  * 
@@ -25,21 +25,21 @@
 
 interface TemplateInterface {
 
-	/**
-	 * This method is intended to be a string replace, using special tags in template
-	 * to be substituted by service content
-	 *
-	 * @param	string	$tag	The tag to replace
-	 * @param	string	$data	The data to inject
-	 */
-	public function replace($tag, $data);
+    /**
+     * This method is intended to be a string replace, using special tags in template
+     * to be substituted by service content
+     *
+     * @param   string  $tag    The tag to replace
+     * @param   string  $data   The data to inject
+     */
+    public function replace($tag, $data);
 
-	/**
-	 * This method is intended to be the end method for template, returning back the complete
-	 * content.
-	 *
-	 * @return	string
-	 */
-	public function serialize();
+    /**
+     * This method is intended to be the end method for template, returning back the complete
+     * content.
+     *
+     * @return  string
+     */
+    public function serialize();
 
 }

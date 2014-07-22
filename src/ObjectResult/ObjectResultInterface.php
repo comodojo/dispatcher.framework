@@ -1,11 +1,11 @@
-<?php namespace comodojo\Dispatcher\ObjectResult;
+<?php namespace Comodojo\Dispatcher\ObjectResult;
 
 /**
  * The ObjectResultInterface, base interface that any result class should implement
  *
- * @package		Comodojo dispatcher (Spare Parts)
- * @author		comodojo <info@comodojo.org>
- * @license		GPL-3.0+
+ * @package     Comodojo dispatcher (Spare Parts)
+ * @author      Marco Giovinazzi <info@comodojo.org>
+ * @license     GPL-3.0+
  *
  * LICENSE:
  * 
@@ -25,153 +25,151 @@
 
 interface ObjectResultInterface {
 
-	/**
-	 * Set service name
-	 *
-	 * @param	string	$service	The service name
-	 *
-	 * @return	Object	$this
-	 */
-	public function setService($service);
+    /**
+     * Set service name
+     *
+     * @param   string  $service    The service name
+     *
+     * @return  Object  $this
+     */
+    public function setService($service);
 
-	/**
-	 * Get service name
-	 *
-	 * @return	string
-	 */
-	public function getService();
+    /**
+     * Get service name
+     *
+     * @return  string
+     */
+    public function getService();
 
-	/**
-	 * Set status code
-	 *
-	 * @param	integer	$code
-	 *
-	 * @return	Object	$this
-	 */
-	public function setStatusCode($code);
+    /**
+     * Set status code
+     *
+     * @param   integer $code
+     *
+     * @return  Object  $this
+     */
+    public function setStatusCode($code);
 
-	/**
-	 * Get status code
-	 *
-	 * @return	integer
-	 */
-	public function getStatusCode();
+    /**
+     * Get status code
+     *
+     * @return  integer
+     */
+    public function getStatusCode();
 
-	/**
-	 * Set result content (http body)
-	 *
-	 * @param	string	$message
-	 *
-	 * @return	Object	$this
-	 */
-	public function setContent($message);
+    /**
+     * Set result content (http body)
+     *
+     * @param   string  $message
+     *
+     * @return  Object  $this
+     */
+    public function setContent($message);
 
-	/**
-	 * Get result content
-	 *
-	 * @return	string
-	 */
-	public function getContent();
+    /**
+     * Get result content
+     *
+     * @return  string
+     */
+    public function getContent();
 
-	/**
-	 * Set location for REDIRECT
-	 *
-	 * @param	string	$location
-	 *
-	 * @return	Object	$this
-	 */
-	public function setLocation($location);
+    /**
+     * Set location for REDIRECT
+     *
+     * @param   string  $location
+     *
+     * @return  Object  $this
+     */
+    public function setLocation($location);
 
-	/**
-	 * Get location (in redirect)
-	 *
-	 * @return	string
-	 */
-	public function getLocation();
+    /**
+     * Get location (in redirect)
+     *
+     * @return  string
+     */
+    public function getLocation();
 
-	/**
-	 * Set header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 * @param 	string 	$value 		Header content (optional)
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeader($header, $value);
+    /**
+     * Set header component
+     *
+     * @param   string  $header     Header name
+     * @param   string  $value      Header content (optional)
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeader($header, $value);
 
-	/**
-	 * Get header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	string 	Header component in case of success, false otherwise
-	 */
-	public function getHeader($header);
+    /**
+     * Get header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  string  Header component in case of success, false otherwise
+     */
+    public function getHeader($header);
 
-	/**
-	 * Unset header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	bool
-	 */
-	public function unsetHeader($header);
+    /**
+     * Unset header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  bool
+     */
+    public function unsetHeader($header);
 
-	/**
-	 * Set headers
-	 *
-	 * @param 	array 	$headers 	Headers array
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeaders($headers);
+    /**
+     * Set headers
+     *
+     * @param   array   $headers    Headers array
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeaders($headers);
 
-	/**
-	 * Get headers
-	 *
-	 * @return 	Array 	Headers array
-	 */
-	public function getHeaders();
+    /**
+     * Get headers
+     *
+     * @return  Array   Headers array
+     */
+    public function getHeaders();
 
-	/**
-	 * Unset headers
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function unsetHeaders();
+    /**
+     * Unset headers
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function unsetHeaders();
 
-	/**
-	 * Set content type
-	 *
-	 * @param	string	$type
-	 *
-	 * @return	Object	$this
-	 */
-	public function setContentType($type);
+    /**
+     * Set content type
+     *
+     * @param   string  $type
+     *
+     * @return  Object  $this
+     */
+    public function setContentType($type);
 
-	/**
-	 * Get content type
-	 *
-	 * @return	strinng
-	 */
-	public function getContentType();
+    /**
+     * Get content type
+     *
+     * @return  strinng
+     */
+    public function getContentType();
 
-	/**
-	 * Set charset
-	 *
-	 * @param	string	$type
-	 *
-	 * @return	Object	$this
-	 */
-	public function setCharset($type);
+    /**
+     * Set charset
+     *
+     * @param   string  $type
+     *
+     * @return  Object  $this
+     */
+    public function setCharset($type);
 
-	/**
-	 * Get charset 
-	 *
-	 * @return	string
-	 */
-	public function getCharset();
+    /**
+     * Get charset 
+     *
+     * @return  string
+     */
+    public function getCharset();
 
 }
-
-?>

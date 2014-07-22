@@ -1,4 +1,4 @@
-<?php namespace comodojo\Dispatcher\ObjectRequest;
+<?php namespace Comodojo\Dispatcher\ObjectRequest;
 
 /**
  * The Object request class
@@ -6,9 +6,9 @@
  * This is the class use to model the request and exposed by level2(/3) event(s)
  * "dispatcher.request(.*)"
  *
- * @package		Comodojo dispatcher (Spare Parts)
- * @author		comodojo <info@comodojo.org>
- * @license		GPL-3.0+
+ * @package     Comodojo dispatcher (Spare Parts)
+ * @author      Marco Giovinazzi <info@comodojo.org>
+ * @license     GPL-3.0+
  *
  * LICENSE:
  * 
@@ -28,440 +28,438 @@
 
 class ObjectRequest {
 
-	/**
-	 * Current time, as provided by dispatcher
-	 *
-	 * @var	float
-	 */
-	private $current_time = NULL;
-
-	/**
-	 * Service name (first sub in querystring or "service=" in standard operational mode)
-	 *
-	 * @var	string
-	 */
-	private $service = NULL;
-
-	/**
-	 * The HTTP method (GET,POST,...) 
-	 *
-	 * @var	string
-	 */
-	private $method = NULL;
-
-	/**
-	 * Attributes (querystring) 
-	 *
-	 * @var	array
-	 */
-	private $attributes = Array();
-
-	/**
-	 * Parameters (POST) 
-	 *
-	 * @var	array
-	 */
-	private $parameters = Array();
-
-	/**
-	 * Raw parameters (php://input) 
-	 *
-	 * @var	array
-	 */
-	private $raw_parameters = NULL;
-
-	/**
-	 * Request headers
-	 *
-	 * @var	array
-	 */
-	private $headers = Array();
-
-	/**
-	 * Set current time
-	 *
-	 * @param	float	$time	
-	 *
-	 * @return	Object	$this
-	 */
-	public function setCurrentTime($time) {
-
-		$this->current_time = $time;
-
-		return $this;
-
-	}
-
-	/**
-	 * Get current time
-	 *
-	 * @return	float	time in microsec
-	 */
-	public function getCurrentTime() {
-		
-		return $this->current_time;
-
-	}
-
-	/**
-	 * Set service 
-	 *
-	 * @param	strinng	$service	
-	 *
-	 * @return	Object	$this
-	 */
-	public function setService($service) {
-
-		$this->service = is_string($service) ? $service : $this->service;
-
-		return $this;
-
-	}
-
-	/**
-	 * Get service name
-	 *
-	 * @return	string
-	 */
-	public function getService() {
-		
-		return $this->service;
-
-	}
-
-	/**
-	 * Set HTTP method
-	 *
-	 * @param	string	$method
-	 *
-	 * @return	Object	$this
-	 */
-	public function setMethod($method) {
-		
-		$this->method = is_string($method) ? strtoupper($method) : $this->method;
+    /**
+     * Current time, as provided by dispatcher
+     *
+     * @var float
+     */
+    private $current_time = null;
+
+    /**
+     * Service name (first sub in querystring or "service=" in standard operational mode)
+     *
+     * @var string
+     */
+    private $service = null;
+
+    /**
+     * The HTTP method (GET,POST,...) 
+     *
+     * @var string
+     */
+    private $method = null;
+
+    /**
+     * Attributes (querystring) 
+     *
+     * @var array
+     */
+    private $attributes = Array();
+
+    /**
+     * Parameters (POST) 
+     *
+     * @var array
+     */
+    private $parameters = Array();
+
+    /**
+     * Raw parameters (php://input) 
+     *
+     * @var array
+     */
+    private $raw_parameters = null;
+
+    /**
+     * Request headers
+     *
+     * @var array
+     */
+    private $headers = Array();
+
+    /**
+     * Set current time
+     *
+     * @param   float   $time   
+     *
+     * @return  Object  $this
+     */
+    public function setCurrentTime($time) {
+
+        $this->current_time = $time;
+
+        return $this;
+
+    }
+
+    /**
+     * Get current time
+     *
+     * @return  float   time in microsec
+     */
+    public function getCurrentTime() {
+        
+        return $this->current_time;
+
+    }
+
+    /**
+     * Set service 
+     *
+     * @param   strinng $service    
+     *
+     * @return  Object  $this
+     */
+    public function setService($service) {
+
+        $this->service = is_string($service) ? $service : $this->service;
+
+        return $this;
+
+    }
+
+    /**
+     * Get service name
+     *
+     * @return  string
+     */
+    public function getService() {
+        
+        return $this->service;
+
+    }
+
+    /**
+     * Set HTTP method
+     *
+     * @param   string  $method
+     *
+     * @return  Object  $this
+     */
+    public function setMethod($method) {
+        
+        $this->method = is_string($method) ? strtoupper($method) : $this->method;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get HTTP method
-	 *
-	 * @return	string	
-	 */
-	public function getMethod() {
-		
-		return $this->method;
+    /**
+     * Get HTTP method
+     *
+     * @return  string  
+     */
+    public function getMethod() {
+        
+        return $this->method;
 
-	}
+    }
 
-	/**
-	 * Set single attribute
-	 *
-	 * @param	string	$name
-	 * @param	scalar	$value
-	 *
-	 * @return	Object	$this
-	 */
-	public function setAttribute($name=NULL, $value) {
+    /**
+     * Set single attribute
+     *
+     * @param   string  $name
+     * @param   scalar  $value
+     *
+     * @return  Object  $this
+     */
+    public function setAttribute($name=null, $value) {
 
-		if ( is_null($name) ) array_push($this->attributes, $value);
+        if ( is_null($name) ) array_push($this->attributes, $value);
 
-		else $this->attributes[$name] = $value;
+        else $this->attributes[$name] = $value;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset single attribute
-	 *
-	 * @param	string	$attribute
-	 *
-	 * @return	Object	$this
-	 */
-	public function unsetAttribute($attribute) {
+    /**
+     * Unset single attribute
+     *
+     * @param   string  $attribute
+     *
+     * @return  Object  $this
+     */
+    public function unsetAttribute($attribute) {
 
-		if ( array_key_exists($attribute, $this->attributes) ) {
+        if ( array_key_exists($attribute, $this->attributes) ) {
 
-			unset($this->attributes[$attribute]);
+            unset($this->attributes[$attribute]);
 
-			return true;
+            return true;
 
-		}
+        }
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Get single attribute
-	 *
-	 * @param	string	$attribute
-	 *
-	 * @return	scalar|NULL	Attribute value or NULL if not found
-	 */
-	public function getAttribute($attribute) {
+    /**
+     * Get single attribute
+     *
+     * @param   string  $attribute
+     *
+     * @return  scalar|null Attribute value or null if not found
+     */
+    public function getAttribute($attribute) {
 
-		if ( array_key_exists($attribute, $this->attributes) ) {
+        if ( array_key_exists($attribute, $this->attributes) ) {
 
-			return $this->attributes[$attribute];
+            return $this->attributes[$attribute];
 
-		}
+        }
 
-		return NULL;
+        return null;
 
-	}
+    }
 
-	/**
-	 * Set attributes (all in one shot)
-	 *
-	 * @param	array	$attributes
-	 *
-	 * @return	Object	$this
-	 */
-	public function setAttributes($attributes) {
+    /**
+     * Set attributes (all in one shot)
+     *
+     * @param   array   $attributes
+     *
+     * @return  Object  $this
+     */
+    public function setAttributes($attributes) {
 
-		$this->attributes = is_array($attributes) ? $attributes : $this->attributes;
+        $this->attributes = is_array($attributes) ? $attributes : $this->attributes;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset attributes
-	 *
-	 * @return	bool
-	 */
-	public function unsetAttributes() {
+    /**
+     * Unset attributes
+     *
+     * @return  bool
+     */
+    public function unsetAttributes() {
 
-		$this->attributes = Array();
+        $this->attributes = Array();
 
-		return true;
+        return true;
 
-	}
+    }
 
-	/**
-	 * Get attributes
-	 *
-	 * @return	array
-	 */
-	public function getAttributes() {
+    /**
+     * Get attributes
+     *
+     * @return  array
+     */
+    public function getAttributes() {
 
-		return $this->attributes;
+        return $this->attributes;
 
-	}
+    }
 
-	/**
-	 * Set single parameter
-	 *
-	 * @param	string	$name
-	 * @param	scalar	$value
-	 *
-	 * @return	Object	$this
-	 */
-	public function setParameter($name, $value) {
+    /**
+     * Set single parameter
+     *
+     * @param   string  $name
+     * @param   scalar  $value
+     *
+     * @return  Object  $this
+     */
+    public function setParameter($name, $value) {
 
-		$this->parameters[$name] = $value;
+        $this->parameters[$name] = $value;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset single parameter
-	 *
-	 * @param	string	$parameter
-	 *
-	 * @return	Object	$this
-	 */
-	public function unsetParameter($parameter) {
+    /**
+     * Unset single parameter
+     *
+     * @param   string  $parameter
+     *
+     * @return  Object  $this
+     */
+    public function unsetParameter($parameter) {
 
-		if ( array_key_exists($parameter, $this->parameters) ) {
+        if ( array_key_exists($parameter, $this->parameters) ) {
 
-			unset($this->parameters[$parameter]);
+            unset($this->parameters[$parameter]);
 
-			return true;
+            return true;
 
-		}
+        }
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Get single parameter
-	 *
-	 * @param	string	$parameter
-	 *
-	 * @return	scalar|NULL	Parameter value or NULL if not found
-	 */
-	public function getParameter($parameter) {
+    /**
+     * Get single parameter
+     *
+     * @param   string  $parameter
+     *
+     * @return  scalar|null Parameter value or null if not found
+     */
+    public function getParameter($parameter) {
 
-		if ( array_key_exists($parameter, $this->parameters) ) {
+        if ( array_key_exists($parameter, $this->parameters) ) {
 
-			return $this->parameters[$parameter];
+            return $this->parameters[$parameter];
 
-		}
+        }
 
-		return NULL;
+        return null;
 
-	}
+    }
 
-	/**
-	 * Set parameters (all in one shot)
-	 *
-	 * @param	array	$parameters
-	 *
-	 * @return	Object	$this
-	 */
-	public function setParameters($parameters) {
+    /**
+     * Set parameters (all in one shot)
+     *
+     * @param   array   $parameters
+     *
+     * @return  Object  $this
+     */
+    public function setParameters($parameters) {
 
-		$this->parameters = is_array($parameters) ? $parameters : $this->parameters;
+        $this->parameters = is_array($parameters) ? $parameters : $this->parameters;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset parameters
-	 *
-	 * @return	bool
-	 */
-	public function unsetParameters() {
+    /**
+     * Unset parameters
+     *
+     * @return  bool
+     */
+    public function unsetParameters() {
 
-		$this->parameters = Array();
+        $this->parameters = Array();
 
-		return true;
+        return true;
 
-	}
+    }
 
-	/**
-	 * Get parameters
-	 *
-	 * @return	array
-	 */
-	public function getParameters() {
+    /**
+     * Get parameters
+     *
+     * @return  array
+     */
+    public function getParameters() {
 
-		return $this->parameters;
+        return $this->parameters;
 
-	}
+    }
 
-	/**
-	 * Set raw parameters
-	 *
-	 * @return	Object	$this
-	 */
-	public function setRawParameters($parameters) {
+    /**
+     * Set raw parameters
+     *
+     * @return  Object  $this
+     */
+    public function setRawParameters($parameters) {
 
-		$this->raw_parameters = $parameters;
+        $this->raw_parameters = $parameters;
 
-		return $this;
+        return $this;
 
-	}
-	
-	/**
-	 * Get raw parameters
-	 *
-	 * @return	string
-	 */
-	public function getRawParameters() {
+    }
+    
+    /**
+     * Get raw parameters
+     *
+     * @return  string
+     */
+    public function getRawParameters() {
 
-		return $this->raw_parameters;
+        return $this->raw_parameters;
 
-	}
+    }
 
-	/**
-	 * Set header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 * @param 	string 	$value 		Header content (optional)
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeader($header, $value=NULL) {
+    /**
+     * Set header component
+     *
+     * @param   string  $header     Header name
+     * @param   string  $value      Header content (optional)
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeader($header, $value=null) {
 
-		$this->headers[$header] = $value;
+        $this->headers[$header] = $value;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	bool
-	 */
-	public function unsetHeader($header) {
+    /**
+     * Unset header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  bool
+     */
+    public function unsetHeader($header) {
 
-		if ( isset($this->headers[$header]) ) {
+        if ( isset($this->headers[$header]) ) {
 
-			unset($this->headers[$header]); 
+            unset($this->headers[$header]); 
 
-			return true;
+            return true;
 
-		}
+        }
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Get header component
-	 *
-	 * @param 	string 	$header 	Header name
-	 *
-	 * @return 	string 	Header component in case of success, false otherwise
-	 */
-	public function getHeader($header) {
+    /**
+     * Get header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  string  Header component in case of success, false otherwise
+     */
+    public function getHeader($header) {
 
-		if ( isset($this->headers[$header]) ) return $this->headers[$header];
+        if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
-		return false;
+        return false;
 
-	}
+    }
 
-	/**
-	 * Set headers
-	 *
-	 * @param 	array 	$headers 	Headers array
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function setHeaders($headers) {
+    /**
+     * Set headers
+     *
+     * @param   array   $headers    Headers array
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function setHeaders($headers) {
 
-		$this->headers = is_array($headers) ? $headers : $this->header;
+        $this->headers = is_array($headers) ? $headers : $this->header;
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Unset headers
-	 *
-	 * @return 	ObjectRequest 	$this
-	 */
-	public function unsetHeaders() {
+    /**
+     * Unset headers
+     *
+     * @return  ObjectRequest   $this
+     */
+    public function unsetHeaders() {
 
-		$this->headers = Array();
+        $this->headers = Array();
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Get headers
-	 *
-	 * @return 	Array 	Headers array
-	 */
-	public function getHeaders() {
+    /**
+     * Get headers
+     *
+     * @return  Array   Headers array
+     */
+    public function getHeaders() {
 
-		return $this->headers;
+        return $this->headers;
 
-	}
+    }
 
 }
-
-?>
