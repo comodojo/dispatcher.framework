@@ -343,6 +343,17 @@ class Dispatcher {
 
     }
 
+    /**
+     * Get dispatcher logger
+     *
+     * @return  Object
+     */
+    final public function getLogger() {
+
+        return $this->logger;
+
+    }
+
     final public function dispatch() {
 
         // Before building dispatcher instance, fire THE level1 event "dispatcher"
