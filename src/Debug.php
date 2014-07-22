@@ -47,16 +47,16 @@ class Debug {
 
         if ( $enabled ) {
 
-            $handler = is_null($target) ? new ErrorLogHandler($level) : new StreamHandler( defined('DISPATCHER_LOG_FOLDER') ? DISPATCHER_LOG_FOLDER.$target : $target, $level);
+            $handler = is_null($target) ? new ErrorLogHandler() : new StreamHandler( defined('DISPATCHER_LOG_FOLDER') ? DISPATCHER_LOG_FOLDER.$target : $target, $level);
 
         }
         else {
 
-            $handler = new NullHandler($logger_level);
+            $handler = new NullHandler($level);
 
         }
 
-        $logger->pushHandler($handler);
+        $this->logger->pushHandler($handler);
 
     }
 

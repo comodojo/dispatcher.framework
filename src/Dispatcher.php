@@ -548,8 +548,8 @@ class Dispatcher {
 
                 $this->logger->error('Service returns a DispatcherException', Array(
                     'SERVICE' => $this->serviceroute->getService(),
-                    'CODE'    => $e->getCode(),
-                    'MESSAGE' => $e->getMessage()
+                    'CODE'    => $de->getCode(),
+                    'MESSAGE' => $de->getMessage()
                 ));
 
                 $route = new ObjectError();
