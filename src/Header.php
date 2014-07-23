@@ -49,7 +49,7 @@ class Header {
      */
     final public function __construct($time=false) {
 
-    	$this->current_time = $time !== false ? $time : time();
+        $this->current_time = $time !== false ? $time : time();
 
     }
 
@@ -61,9 +61,9 @@ class Header {
      */
     final public function set($header, $value=null) {
 
-    	$this->headers[$header] = $value;
+        $this->headers[$header] = $value;
 
-    	return $this;
+        return $this;
 
     }
 
@@ -75,8 +75,8 @@ class Header {
      */
     final public function get($header) {
 
-    	if ( array_key_exists($header, $this->headers) ) return $this->headers[$header];
-    	else return false;
+        if ( array_key_exists($header, $this->headers) ) return $this->headers[$header];
+        else return false;
 
     }
 
@@ -87,9 +87,9 @@ class Header {
      */
     final public function free() {
 
-    	$this->headers = Array();
+        $this->headers = Array();
 
-    	return $this;
+        return $this;
 
     }
 
@@ -112,7 +112,7 @@ class Header {
      */
     final public function compose($status, $contentLength=0, $value=false) {
 
-    	switch ($status) {
+        switch ($status) {
 
             case 200: //OK
 
@@ -215,7 +215,7 @@ class Header {
             header('HTTP/1.1 503 Service Temporarily Unavailable');
             header('Status: 503 Service Temporarily Unavailable');
             if ( $value !== false AND @is_int($value) ) {
-            	header('Retry-After: '.$value);
+                header('Retry-After: '.$value);
             }
             
             break;
@@ -232,18 +232,18 @@ class Header {
      */
     public function setClientCache($ttl) {
 
-    	$ttl = filter_var($ttl, FILTER_VALIDATE_INT);
+        $ttl = filter_var($ttl, FILTER_VALIDATE_INT);
 
-    	if ( $ttl > 0 ) {
-    		$this->set("Cache-Control","max-age=".$ttl.", must-revalidate");
-    		$this->set("Expires",gmdate("D, d M Y H:i:s", (int)$this->current_time + $ttl)." GMT");
-    	}
-    	else {
-    		$this->set("Cache-Control","no-cache, must-revalidate");
-    		$this->set("Expires","Mon, 26 Jul 1997 05:00:00 GMT");
-    	}
+        if ( $ttl > 0 ) {
+            $this->set("Cache-Control","max-age=".$ttl.", must-revalidate");
+            $this->set("Expires",gmdate("D, d M Y H:i:s", (int)$this->current_time + $ttl)." GMT");
+        }
+        else {
+            $this->set("Cache-Control","no-cache, must-revalidate");
+            $this->set("Expires","Mon, 26 Jul 1997 05:00:00 GMT");
+        }
 
-    	return $this;
+        return $this;
 
     }
 
@@ -257,10 +257,10 @@ class Header {
     public function setContentType($type, $charset=null) {
 
 
-    	if ( is_null($charset) ) $this->set("Content-type",strtolower($type));
-    	else $this->set("Content-type",strtolower($type)."; charset=".$charset);
+        if ( is_null($charset) ) $this->set("Content-type",strtolower($type));
+        else $this->set("Content-type",strtolower($type)."; charset=".$charset);
 
-    	return $this;
+        return $this;
 
     }
 
@@ -271,20 +271,20 @@ class Header {
      */
     final public function getRequestHeaders() {
 
-    	$headers = '';
+        $headers = '';
 
-    	if (function_exists('getallheaders')) $headers = getallheaders();
+        if (function_exists('getallheaders')) $headers = getallheaders();
 
-    	else {
+        else {
 
-    		foreach ($_SERVER as $name => $value) {
+            foreach ($_SERVER as $name => $value) {
 
-    			if (substr($name, 0, 5) == 'HTTP_') $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
-    		}
+                if (substr($name, 0, 5) == 'HTTP_') $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
 
-    	}
+        }
 
-    	return $headers;
+        return $headers;
 
     }
 
@@ -295,12 +295,12 @@ class Header {
      */
     private function processExtraHeaders($headers) {
 
-    	foreach ( $headers as $header => $value ) {
+        foreach ( $headers as $header => $value ) {
 
-    		if ( is_null($value) ) header($header, true);
-    		else  header($header.": ".$value, true);
+            if ( is_null($value) ) header($header, true);
+            else  header($header.": ".$value, true);
 
-    	}
+        }
 
     }
 

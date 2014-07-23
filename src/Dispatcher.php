@@ -748,17 +748,27 @@ class Dispatcher {
 
         else if ( $psize == $esize ) {
 
-            $attributes = array_combine($expected, $provided);
+            $attributes = $psize == 0 ? array() : array_combine($expected, $provided);
 
         }
 
         else {
 
-            $pvalues = array_slice($provided, 0, $esize);
+            if ( $esize == 0 ) {
 
-            $e_attributes = array_combine($expected, $pvalues);
+                $e_attributes = array();
 
-            $lvalues = array_slice($provided, $esize);
+                $lvalues = $provided;
+
+            } else {
+
+                $pvalues = array_slice($provided, 0, $esize);
+
+                $e_attributes = array_combine($expected, $pvalues);
+
+                $lvalues = array_slice($provided, $esize);
+
+            }
 
             $lvaluessize = sizeof($lvalues);
 
@@ -771,16 +781,24 @@ class Dispatcher {
             }
             else if ( $lvaluessize == $lsize ) {
 
-                $l_attributes = array_combine($liked, $lvalues);
+                $l_attributes = $lvaluessize == 0 ? array() : array_combine($liked, $lvalues);
 
             }
             else {
 
-                $r_attributes = array_combine($liked, array_slice($lvalues, 0, $lsize));
+                if ( $lsize == 0 ) {
 
-                $remaining_parameters = array_slice($lvalues, $lsize);
+                    $l_attributes = $lvalues;
 
-                $l_attributes = array_merge($r_attributes, $remaining_parameters);
+                } else {
+
+                    $r_attributes = array_combine($liked, array_slice($lvalues, 0, $lsize));
+
+                    $remaining_parameters = array_slice($lvalues, $lsize);
+
+                    $l_attributes = array_merge($r_attributes, $remaining_parameters);
+
+                }
 
             }
 
