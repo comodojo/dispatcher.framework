@@ -354,6 +354,24 @@ class Dispatcher {
 
     }
 
+    /**
+     * Crear cache for a single request or entirely
+     *
+     * @param   mixed    $all    True = purge entire cache, false/null = purge current request cache
+     *
+     * @return  Object
+     */
+    final public function clearCache($all = null) {
+
+        return $this->cacher->purge( $all == true ? null : $this->service_url );
+
+    }
+
+    /**
+     * Dispatcher working method
+     *
+     * @return  mixed
+     */
     final public function dispatch() {
 
         // Before building dispatcher instance, fire THE level1 event "dispatcher"
