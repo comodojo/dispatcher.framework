@@ -908,7 +908,7 @@ class Dispatcher {
 
         if ( !in_array($method, $theservice->getImplementedMethods()) ) {
 
-            throw new DispatcherException("Allow: ".implode(",",$theservice->getSupportedMethods()), 501);
+            throw new DispatcherException("Allow: ".implode(",",$theservice->getImplementedMethods()), 501);
 
         }
 
