@@ -82,35 +82,28 @@ class Service {
      *
      * @var     array
      */
-    public $attributes = Array();
+    private $attributes = Array();
 
     /**
      * Request parameters, populated at runtime by dispatcher 
      *
      * @var     array
      */
-    public $parameters = Array();
+    private $parameters = Array();
 
     /**
      * Request raw parameters (php://input), populated at runtime by dispatcher 
      *
      * @var     array
      */
-    public $raw_parameters = Array();
+    private $raw_parameters = Array();
 
     /**
-     * An instance of dispatcher serializer
+     * Request headers, injected by dispatcher
      *
-     * @var     Object
+     * @var float
      */
-    public $serialize = NULL;
-
-    /**
-     * An instance of dispatcher deserializer
-     *
-     * @var     Object
-     */
-    public $deserialize = NULL;
+    private $request_headers = null;
 
     /**
      * Logger, injected by dispatcher
@@ -118,6 +111,20 @@ class Service {
      * @var float
      */
     private $logger = null;
+
+    /**
+     * An instance of dispatcher serializer
+     *
+     * @var     Object
+     */
+    public $serialize = null;
+
+    /**
+     * An instance of dispatcher deserializer
+     *
+     * @var     Object
+     */
+    public $deserialize = null;
 
     //###### Things a service may define ######//
 
@@ -406,7 +413,7 @@ class Service {
      *
      * @return  Object  $this
      */
-    final public function setHeader($header, $value=NULL) {
+    final public function setHeader($header, $value=null) {
 
         $this->headers[$header] = $value;
 
@@ -446,7 +453,7 @@ class Service {
 
         if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
-        return false;
+        return null;
 
     }
 
@@ -551,7 +558,7 @@ class Service {
 
             ( sizeof($this->expected_parameters[$method]) == 0 AND sizeof($this->expected_parameters["ANY"]) != 0 ) ? $this->expected_parameters["ANY"] : $this->expected_parameters[$method]           
 
-            );
+        );
 
     }
 
@@ -594,6 +601,71 @@ class Service {
 
         return $raw ? $this->raw_parameters : $this->parameters;
         
+    }
+
+    /**
+     * Set request attributes (used by dispatcher)
+     *
+     */
+    final public function setAttributes($attributes) {
+
+        $this->attributes = $attributes;
+
+    }
+
+    /**
+     * Set request parameters (used by dispatcher)
+     *
+     */
+    final public function setParameters($parameters) {
+
+        $this->parameters = $parameters;
+        
+    }
+
+    /**
+     * Set raw parameters  (used by dispatcher)
+     *
+     */
+    final public function setRawParameters($raw_parameters) {
+
+        $this->raw_parameters = $raw_parameters;
+        
+    }
+
+    /**
+     * Get request parameters, populated by dispatcher
+     *
+     */
+    final public function setRequestHeaders($headers) {
+
+        $this->request_headers = is_array($headers) ? $headers : array();
+        
+    }
+
+    /**
+     * Get request header component
+     *
+     * @param   string  $header     Header name
+     *
+     * @return  string  Header component in case of success, false otherwise
+     */
+    final public function getRequestHeader($header) {
+
+        if ( isset($this->request_headers[$header]) ) return $this->request_headers[$header];
+
+        return null;
+
+    }
+    /**
+     * Get headers
+     *
+     * @return  Array   Headers array
+     */
+    final public function getRequestHeaders() {
+
+        return $this->request_headers;
+
     }
 
 }

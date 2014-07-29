@@ -466,7 +466,7 @@ class Dispatcher {
             unset($preroute["parameters"]["ttl"]);
         }
         if ( isset($preroute["parameters"]["headers"]) ) {
-            $this->serviceroute->setHeaders($preroute["parameters"]["headers"]);
+            if ( is_array($preroute["parameters"]["headers"]) ) foreach ($preroute["parameters"]["headers"] as $header => $value) $this->serviceroute->setHeader($header, $value);
             unset($preroute["parameters"]["headers"]);
         }
         if ( isset($preroute["parameters"]["accessControl"]) ) {
@@ -932,9 +932,10 @@ class Dispatcher {
         
         // Fill service with dispatcher pieces
 
-        $theservice->attributes = $validated_attributes;
-        $theservice->parameters = $validated_parameters;
-        $theservice->raw_parameters = $request->getRawParameters();
+        $theservice->setAttributes($validated_attributes);
+        $theservice->setParameters($validated_parameters);
+        $theservice->setRawParameters($request->getRawParameters());
+        $theservice->setRequestHeaders($request->getHeaders());
 
         // Requesto to service the callable method (just to handle any method)
 
@@ -950,7 +951,6 @@ class Dispatcher {
             $return->setService($service)
                 ->setStatusCode($theservice->getStatusCode())
                 ->setContent($result)
-                //->setHeaders($theservice->getHeaders())
                 ->setHeaders( array_merge($theservice->getHeaders(), $route->getHeaders()) )
                 ->setContentType($theservice->getContentType())
                 ->setCharset($theservice->getCharset());
