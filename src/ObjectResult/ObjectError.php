@@ -171,13 +171,13 @@ class ObjectError implements ObjectResultInterface {
      *
      * @param   string  $header     Header name
      *
-     * @return  string  Header component in case of success, false otherwise
+     * @return  string  Header component in case of success, null otherwise
      */
     public function getHeader($header) {
 
         if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
-        return false;
+        return null;
 
     }
 

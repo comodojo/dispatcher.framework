@@ -57,7 +57,7 @@ class Service {
      *
      * @var     array
      */
-    private $headers = Array();
+    private $headers = array();
 
     /**
      * Supported HTTP methods (comma separated, not spaced)
@@ -82,35 +82,42 @@ class Service {
      *
      * @var     array
      */
-    private $attributes = Array();
+    private $attributes = array();
 
     /**
      * Request parameters, populated at runtime by dispatcher 
      *
      * @var     array
      */
-    private $parameters = Array();
+    private $parameters = array();
 
     /**
      * Request raw parameters (php://input), populated at runtime by dispatcher 
      *
      * @var     array
      */
-    private $raw_parameters = Array();
+    private $raw_parameters = array();
 
     /**
      * Request headers, injected by dispatcher
      *
      * @var float
      */
-    private $request_headers = null;
+    private $request_headers = array();
 
     /**
      * Logger, injected by dispatcher
      *
-     * @var float
+     * @var Object
      */
     private $logger = null;
+
+    /**
+     * Cacher, injected by dispatcher
+     *
+     * @var Object
+     */
+    private $cacher = null;
 
     /**
      * An instance of dispatcher serializer
@@ -129,39 +136,39 @@ class Service {
     //###### Things a service may define ######//
 
     // Expected attributes
-    private $expected_attributes = Array(
-        "GET"   =>  Array(),
-        "PUT"   =>  Array(),
-        "POST"  =>  Array(),
-        "DELETE"=>  Array(),
-        "ANY"   =>  Array()
+    private $expected_attributes = array(
+        "GET"   =>  array(),
+        "PUT"   =>  array(),
+        "POST"  =>  array(),
+        "DELETE"=>  array(),
+        "ANY"   =>  array()
         );
 
     // Expected parameters
-    private $expected_parameters = Array(
-        "GET"   =>  Array(),
-        "PUT"   =>  Array(),
-        "POST"  =>  Array(),
-        "DELETE"=>  Array(),
-        "ANY"   =>  Array()
+    private $expected_parameters = array(
+        "GET"   =>  array(),
+        "PUT"   =>  array(),
+        "POST"  =>  array(),
+        "DELETE"=>  array(),
+        "ANY"   =>  array()
         );
 
     // Liked attributes
-    private $liked_attributes = Array(
-        "GET"   =>  Array(),
-        "PUT"   =>  Array(),
-        "POST"  =>  Array(),
-        "DELETE"=>  Array(),
-        "ANY"   =>  Array()
+    private $liked_attributes = array(
+        "GET"   =>  array(),
+        "PUT"   =>  array(),
+        "POST"  =>  array(),
+        "DELETE"=>  array(),
+        "ANY"   =>  array()
         );
 
     // Liked parameters
-    private $liked_parameters = Array(
-        "GET"   =>  Array(),
-        "PUT"   =>  Array(),
-        "POST"  =>  Array(),
-        "DELETE"=>  Array(),
-        "ANY"   =>  Array()
+    private $liked_parameters = array(
+        "GET"   =>  array(),
+        "PUT"   =>  array(),
+        "POST"  =>  array(),
+        "DELETE"=>  array(),
+        "ANY"   =>  array()
         );
 
     //###### Things dedicated to internal use ######//
@@ -169,9 +176,9 @@ class Service {
     /**
      * Supported success code (as defined in ObjectSuccess)
      *
-     * @var     Array
+     * @var     array
      */
-    private $supported_success_codes = Array(200,202,204);
+    private $supported_success_codes = array(200,202,204);
 
     /*************** HTTP METHODS IMPLEMENTATIONS **************/
     
@@ -221,9 +228,7 @@ class Service {
      *
      * @return null
      */
-    public function setup() {
-
-    }
+    public function setup() { }
 
     /**
      * Service constructor.
@@ -235,9 +240,11 @@ class Service {
      *
      * @return null
      */
-    public function __construct($logger) {
+    public function __construct($logger, $cacher) {
 
         $this->logger = $logger;
+
+        $this->cacher = $cacher;
 
         $this->serialize = new Serialization();
 
@@ -254,7 +261,7 @@ class Service {
      * @param   array   $parameters An array of parameters, with or without compliance check
      * @return  Object  $this
      */
-    final public function expects($method, $attributes, $parameters=Array()) {
+    final public function expects($method, $attributes, $parameters=array()) {
 
         $method = strtoupper($method);
 
@@ -272,7 +279,7 @@ class Service {
      * @param   array   $parameters An array of parameters, with or without compliance check
      * @return  Object  $this
      */
-    final public function likes($method, $attributes, $parameters=Array()) {
+    final public function likes($method, $attributes, $parameters=array()) {
 
         $method = strtoupper($method);
 
@@ -303,7 +310,7 @@ class Service {
         $methods = preg_replace('/\s+/', '', $methods);
         $methods = explode(",", $methods);
 
-        $supported_methods = Array();
+        $supported_methods = array();
 
         foreach ($methods as $method) {
             
@@ -406,6 +413,17 @@ class Service {
     }
 
     /**
+     * Get dispatcher cacher
+     *
+     * @return  Object
+     */
+    final public function getCacher() {
+
+        return $this->cacher;
+
+    }
+
+    /**
      * Set header component
      *
      * @param   string  $header     Header name
@@ -479,7 +497,7 @@ class Service {
      */
     final public function unsetHeaders() {
 
-        $this->headers = Array();
+        $this->headers = array();
 
         return $this;
 
@@ -488,7 +506,7 @@ class Service {
     /**
      * Get headers
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     final public function getHeaders() {
 
@@ -499,7 +517,7 @@ class Service {
     /**
      * Get service-supported HTTP methods
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     final public function getSupportedMethods() {
 
@@ -510,7 +528,7 @@ class Service {
     /**
      * Get service-implemented HTTP methods
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     final public function getImplementedMethods() {
 
@@ -518,7 +536,7 @@ class Service {
 
         $supported_methods = explode(',',$this->supported_http_methods);
 
-        $implemented_methods = Array();
+        $implemented_methods = array();
 
         foreach ( $supported_methods as $method ) {
 
@@ -533,7 +551,7 @@ class Service {
     /**
      * Return the callable class method that reflect the requested one
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     final public function getCallableMethod($method) {
 
@@ -546,13 +564,13 @@ class Service {
     /**
      * Get attributes and parameters that service expects
      *
-     * @return  Array 
+     * @return  array 
      */
     final public function getExpected($method) {
 
         $method = strtoupper($method);
 
-        return Array(
+        return array(
 
             ( sizeof($this->expected_attributes[$method]) == 0 AND sizeof($this->expected_attributes["ANY"]) != 0 ) ? $this->expected_attributes["ANY"] : $this->expected_attributes[$method],
 
@@ -565,13 +583,13 @@ class Service {
     /**
      * Get attributes and parameters that service likes
      *
-     * @return  Array 
+     * @return  array 
      */
     final public function getLiked($method) {
 
         $method = strtoupper($method);
 
-        return Array(
+        return array(
 
             ( sizeof($this->liked_attributes[$method]) == 0 AND sizeof($this->liked_attributes["ANY"]) != 0 ) ? $this->liked_attributes["ANY"] : $this->liked_attributes[$method],
 
@@ -579,28 +597,6 @@ class Service {
 
             );
 
-    }
-
-    /**
-     * Get request attributes, populated by dispatcher
-     *
-     * @return  Array 
-     */
-    final public function getAttributes() {
-
-        return $this->attributes;
-
-    }
-
-    /**
-     * Get request parameters, populated by dispatcher
-     *
-     * @return  Array 
-     */
-    final public function getParameters($raw=false) {
-
-        return $raw ? $this->raw_parameters : $this->parameters;
-        
     }
 
     /**
@@ -614,6 +610,42 @@ class Service {
     }
 
     /**
+     * Get request attributes, populated by dispatcher
+     *
+     * @return  array 
+     */
+    final public function getAttributes() {
+
+        return $this->attributes;
+
+    }
+
+    /**
+     * Get request attribute, populated by dispatcher
+     *
+     * @param   string  $attribute  Attribute to search for
+     *
+     * @return  mixed 
+     */
+    final public function getAttribute($attribute) {
+
+        if ( isset($this->attributes[$attribute]) ) return $this->attributes[$attribute];
+
+        return null;
+
+    }
+
+    /**
+     * Set raw parameters  (used by dispatcher)
+     *
+     */
+    final public function setRawParameters($raw_parameters) {
+
+        $this->raw_parameters = $raw_parameters;
+        
+    }
+
+    /**
      * Set request parameters (used by dispatcher)
      *
      */
@@ -624,12 +656,28 @@ class Service {
     }
 
     /**
-     * Set raw parameters  (used by dispatcher)
+     * Get request parameters, populated by dispatcher
      *
+     * @return  array 
      */
-    final public function setRawParameters($raw_parameters) {
+    final public function getParameters($raw=false) {
 
-        $this->raw_parameters = $raw_parameters;
+        return $raw ? $this->raw_parameters : $this->parameters;
+        
+    }
+
+    /**
+     * Get request parameter, populated by dispatcher
+     *
+     * @param   string  $parameter  Parameter to search for
+     *
+     * @return  array 
+     */
+    final public function getParameter($parameter) {
+
+        if ( isset($this->parameters[$parameter]) ) return $this->parameters[$parameter];
+
+        return null;
         
     }
 
@@ -646,9 +694,9 @@ class Service {
     /**
      * Get request header component
      *
-     * @param   string  $header     Header name
+     * @param   string  $header     Header to search for
      *
-     * @return  string  Header component in case of success, false otherwise
+     * @return  string              Header component in case of success, null otherwise
      */
     final public function getRequestHeader($header) {
 
@@ -660,7 +708,7 @@ class Service {
     /**
      * Get headers
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     final public function getRequestHeaders() {
 

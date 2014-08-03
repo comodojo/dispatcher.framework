@@ -882,7 +882,7 @@ class Dispatcher {
 
         $service_class = "\\Comodojo\\Dispatcher\\Service\\".$service_class;
 
-        $theservice = new $service_class($this->logger);
+        $theservice = new $service_class($this->logger, $this->cacher);
 
         // Setup service
 

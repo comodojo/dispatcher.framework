@@ -419,7 +419,7 @@ class ObjectRequest {
 
         if ( isset($this->headers[$header]) ) return $this->headers[$header];
 
-        return false;
+        return null;
 
     }
 
