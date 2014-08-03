@@ -1,5 +1,16 @@
 <?php namespace Comodojo\Dispatcher;
 
+use \Comodojo\Dispatcher\Debug;
+use \Comodojo\Exception\DispatcherException;
+use \Comodojo\Exception\IOException;
+use \Comodojo\Dispatcher\ObjectRequest\ObjectRequest;
+use \Comodojo\Dispatcher\ObjectRoutingTable\ObjectRoutingTable;
+use \Comodojo\Dispatcher\ObjectRoute\ObjectRoute;
+use \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface;
+use \Comodojo\Dispatcher\ObjectResult\ObjectSuccess;
+use \Comodojo\Dispatcher\ObjectResult\ObjectError;
+use \Comodojo\Dispatcher\ObjectResult\ObjectRedirect;
+
 /**
  * THE comodojo dispatcher
  *
@@ -22,17 +33,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-use \Comodojo\Dispatcher\Debug;
-use \Comodojo\Exception\DispatcherException;
-use \Comodojo\Exception\IOException;
-use \Comodojo\Dispatcher\ObjectRequest\ObjectRequest;
-use \Comodojo\Dispatcher\ObjectRoutingTable\ObjectRoutingTable;
-use \Comodojo\Dispatcher\ObjectRoute\ObjectRoute;
-use \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface;
-use \Comodojo\Dispatcher\ObjectResult\ObjectSuccess;
-use \Comodojo\Dispatcher\ObjectResult\ObjectError;
-use \Comodojo\Dispatcher\ObjectResult\ObjectRedirect;
 
 class Dispatcher {
 

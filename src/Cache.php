@@ -1,5 +1,7 @@
 <?php namespace Comodojo\Dispatcher;
 
+use \Comodojo\Exception\IOException;
+
 /**
  * dspatcher cache controller
  * 
@@ -22,8 +24,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-use \Comodojo\Exception\IOException;
 
 class Cache {
     
@@ -58,7 +58,8 @@ class Cache {
     /**
      * Constructor method. It only acquire current time and notify that cache is ready
      *
-     * @param   string  $time   Dispatcher time
+     * @param   float   $time   Dispatcher time
+     * @param   Object  $logger Logger, injected by dispatcher
      */
     final public function __construct($time, $logger) {
 

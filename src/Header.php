@@ -56,7 +56,8 @@ class Header {
     /**
      * Set $header with a $value. If value is null, only $header will be used
      *
-     * @param   string  $time   Dispatcher time
+     * @param   string  $header   Header name
+     * @param   mixed   $value    Header value (if not included in $header)
      * @return  Object  $this
      */
     final public function set($header, $value=null) {
@@ -70,13 +71,15 @@ class Header {
     /**
      * Get header value (if in array).
      *
-     * @param   string  $time   Dispatcher time
-     * @return  string|bool     Header value or false
+     * @param   string  $header     Header to search for
+     *
+     * @return  string              Header value or null
      */
     final public function get($header) {
 
         if ( array_key_exists($header, $this->headers) ) return $this->headers[$header];
-        else return false;
+
+        else return null;
 
     }
 

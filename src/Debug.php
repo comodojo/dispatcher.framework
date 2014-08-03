@@ -1,5 +1,10 @@
 <?php namespace Comodojo\Dispatcher;
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Handler\NullHandler;
+
 /**
  * Init the monolog logger/debugger
  * 
@@ -22,12 +27,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\ErrorLogHandler;
-use Monolog\Handler\NullHandler;
-
 
 class Debug {
 

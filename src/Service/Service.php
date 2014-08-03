@@ -1,5 +1,10 @@
 <?php namespace Comodojo\Dispatcher\Service;
 
+use \Comodojo\Exception\DispatcherException;
+use \Comodojo\Exception\IOException;
+use \Comodojo\Dispatcher\Serialization;
+use \Comodojo\Dispatcher\Deserialization;
+
 /**
  * The Service base class, feel free to extend
  * 
@@ -22,12 +27,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-use \Comodojo\Exception\DispatcherException;
-use \Comodojo\Exception\IOException;
-use \Comodojo\Dispatcher\Serialization;
-use \Comodojo\Dispatcher\Deserialization;
-
 
 class Service {
 
@@ -258,7 +257,9 @@ class Service {
      * Expected attributes (i.e. ones that will build the URI)
      *
      * @param   string  $method     HTTP method for punctual attributes rematch or ANY
-     * @param   array   $parameters An array of parameters, with or without compliance check
+     * @param   array   $attributes Array og attributes that service expects
+     * @param   array   $parameters Array of parameters that service expects
+     *
      * @return  Object  $this
      */
     final public function expects($method, $attributes, $parameters=array()) {
@@ -276,7 +277,9 @@ class Service {
      * Liked (optional) attributes
      *
      * @param   string  $method     HTTP method for punctual attributes rematch or ANY
-     * @param   array   $parameters An array of parameters, with or without compliance check
+     * @param   array   $attributes Array og attributes that service likes
+     * @param   array   $parameters Array of parameters that service likes
+     *
      * @return  Object  $this
      */
     final public function likes($method, $attributes, $parameters=array()) {
@@ -301,8 +304,8 @@ class Service {
      * - If method is not IMPLEMENTED - i.e. get() method is not defined - service will not
      *   be initiated and a 501 - Not Implemented error will be returned
      *
-     * @param   string  $method     HTTP method for punctual attributes rematch or ANY
-     * @param   array   $parameters An array of parameters, with or without compliance check
+     * @param   string  $methods     HTTP methods, comma separated
+     *
      * @return  Object  $this
      */
     final public function setSupportedMethods($methods) {
@@ -352,7 +355,8 @@ class Service {
     /**
      * Set service charset
      *
-     * @param   string  $type   Charset
+     * @param   string  $charset   Charset
+     *
      * @return  Object  $this
      */
     final public function setCharset($charset) {
