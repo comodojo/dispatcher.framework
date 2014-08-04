@@ -655,7 +655,7 @@ class Dispatcher {
             }
             else {
 
-                $service_requested = "default";
+                $service_requested = "";
                 $service_attributes = Array();
 
             }
@@ -754,7 +754,7 @@ class Dispatcher {
 
     private function attributesMatch($provided, $expected, $liked) {
 
-        if ( $this->working_mode == "STANDARD" ) return $this->parameters_match($provided, $expected, $liked);
+        if ( $this->working_mode == "STANDARD" ) return $this->parametersMatch($provided, $expected, $liked);
 
         $attributes = Array();
 
