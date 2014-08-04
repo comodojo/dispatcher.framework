@@ -1,8 +1,8 @@
 Comodojo dispatcher
 ===================
 
-> REST services microframework
+REST services microframework (3.0)
 
-This repository contains an unstable (and not yet working) version of dispatcher (3.0).
+Dispatcher is a service-oriented REST service micro framework, born as an offshoot of comodojo core and evolved to be fast, extensible, simple to use and learn.
 
-Old releases available at www.comodojo.org
+For more information, visit [dispatcher.comodojo.org](http://dispatcher.comodojo.org).
