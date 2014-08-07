@@ -226,7 +226,7 @@ class Cache {
             while( false !== ( $cache_file = readdir($cache_path) ) ) {
 
                 if ( pathinfo($cache_file, PATHINFO_EXTENSION) == "cache" ) {
-                    if ( unlink($cache_file) == false ) return false;
+                    if ( unlink( $this->cache_path . ( $this->cache_path[strlen($this->cache_path)-1] == "/" ? "" : "/" ) . $cache_file ) == false ) return false;
                     else $cache_files_number++;
                 }
                 else continue;
