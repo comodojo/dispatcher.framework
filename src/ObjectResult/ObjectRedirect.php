@@ -3,7 +3,7 @@
 /**
  * The Object redirect class, an implementation of ObjectResultInterface
  *
- * @package     Comodojo dispatcher (Spare Parts)
+ * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
  *

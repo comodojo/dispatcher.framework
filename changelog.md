@@ -1,7 +1,7 @@
 comodojo\dispatcher.framework changelog
 =======================================
 
-# 3.0.0-beta.1
+# 3.0.0 (Cosmonaut)
 -------------
 
 - Monolog as default log library

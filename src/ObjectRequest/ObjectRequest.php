@@ -6,7 +6,7 @@
  * This is the class use to model the request and exposed by level2(/3) event(s)
  * "dispatcher.request(.*)"
  *
- * @package     Comodojo dispatcher (Spare Parts)
+ * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
  *

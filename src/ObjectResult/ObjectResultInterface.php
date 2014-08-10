@@ -3,7 +3,7 @@
 /**
  * The ObjectResultInterface, base interface that any result class should implement
  *
- * @package     Comodojo dispatcher (Spare Parts)
+ * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
  *

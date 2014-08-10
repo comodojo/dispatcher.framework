@@ -4,7 +4,7 @@
  * DispatcherException handler; nothing special, just an implementation of
  * standard Exception class.
  *
- * @package     Comodojo dispatcher (Spare Parts)
+ * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
  *

@@ -5,7 +5,7 @@ use \Comodojo\Exception\IOException;
 /**
  * dspatcher cache controller
  * 
- * @package     Comodojo dispatcher (Spare Parts)
+ * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
  *

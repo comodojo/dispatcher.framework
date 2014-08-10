@@ -3,7 +3,7 @@
 /**
  * serialization class for dispatcher
  * 
- * @package     Comodojo dispatcher (Spare Parts)
+ * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
  *

@@ -8,7 +8,7 @@ use \Comodojo\Dispatcher\Deserialization;
 /**
  * The Service base class, feel free to extend
  * 
- * @package     Comodojo dispatcher (Spare Parts)
+ * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
  *

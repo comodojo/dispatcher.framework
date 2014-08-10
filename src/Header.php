@@ -6,7 +6,7 @@
  * This class manage response headers, from the status code to the custom
  * header the service will return.
  *
- * @package     Comodojo dispatcher (Spare Parts)
+ * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <info@comodojo.org>
  * @license     GPL-3.0+
  *
