@@ -1,5 +1,7 @@
 <?php namespace Comodojo\Dispatcher;
 
+use \Exception;
+
 /**
  * Dispatcher event class
  *

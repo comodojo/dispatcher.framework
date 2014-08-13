@@ -3,6 +3,7 @@
 use \Comodojo\Dispatcher\Debug;
 use \Comodojo\Exception\DispatcherException;
 use \Comodojo\Exception\IOException;
+use \Exception;
 use \Comodojo\Dispatcher\ObjectRequest\ObjectRequest;
 use \Comodojo\Dispatcher\ObjectRoutingTable\ObjectRoutingTable;
 use \Comodojo\Dispatcher\ObjectRoute\ObjectRoute;
