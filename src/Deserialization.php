@@ -58,9 +58,8 @@ class Deserialization {
         if ( !is_string($data) ) throw new Exception("Invalid data for XML deserialization");
 
         $xmlEngine = new XML();
-        $xmlEngine->sourceString = $data;
 
-        return $xmlEngine->decode();
+        return $xmlEngine->decode($data);
 
     }
 

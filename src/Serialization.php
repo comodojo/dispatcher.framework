@@ -62,26 +62,32 @@ class Serialization {
         if ( is_object($data) ) $data = $this->objectToArray($data);
 
         $xmlEngine = new XML();
-        $xmlEngine->sourceArray = $data;
-
-        $encoded = $xmlEngine->encode();
+        
+        $encoded = $xmlEngine->encode($data);
 
         switch ($prettify) {
             
             case 'HTML':
             case 'html':
-            $return = htmlspecialchars($this->xmlToTxt($encoded), ENT_QUOTES);
-            break;
+            
+                $return = htmlspecialchars($this->xmlToTxt($encoded), ENT_QUOTES);
+                
+                break;
 
             case 'TXT':
             case 'txt':
             case true:
-            $return = $this->xmlToTxt($encoded);
-            break;
+            
+                $return = $this->xmlToTxt($encoded);
+                
+                break;
             
             default:
-            $return = $encoded;
-            break;
+                
+                $return = $encoded;
+            
+                break;
+                
         }
 
         return $return;
