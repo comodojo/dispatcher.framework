@@ -1,6 +1,13 @@
 comodojo\dispatcher.framework changelog
 =======================================
 
+# 3.0.1 (Cosmonaut - maintenance release 1)
+-------------
+
+- fixed error in whole cache purging
+- missing exception namespace declaration
+- serialization methods fix
+
 # 3.0.0 (Cosmonaut)
 -------------
 
