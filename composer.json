@@ -4,12 +4,16 @@
     "license": "GPL-3.0+",
     "type": "library",
     "keywords": [
-        "REST",
+        "rest",
+        "restful",
         "php",
-        "rest services",
-        "lframework",
+        "restservices",
+        "service",
+        "framework",
         "comodojo",
-        "services"
+        "services",
+        "webservices",
+        "extensible"
     ],
     "homepage": "http://dispatcher.comodojo.org",
      "support": {
