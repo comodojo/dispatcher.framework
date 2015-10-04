@@ -9,7 +9,7 @@ use Monolog\Handler\NullHandler;
  * Init the monolog logger/debugger
  * 
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:

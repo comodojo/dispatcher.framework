@@ -4,7 +4,7 @@
  * The Object error class, an implementation of ObjectResultInterface
  *
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -190,7 +190,7 @@ class ObjectError implements ObjectResultInterface {
      */
     public function setHeaders($headers) {
 
-        $this->headers = is_array($headers) ? $headers : $this->header;
+        $this->headers = is_array($headers) ? $headers : $this->headers;
 
         return $this;
 

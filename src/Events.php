@@ -5,66 +5,8 @@ use \Exception;
 /**
  * Dispatcher event class
  *
- * It handle any hook fired by events.
- *
- * By default, dispatcher uses three different level of events:
- *
- * - level one: [event]
- *
- * - level two: [event].[notification]
- *
- * - level one: [event].[notification].[detail]
- *
- *
- * There is only one level 1 event, the "dispatcher". It can be used, for example,
- *
- * to close dispatcher for a particular kind of request.
- *
- * Level 2/3 events are stage-dependent. A complete, time based, list could be:
- *
- *
- * << dispatcher receive a request, so starts modelling it in ObjectRequest
- *
- * -->> "dispatcher.request"
- *
- * ---->> "dispatcher.request.[METHOD]"
- *
- * ---->> "dispatcher.request.[SERVICE]"
- *
- * -->> "dispatcher.request.#" (special event, for tracing or timing funcs; fires after every other callback and cannot modify request)
- *
- *
- * >< an instance of routingtable was initiated
- *
- * -->> "dispatcher.routingtable" - exposing routingtable
- *
- *
- * >< ask routing table for a route
- *
- * -->> "dispatcher.serviceroute" - exposing serive route
- *
- * ---->> "dispatcher.serviceroute.[TYPE]"
- *
- * ---->> "dispatcher.serviceroute.[SERVICE]"
- *
- * -->> "dispatcher.serviceroute.#" (special event, for tracing or timing funcs; fires after every other callback and cannot modify route)
- *
- *
- * >< service runs and return a result || route is a REDIRECT || route is a ERROR
- *
- * -->> "dispatcher.result" - exposing result
- *
- * -->> "dispatcher.route|redirect|error"
- *
- * ---->> "dispatcher.route|redirect|error.[STATUSCODE]"
- *
- * -->> "dispatcher.result.#" (special event, for tracing or timing funcs; fires after every other callback and can modify result)
- *
- *
- * >> result to requestor
- *
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -95,7 +37,7 @@ class Events {
     /**
      * Logger, injected by dispatcher
      *
-     * @var float
+     * @var \Comodojo\Dispatcher\Debug
      */
     private $logger = null;
 
@@ -261,7 +203,6 @@ class Events {
                             'METHOD'   => $callback[1]
                         ));
 
-                        debug("Skipping not-callable hook ".$event."::".$callback[0].":".$callback[1], "WARNING", "events");
                         continue;
 
                     }

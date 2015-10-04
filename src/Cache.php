@@ -6,7 +6,7 @@ use \Comodojo\Exception\IOException;
  * dspatcher cache controller
  * 
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -51,7 +51,7 @@ class Cache {
     /**
      * Logger, injected by dispatcher
      *
-     * @var float
+     * @var \Comodojo\Dispatcher\Debug
      */
     private $logger = null;
 

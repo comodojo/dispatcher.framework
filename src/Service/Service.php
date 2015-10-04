@@ -9,7 +9,7 @@ use \Comodojo\Dispatcher\Deserialization;
  * The Service base class, feel free to extend
  * 
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -100,7 +100,7 @@ class Service {
     /**
      * Request headers, injected by dispatcher
      *
-     * @var float
+     * @var array
      */
     private $request_headers = array();
 
@@ -388,7 +388,7 @@ class Service {
 
         $code = filter_var($code, FILTER_VALIDATE_INT);
 
-        $this->status_code = in_array($code, $this->supported_success_codes) ? $code : $this->code;
+        $this->status_code = in_array($code, $this->supported_success_codes) ? $code : $this->status_code;
 
         return $this;
 
@@ -488,7 +488,7 @@ class Service {
      */
     final public function setHeaders($headers) {
 
-        $this->headers = is_array($headers) ? $headers : $this->header;
+        $this->headers = is_array($headers) ? $headers : $this->headers;
 
         return $this;
 

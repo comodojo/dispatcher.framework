@@ -4,7 +4,7 @@
  * The ObjectResultInterface, base interface that any result class should implement
  *
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -30,7 +30,7 @@ interface ObjectResultInterface {
      *
      * @param   string  $service    The service name
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface
      */
     public function setService($service);
 
@@ -46,7 +46,7 @@ interface ObjectResultInterface {
      *
      * @param   integer $code
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface
      */
     public function setStatusCode($code);
 
@@ -62,7 +62,7 @@ interface ObjectResultInterface {
      *
      * @param   string  $message
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface
      */
     public function setContent($message);
 
@@ -78,7 +78,7 @@ interface ObjectResultInterface {
      *
      * @param   string  $location
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface
      */
     public function setLocation($location);
 
@@ -95,7 +95,7 @@ interface ObjectResultInterface {
      * @param   string  $header     Header name
      * @param   string  $value      Header content (optional)
      *
-     * @return  ObjectRequest   $this
+     * @return  \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface
      */
     public function setHeader($header, $value);
 
@@ -122,7 +122,7 @@ interface ObjectResultInterface {
      *
      * @param   array   $headers    Headers array
      *
-     * @return  ObjectRequest   $this
+     * @return  \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface
      */
     public function setHeaders($headers);
 
@@ -136,7 +136,7 @@ interface ObjectResultInterface {
     /**
      * Unset headers
      *
-     * @return  ObjectRequest   $this
+     * @return  \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface
      */
     public function unsetHeaders();
 
@@ -145,14 +145,14 @@ interface ObjectResultInterface {
      *
      * @param   string  $type
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface
      */
     public function setContentType($type);
 
     /**
      * Get content type
      *
-     * @return  strinng
+     * @return  string
      */
     public function getContentType();
 
@@ -161,7 +161,7 @@ interface ObjectResultInterface {
      *
      * @param   string  $type
      *
-     * @return  Object  $this
+     * @return  \Comodojo\Dispatcher\ObjectResult\ObjectResultInterface
      */
     public function setCharset($type);
 

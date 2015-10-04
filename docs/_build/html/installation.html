@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; Comodojo dispatcher 3.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '3.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="top" title="Comodojo dispatcher 3.1.0 documentation" href="index.html" />
+    <link rel="next" title="Configuration" href="configuration.html" />
+    <link rel="prev" title="Comodojo dispatcher docs" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Comodojo dispatcher docs"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Comodojo dispatcher 3.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Comodojo dispatcher could be installed via <a class="reference external" href="https://getcomposer.org/">composer</a>, using dedicated <a class="reference external" href="https://github.com/comodojo/dispatcher.project">dispatcher.project</a> package.</p>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>To work properly, dispatcher requires an apache webserver with PHP &gt;=5.3.0, installed as apache module or cgi/fastcgi.</p>
+<p>It may work on different webservers like nginx (ensure to convert the .htaccess logic if you plan to use rewrite mode), but this is actually untested.</p>
+</div>
+<div class="section" id="installing-via-composer">
+<h2>Installing via composer<a class="headerlink" href="#installing-via-composer" title="Permalink to this headline">¶</a></h2>
+<p>First install <a class="reference external" href="https://getcomposer.org/">composer</a>, then create a new <a class="reference external" href="https://github.com/comodojo/dispatcher.project">dispatcher.project</a> using this command:</p>
+<blockquote>
+<div>php composer.phar create-project comodojo/dispatcher.project dispatcher</div></blockquote>
+<p>This will install a new instance of dispatcher and required dependencies in &#8220;dispatcher&#8221; folder.</p>
+<p>If you need also default content and tests, install the package:</p>
+<blockquote>
+<div>php composer.phar require comodojo/dispatcher.servicebundle.default</div></blockquote>
+<p>## Downloading as archive</p>
+<p>Stable releases are published on <a class="reference external" href="https://dispatcher.comodojo.org">dispatcher.comodojo.org</a>.</p>
+<p>To install, download latest package and type (in the package folder):</p>
+<blockquote>
+<div>php composer.phar install</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#installing-via-composer">Installing via composer</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Comodojo dispatcher docs</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="configuration.html"
+                        title="next chapter">Configuration</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/installation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Comodojo dispatcher docs"
+             >previous</a> |</li>
+        <li><a href="index.html">Comodojo dispatcher 3.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Marco Giovinazzi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

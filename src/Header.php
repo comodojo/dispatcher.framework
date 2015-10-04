@@ -7,7 +7,7 @@
  * header the service will return.
  *
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -49,7 +49,7 @@ class Header {
      */
     final public function __construct($time=false) {
 
-        $this->current_time = $time !== false ? $time : time();
+        $this->current_time = $time !== false ? $time : microtime(true);
 
     }
 

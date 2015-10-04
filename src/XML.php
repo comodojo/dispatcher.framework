@@ -7,7 +7,7 @@ use \Comodojo\Exception\XMLException;
  * XML data transformation class
  *
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -266,7 +266,7 @@ class XML {
      */
     private function free() {
 
-        if( isset($this->_parser) AND @is_resource($this->_parser) ) {
+        if( isset($this->parser) AND @is_resource($this->parser) ) {
 
             xml_parser_free($this->parser);
 

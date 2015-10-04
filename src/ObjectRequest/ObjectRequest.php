@@ -7,7 +7,7 @@
  * "dispatcher.request(.*)"
  *
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -54,14 +54,14 @@ class ObjectRequest {
      *
      * @var array
      */
-    private $attributes = Array();
+    private $attributes = array();
 
     /**
      * Parameters (POST) 
      *
      * @var array
      */
-    private $parameters = Array();
+    private $parameters = array();
 
     /**
      * Raw parameters (php://input) 
@@ -75,7 +75,7 @@ class ObjectRequest {
      *
      * @var array
      */
-    private $headers = Array();
+    private $headers = array();
 
     /**
      * Set current time
@@ -235,7 +235,7 @@ class ObjectRequest {
      */
     public function unsetAttributes() {
 
-        $this->attributes = Array();
+        $this->attributes = array();
 
         return true;
 
@@ -330,7 +330,7 @@ class ObjectRequest {
      */
     public function unsetParameters() {
 
-        $this->parameters = Array();
+        $this->parameters = array();
 
         return true;
 
@@ -432,7 +432,7 @@ class ObjectRequest {
      */
     public function setHeaders($headers) {
 
-        $this->headers = is_array($headers) ? $headers : $this->header;
+        $this->headers = is_array($headers) ? $headers : $this->headers;
 
         return $this;
 
@@ -445,7 +445,7 @@ class ObjectRequest {
      */
     public function unsetHeaders() {
 
-        $this->headers = Array();
+        $this->headers = array();
 
         return $this;
 
@@ -454,7 +454,7 @@ class ObjectRequest {
     /**
      * Get headers
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     public function getHeaders() {
 

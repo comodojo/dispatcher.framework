@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Comodojo dispatcher docs &mdash; Comodojo dispatcher 3.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '3.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="top" title="Comodojo dispatcher 3.1.0 documentation" href="#" />
+    <link rel="next" title="Installation" href="installation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">Comodojo dispatcher 3.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="comodojo-dispatcher-docs">
+<h1>Comodojo dispatcher docs<a class="headerlink" href="#comodojo-dispatcher-docs" title="Permalink to this headline">¶</a></h1>
+<img alt="_images/dispatcher_logo.png" src="_images/dispatcher_logo.png" />
+<p>Comodojo dispatcher is a service-oriented REST microframework designed to be simple to use, extensible and fast.</p>
+<p>Before version 3 project name was &#8220;SimpleDataRestDispatcher&#8221; and it was mainly oriented to JSON and XML pure-data REST services. Since version 3.0, dispatcher has become a totally different project, designed to publish and manage (almost) any kind of data.</p>
+<p>Dispatcher is structured on top of following main concepts:</p>
+<ul class="simple">
+<li>A dispatcher instance is a sort of multi-service container; services are grouped in bundles, managed by composer and installed from the project package. Installing or removing a bundle should never stop or interfere with other bundles or the dispatcher itself.</li>
+<li>Services are the central point of framework&#8217;s logic: they are independent, callable php classes that may return data (in any form) or errors (exception); a service must extend the <cite>ComodojoDispatcherService</cite> class.</li>
+<li>Routes are paths (urls) that may be associated to a service, redirect to another location or generate errors (exception); in practice, routes are only paths that forward a request to a service without any knowledge of the service&#8217;s logic.</li>
+<li>Services and routes are completely separated. It means that a single service may be reached via multiple routes and it&#8217;s life does not depend on any of them.</li>
+<li>In dispatcher, (almost) everything about requests, routes and results can be modified using events&#8217; subsystem; plugins are made to hook those events and interact with the framework. They can also be packed in bundles and managed using composer.</li>
+</ul>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-via-composer">Installing via composer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#directory-structure">Directory structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#configuration-files">Configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#general-properties">General properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#logging">Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#folders">Folders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#cache">Cache</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Comodojo dispatcher docs</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">Installation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >next</a> |</li>
+        <li><a href="#">Comodojo dispatcher 3.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Marco Giovinazzi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

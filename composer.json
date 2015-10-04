@@ -15,19 +15,19 @@
         "webservices",
         "extensible"
     ],
-    "homepage": "http://dispatcher.comodojo.org",
+    "homepage": "https://dispatcher.comodojo.org",
      "support": {
         "issues": "https://github.com/comodojo/dispatcher.framework/issues"
     },
     "authors": [
         {
             "name": "Marco Giovinazzi",
-            "email": "info@comodojo.org"
+            "email": "marco.giovinazzi@comodojo.org",
+            "homepage": "http://jme.altervista.org"
         }
     ],
     "autoload": {
         "psr-4": {
-            "Comodojo\\Exception\\": "src/Exception",
             "Comodojo\\Dispatcher\\ObjectRequest\\": "src/ObjectRequest",
             "Comodojo\\Dispatcher\\ObjectRoutingTable\\": "src/ObjectRoutingTable",
             "Comodojo\\Dispatcher\\ObjectRoute\\": "src/ObjectRoute",
@@ -36,10 +36,10 @@
             "Comodojo\\Dispatcher\\": "src"
         }
     },
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.0",
         "mustangostang/spyc": "0.5.*",
-        "monolog/monolog": "1.10.*"
+        "monolog/monolog": "1.17.*",
+        "comodojo/exceptions": "@stable"
     }
 }

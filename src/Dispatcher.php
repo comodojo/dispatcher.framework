@@ -16,7 +16,7 @@ use \Comodojo\Dispatcher\ObjectResult\ObjectRedirect;
  * THE comodojo dispatcher
  *
  * @package     Comodojo dispatcher
- * @author      Marco Giovinazzi <info@comodojo.org>
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -47,7 +47,7 @@ class Dispatcher {
     /**
      * Time at the time of request
      *
-     * @var integer
+     * @var float
      */
     private $current_time = null;
 
@@ -670,7 +670,7 @@ class Dispatcher {
     /**
      * Return current request uri
      *
-     * @return uri  The request uri
+     * @return string  The request uri
      */
     private function urlGetUri() {
 
@@ -681,7 +681,7 @@ class Dispatcher {
     /**
      * Return current request url
      *
-     * @return uri  The request uri
+     * @return string  The request uri
      */
     private function urlGetUrl() {
 
@@ -982,10 +982,21 @@ class Dispatcher {
         // This means event engine will fire a dispatcher.[routetype] event
         // In case of wrong instance, create an ObjectError (500, null) instance
 
-        if ( $route instanceof ObjectSuccess ) $hook = "dispatcher.route";
-        else if ( $route instanceof ObjectError ) $hook = "dispatcher.error";
-        else if ( $route instanceof ObjectRedirect ) $hook = "dispatcher.redirect";
-        else {
+        if ( $route instanceof ObjectSuccess ) {
+
+            $hook = "dispatcher.route";
+
+        } else if ( $route instanceof ObjectError ) {
+
+            $hook = "dispatcher.error";
+
+        } else if ( $route instanceof ObjectRedirect ) {
+
+            $hook = "dispatcher.redirect";
+
+        } else {
+
+            $hook = "dispatcher.error";
 
             $route = new ObjectError();
 
