@@ -39,7 +39,7 @@
     "require": {
         "php": ">=5.3.0",
         "mustangostang/spyc": "0.5.*",
-        "monolog/monolog": "1.17.*",
+        "monolog/monolog": "~1.0",
         "comodojo/exceptions": "@stable"
     }
 }
