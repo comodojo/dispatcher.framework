@@ -1,3 +1,7 @@
-.DS_Store
-/vendor/
-packages.json
+composer.phar
+composer.lock
+coverage.clover
+vendor/
+build/
+docs/_build/
+# composer.lock

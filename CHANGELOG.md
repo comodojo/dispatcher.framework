@@ -1,15 +1,12 @@
-comodojo\dispatcher.framework changelog
-=======================================
+# Changelog
 
-# 3.0.1 (Cosmonaut - maintenance release 1)
--------------
+## 3.0.1 (Cosmonaut - maintenance release 1)
 
 - fixed error in whole cache purging
 - missing exception namespace declaration
 - serialization methods fix
 
-# 3.0.0 (Cosmonaut)
--------------
+## 3.0.0 (Cosmonaut)
 
 - Monolog as default log library
 - (almost) compatible with fig standards
@@ -21,15 +18,13 @@ comodojo\dispatcher.framework changelog
 - Event engine & routing
 - Lots more...
 
-# 2.1 (never released)
---------------------------
+## 2.1 (never released)
 - Support for MySQL via mysqli
 - DB query fetch method (ASSOC,NUM,BOTH)
 - YAML output/transport
 - Bugfixing
 
-# 2.0
------------
+## 2.0
 
 - Bugfixing & optimization
 - GET,PUT,POST,DELETE Methods support
@@ -41,15 +36,13 @@ comodojo\dispatcher.framework changelog
 - CORS now supports multiple domains list (comma separated)
 - Support for PostgreSQL
 
-# 1.1
------------
+## 1.1
 
 - Bugfixing & optimization
 - Server and client cache support in router
 - Correct encoding in XML output (via constant DEFAULT_ENCODING)
 - Client cache support in services
 
-# 1.0
------------
+## 1.0
 
 - Initial release
