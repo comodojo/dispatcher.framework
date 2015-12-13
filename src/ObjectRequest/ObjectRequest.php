@@ -11,7 +11,7 @@
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -43,28 +43,28 @@ class ObjectRequest {
     private $service = null;
 
     /**
-     * The HTTP method (GET,POST,...) 
+     * The HTTP method (GET,POST,...)
      *
      * @var string
      */
     private $method = null;
 
     /**
-     * Attributes (querystring) 
+     * Attributes (querystring)
      *
      * @var array
      */
     private $attributes = array();
 
     /**
-     * Parameters (POST) 
+     * Parameters (POST)
      *
      * @var array
      */
     private $parameters = array();
 
     /**
-     * Raw parameters (php://input) 
+     * Raw parameters (php://input)
      *
      * @var array
      */
@@ -80,7 +80,7 @@ class ObjectRequest {
     /**
      * Set current time
      *
-     * @param   float   $time   
+     * @param   float   $time
      *
      * @return  Object  $this
      */
@@ -98,15 +98,15 @@ class ObjectRequest {
      * @return  float   time in microsec
      */
     public function getCurrentTime() {
-        
+
         return $this->current_time;
 
     }
 
     /**
-     * Set service 
+     * Set service
      *
-     * @param   strinng $service    
+     * @param   strinng $service
      *
      * @return  Object  $this
      */
@@ -124,7 +124,7 @@ class ObjectRequest {
      * @return  string
      */
     public function getService() {
-        
+
         return $this->service;
 
     }
@@ -137,7 +137,7 @@ class ObjectRequest {
      * @return  Object  $this
      */
     public function setMethod($method) {
-        
+
         $this->method = is_string($method) ? strtoupper($method) : $this->method;
 
         return $this;
@@ -147,10 +147,10 @@ class ObjectRequest {
     /**
      * Get HTTP method
      *
-     * @return  string  
+     * @return  string
      */
     public function getMethod() {
-        
+
         return $this->method;
 
     }
@@ -359,7 +359,7 @@ class ObjectRequest {
         return $this;
 
     }
-    
+
     /**
      * Get raw parameters
      *
@@ -398,7 +398,7 @@ class ObjectRequest {
 
         if ( isset($this->headers[$header]) ) {
 
-            unset($this->headers[$header]); 
+            unset($this->headers[$header]);
 
             return true;
 

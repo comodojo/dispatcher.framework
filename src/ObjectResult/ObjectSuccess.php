@@ -8,7 +8,7 @@
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -31,13 +31,13 @@ class ObjectSuccess implements ObjectResultInterface {
 
     private $content = null;
 
-    private $headers = Array();
+    private $headers = array();
 
     private $contentType = "text/plain";
 
     private $charset = DISPATCHER_DEFAULT_ENCODING;
 
-    private $supported_success_codes = Array(200,202,204);
+    private $supported_success_codes = array(200,202,204);
 
     /**
      * Set service name
@@ -156,7 +156,7 @@ class ObjectSuccess implements ObjectResultInterface {
 
         if ( isset($this->headers[$header]) ) {
 
-            unset($this->headers[$header]); 
+            unset($this->headers[$header]);
 
             return true;
 
@@ -203,7 +203,7 @@ class ObjectSuccess implements ObjectResultInterface {
      */
     public function unsetHeaders() {
 
-        $this->headers = Array();
+        $this->headers = array();
 
         return $this;
 
@@ -212,7 +212,7 @@ class ObjectSuccess implements ObjectResultInterface {
     /**
      * Get headers
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     public function getHeaders() {
 
@@ -262,7 +262,7 @@ class ObjectSuccess implements ObjectResultInterface {
     }
 
     /**
-     * Get charset 
+     * Get charset
      *
      * @return  string
      */

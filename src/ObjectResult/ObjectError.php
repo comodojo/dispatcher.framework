@@ -8,7 +8,7 @@
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -29,11 +29,11 @@ class ObjectError implements ObjectResultInterface {
 
     private $code = 500;
 
-    private $supported_error_codes = Array(400,403,404,405,500,501,503);
+    private $supported_error_codes = array(400,403,404,405,500,501,503);
 
     private $content = null;
 
-    private $headers = Array();
+    private $headers = array();
 
     private $contentType = "text/plain";
 
@@ -156,7 +156,7 @@ class ObjectError implements ObjectResultInterface {
 
         if ( isset($this->headers[$header]) ) {
 
-            unset($this->headers[$header]); 
+            unset($this->headers[$header]);
 
             return true;
 
@@ -203,7 +203,7 @@ class ObjectError implements ObjectResultInterface {
      */
     public function unsetHeaders() {
 
-        $this->headers = Array();
+        $this->headers = array();
 
         return $this;
 
@@ -212,7 +212,7 @@ class ObjectError implements ObjectResultInterface {
     /**
      * Get headers
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     public function getHeaders() {
 
@@ -262,7 +262,7 @@ class ObjectError implements ObjectResultInterface {
     }
 
     /**
-     * Get charset 
+     * Get charset
      *
      * @return  string
      */

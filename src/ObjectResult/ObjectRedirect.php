@@ -8,7 +8,7 @@
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -29,11 +29,11 @@ class ObjectRedirect implements ObjectResultInterface {
 
     private $code = 307;
 
-    private $supported_redirect_codes = Array(201,301,302,303,307);
+    private $supported_redirect_codes = array(201,301,302,303,307);
 
     private $location = null;
 
-    private $headers = Array();
+    private $headers = array();
 
     /**
      * Set service name
@@ -154,7 +154,7 @@ class ObjectRedirect implements ObjectResultInterface {
 
         if ( isset($this->headers[$header]) ) {
 
-            unset($this->headers[$header]); 
+            unset($this->headers[$header]);
 
             return true;
 
@@ -201,7 +201,7 @@ class ObjectRedirect implements ObjectResultInterface {
      */
     public function unsetHeaders() {
 
-        $this->headers = Array();
+        $this->headers = array();
 
         return $this;
 
@@ -210,7 +210,7 @@ class ObjectRedirect implements ObjectResultInterface {
     /**
      * Get headers
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     public function getHeaders() {
 

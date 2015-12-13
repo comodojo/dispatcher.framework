@@ -8,7 +8,7 @@
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -129,7 +129,7 @@ interface ObjectResultInterface {
     /**
      * Get headers
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     public function getHeaders();
 
@@ -166,7 +166,7 @@ interface ObjectResultInterface {
     public function setCharset($type);
 
     /**
-     * Get charset 
+     * Get charset
      *
      * @return  string
      */

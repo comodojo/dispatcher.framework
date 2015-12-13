@@ -2,13 +2,13 @@
 
 /**
  * Routing table object
- * 
+ *
  * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -37,7 +37,7 @@ class ObjectRoutingTable {
      *
      * @var array
      */
-    private $table = Array();
+    private $table = array();
 
     /**
      * Supported route types.
@@ -48,7 +48,7 @@ class ObjectRoutingTable {
      *
      * @var array
      */
-    private $supported_route_types = Array("ROUTE","REDIRECT","ERROR");
+    private $supported_route_types = array("ROUTE","REDIRECT","ERROR");
 
     /**
      * Object constructor.
@@ -57,10 +57,10 @@ class ObjectRoutingTable {
      */
     final public function __construct() {
 
-        $this->table["default"] = Array(
+        $this->table["default"] = array(
             "type"          =>  "ERROR",
             "target"        =>  "Service not found",
-            "parameters"    =>  Array(
+            "parameters"    =>  array(
                 "errorCode"     => 404
                 )
             );
@@ -77,13 +77,13 @@ class ObjectRoutingTable {
      *
      * @return  Object  $this
      */
-    public function setRoute($service, $type, $target, $parameters=Array()) {
+    public function setRoute($service, $type, $target, $parameters=array()) {
 
-        $this->table[$service] = Array(
+        $this->table[$service] = array(
             "type"          =>  $type,
             "target"        =>  $target,
             "parameters"    =>  $parameters
-            );
+        );
 
         return $this;
 
@@ -144,13 +144,13 @@ class ObjectRoutingTable {
         // If autoroute is enabled, try to match service name with a service file.
         // If true, try to route request
 
-        else if ( DISPATCHER_AUTO_ROUTE AND $this->routable($service.".php", true) ) {
+        else if ( defined('DISPATCHER_AUTO_ROUTE') && DISPATCHER_AUTO_ROUTE === true AND $this->routable($service.".php", true) ) {
 
-            return Array(
+            return array(
                 "type"          =>  "ROUTE",
                 "target"        =>  DISPATCHER_SERVICES_FOLDER.$service.".php",
-                "parameters"    =>  Array()
-                );
+                "parameters"    =>  array()
+            );
 
         }
 
@@ -227,10 +227,10 @@ class ObjectRoutingTable {
      */
     private function routeToNotfound() {
 
-        return Array(
+        return array(
             "type"          =>  "ERROR",
             "target"        =>  "Service not found",
-            "parameters"    =>  Array(
+            "parameters"    =>  array(
                 "errorCode"     => 404
                 )
             );
@@ -244,10 +244,10 @@ class ObjectRoutingTable {
      */
     private function routeToNowhere() {
 
-        return Array(
+        return array(
             "type"          =>  "ERROR",
             "target"        =>  "Service not runnable",
-            "parameters"    =>  Array(
+            "parameters"    =>  array(
                 "errorCode"     => 500
                 )
             );

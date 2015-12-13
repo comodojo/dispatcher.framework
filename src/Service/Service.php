@@ -7,13 +7,13 @@ use \Comodojo\Dispatcher\Deserialization;
 
 /**
  * The Service base class, feel free to extend
- * 
+ *
  * @package     Comodojo dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -67,7 +67,7 @@ class Service {
     private $supported_http_methods = DISPATCHER_SUPPORTED_METHODS;
 
     /**
-     * Result charset 
+     * Result charset
      *
      * @var     string
      * @see     dispatcher-config.php
@@ -77,21 +77,21 @@ class Service {
     //###### Thins a service could use for free ######//
 
     /**
-     * Request attributes, populated at runtime by dispatcher 
+     * Request attributes, populated at runtime by dispatcher
      *
      * @var     array
      */
     private $attributes = array();
 
     /**
-     * Request parameters, populated at runtime by dispatcher 
+     * Request parameters, populated at runtime by dispatcher
      *
      * @var     array
      */
     private $parameters = array();
 
     /**
-     * Request raw parameters (php://input), populated at runtime by dispatcher 
+     * Request raw parameters (php://input), populated at runtime by dispatcher
      *
      * @var     array
      */
@@ -180,39 +180,39 @@ class Service {
     private $supported_success_codes = array(200,202,204);
 
     /*************** HTTP METHODS IMPLEMENTATIONS **************/
-    
+
     /**
      * Implement this method if your service should support
      * HTTP-GET requests
      */
     //public function get() {}
-    
+
     /**
      * Implement this method if your service should support
      * HTTP-POST requests
      */
     // public function post() {}
-    
+
     /**
      * Implement this method if your service should support
      * HTTP-PUT requests
      */
     // public function put() {}
-    
+
     /**
      * Implement this method if your service should support
      * HTTP-DELETE requests
      */
     // public function delete() {}
-    
+
     /**
      * Implement this method if your service should support
      * any HTTP requests (it's quite a wildcard, please be careful...)
      */
     // public function any() {}
-    
+
     /*************** HTTP METHODS IMPLEMENTATIONS **************/
-    
+
     /******************* OVERRIDABLE METHODS *******************/
 
     /**
@@ -257,8 +257,8 @@ class Service {
      * Expected attributes (i.e. ones that will build the URI)
      *
      * @param   string  $method     HTTP method for punctual attributes rematch or ANY
-     * @param   array   $attributes Array og attributes that service expects
-     * @param   array   $parameters Array of parameters that service expects
+     * @param   array   $attributes array og attributes that service expects
+     * @param   array   $parameters array of parameters that service expects
      *
      * @return  Object  $this
      */
@@ -277,8 +277,8 @@ class Service {
      * Liked (optional) attributes
      *
      * @param   string  $method     HTTP method for punctual attributes rematch or ANY
-     * @param   array   $attributes Array og attributes that service likes
-     * @param   array   $parameters Array of parameters that service likes
+     * @param   array   $attributes array og attributes that service likes
+     * @param   array   $parameters array of parameters that service likes
      *
      * @return  Object  $this
      */
@@ -296,7 +296,7 @@ class Service {
     /**
      * Set methods service will support.
      *
-     * In can be misleading, but supported HTTP methods and implemented HTTP methods 
+     * In can be misleading, but supported HTTP methods and implemented HTTP methods
      * are not the same thing.
      *
      * - If method is not SUPPORTED, service will not be initiated and a 405 - Not Allowed
@@ -316,7 +316,7 @@ class Service {
         $supported_methods = array();
 
         foreach ($methods as $method) {
-            
+
             array_push($supported_methods, strtoupper($method));
 
         }
@@ -454,7 +454,7 @@ class Service {
 
         if ( isset($this->headers[$header]) ) {
 
-            unset($this->headers[$header]); 
+            unset($this->headers[$header]);
 
             return true;
 
@@ -568,7 +568,7 @@ class Service {
     /**
      * Get attributes and parameters that service expects
      *
-     * @return  array 
+     * @return  array
      */
     final public function getExpected($method) {
 
@@ -578,7 +578,7 @@ class Service {
 
             ( sizeof($this->expected_attributes[$method]) == 0 AND sizeof($this->expected_attributes["ANY"]) != 0 ) ? $this->expected_attributes["ANY"] : $this->expected_attributes[$method],
 
-            ( sizeof($this->expected_parameters[$method]) == 0 AND sizeof($this->expected_parameters["ANY"]) != 0 ) ? $this->expected_parameters["ANY"] : $this->expected_parameters[$method]           
+            ( sizeof($this->expected_parameters[$method]) == 0 AND sizeof($this->expected_parameters["ANY"]) != 0 ) ? $this->expected_parameters["ANY"] : $this->expected_parameters[$method]
 
         );
 
@@ -587,7 +587,7 @@ class Service {
     /**
      * Get attributes and parameters that service likes
      *
-     * @return  array 
+     * @return  array
      */
     final public function getLiked($method) {
 
@@ -597,7 +597,7 @@ class Service {
 
             ( sizeof($this->liked_attributes[$method]) == 0 AND sizeof($this->liked_attributes["ANY"]) != 0 ) ? $this->liked_attributes["ANY"] : $this->liked_attributes[$method],
 
-            ( sizeof($this->liked_parameters[$method]) == 0 AND sizeof($this->liked_parameters["ANY"]) != 0 ) ? $this->liked_parameters["ANY"] : $this->liked_parameters[$method]           
+            ( sizeof($this->liked_parameters[$method]) == 0 AND sizeof($this->liked_parameters["ANY"]) != 0 ) ? $this->liked_parameters["ANY"] : $this->liked_parameters[$method]
 
             );
 
@@ -616,7 +616,7 @@ class Service {
     /**
      * Get request attributes, populated by dispatcher
      *
-     * @return  array 
+     * @return  array
      */
     final public function getAttributes() {
 
@@ -629,7 +629,7 @@ class Service {
      *
      * @param   string  $attribute  Attribute to search for
      *
-     * @return  mixed 
+     * @return  mixed
      */
     final public function getAttribute($attribute) {
 
@@ -646,7 +646,7 @@ class Service {
     final public function setRawParameters($raw_parameters) {
 
         $this->raw_parameters = $raw_parameters;
-        
+
     }
 
     /**
@@ -656,18 +656,18 @@ class Service {
     final public function setParameters($parameters) {
 
         $this->parameters = $parameters;
-        
+
     }
 
     /**
      * Get request parameters, populated by dispatcher
      *
-     * @return  array 
+     * @return  array
      */
     final public function getParameters($raw=false) {
 
         return $raw ? $this->raw_parameters : $this->parameters;
-        
+
     }
 
     /**
@@ -675,14 +675,14 @@ class Service {
      *
      * @param   string  $parameter  Parameter to search for
      *
-     * @return  array 
+     * @return  array
      */
     final public function getParameter($parameter) {
 
         if ( isset($this->parameters[$parameter]) ) return $this->parameters[$parameter];
 
         return null;
-        
+
     }
 
     /**
@@ -692,7 +692,7 @@ class Service {
     final public function setRequestHeaders($headers) {
 
         $this->request_headers = is_array($headers) ? $headers : array();
-        
+
     }
 
     /**

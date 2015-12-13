@@ -8,7 +8,7 @@
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -41,19 +41,19 @@ class ObjectRoute {
 
     private $ttl = false;
 
-    private $headers = Array();
+    private $headers = array();
 
     private $access_control = null;
 
-    private $parameters = Array();
+    private $parameters = array();
 
-    private $supported_route_types = Array("ROUTE","REDIRECT","ERROR");
+    private $supported_route_types = array("ROUTE","REDIRECT","ERROR");
 
-    private $supported_redirect_codes = Array(201,301,302,303,307);
+    private $supported_redirect_codes = array(201,301,302,303,307);
 
-    private $supported_error_codes = Array(400,403,404,405,500,501,503);
+    private $supported_error_codes = array(400,403,404,405,500,501,503);
 
-    private $supported_cache_modes = Array("SERVER","CLIENT","BOTH");
+    private $supported_cache_modes = array("SERVER","CLIENT","BOTH");
 
     /**
      * Set service name
@@ -196,7 +196,7 @@ class ObjectRoute {
         }
 
         return $this;
-        
+
     }
 
     public function getCache() {
@@ -260,7 +260,7 @@ class ObjectRoute {
 
         if ( isset($this->headers[$header]) ) {
 
-            unset($this->headers[$header]); 
+            unset($this->headers[$header]);
 
             return true;
 
@@ -307,7 +307,7 @@ class ObjectRoute {
      */
     public function unsetHeaders() {
 
-        $this->headers = Array();
+        $this->headers = array();
 
         return $this;
 
@@ -316,7 +316,7 @@ class ObjectRoute {
     /**
      * Get headers
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     public function getHeaders() {
 
@@ -340,7 +340,7 @@ class ObjectRoute {
     /**
      * Get extra parameter
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     public function getParameter($parameter) {
 
@@ -353,7 +353,7 @@ class ObjectRoute {
     /**
      * Get extra parameters
      *
-     * @return  Array   Headers array
+     * @return  array   Headers array
      */
     public function getParameters() {
 
