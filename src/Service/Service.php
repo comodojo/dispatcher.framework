@@ -28,7 +28,7 @@ use \Comodojo\Dispatcher\Deserialization;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Service {
+abstract class Service {
 
     //###### Things a service should define ######//
 
@@ -74,7 +74,7 @@ class Service {
      */
     private $charset = DISPATCHER_DEFAULT_ENCODING;
 
-    //###### Thins a service could use for free ######//
+    //###### Things a service could use for free ######//
 
     /**
      * Request attributes, populated at runtime by dispatcher
@@ -135,40 +135,16 @@ class Service {
     //###### Things a service may define ######//
 
     // Expected attributes
-    private $expected_attributes = array(
-        "GET"   =>  array(),
-        "PUT"   =>  array(),
-        "POST"  =>  array(),
-        "DELETE"=>  array(),
-        "ANY"   =>  array()
-        );
+    private $expected_attributes = null;
 
     // Expected parameters
-    private $expected_parameters = array(
-        "GET"   =>  array(),
-        "PUT"   =>  array(),
-        "POST"  =>  array(),
-        "DELETE"=>  array(),
-        "ANY"   =>  array()
-        );
+    private $expected_parameters = null;
 
     // Liked attributes
-    private $liked_attributes = array(
-        "GET"   =>  array(),
-        "PUT"   =>  array(),
-        "POST"  =>  array(),
-        "DELETE"=>  array(),
-        "ANY"   =>  array()
-        );
+    private $liked_attributes = null;
 
     // Liked parameters
-    private $liked_parameters = array(
-        "GET"   =>  array(),
-        "PUT"   =>  array(),
-        "POST"  =>  array(),
-        "DELETE"=>  array(),
-        "ANY"   =>  array()
-        );
+    private $liked_parameters = null;
 
     //###### Things dedicated to internal use ######//
 
@@ -244,6 +220,16 @@ class Service {
         $this->logger = $logger;
 
         $this->cacher = $cacher;
+
+        $methods_to_array = $this->methodsToArray();
+
+        $this->expected_attributes = $methods_to_array;
+
+        $this->expected_parameters = $methods_to_array;
+
+        $this->liked_attributes = $methods_to_array;
+
+        $this->liked_parameters = $methods_to_array;
 
         $this->serialize = new Serialization();
 
@@ -717,6 +703,20 @@ class Service {
     final public function getRequestHeaders() {
 
         return $this->request_headers;
+
+    }
+
+    private function methodsToArray() {
+
+        $methods = explode(",",$this->supported_http_methods);
+
+        $methods_array = array();
+
+        foreach ($methods as $method) $methods_array[$method] = array();
+
+        $methods_array['ANY'] = array();
+
+        return $methods_array;
 
     }
 

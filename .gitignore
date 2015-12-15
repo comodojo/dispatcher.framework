@@ -4,4 +4,3 @@ coverage.clover
 vendor/
 build/
 docs/_build/
-# composer.lock

@@ -20,7 +20,7 @@ use \Comodojo\Dispatcher\ObjectResult\ObjectRedirect;
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -164,7 +164,7 @@ class Dispatcher {
         $this->logger = new Debug();
 
         $this->logger->info('Dispatcher online, request time: '.$this->current_time);
-        
+
         $this->logger->debug('Working mode: '.$this->working_mode);
 
         $this->logger->debug('Request URI: '.$this->service_uri);
@@ -184,6 +184,10 @@ class Dispatcher {
         list($request_service,$request_attributes) = $this->urlInterpreter($this->working_mode);
 
         list($request_parameters, $request_raw_parameters) = $this->deserializeParameters($this->request_method);
+
+        $this->logger->debug('Provided attributes',$request_attributes);
+
+        $this->logger->debug('Provided parameters',$request_parameters);
 
         $request_headers = $this->header->getRequestHeaders();
 
@@ -218,7 +222,7 @@ class Dispatcher {
      * @param   array   $parameters (optional) Service options (cache, ...)
      * @param   bool    $relative   (optional) If true, target will be assumed in default service directory
      */
-    final public function setRoute($service, $type, $target, $parameters=Array(), $relative=true) {
+    final public function setRoute($service, $type, $target, $parameters=array(), $relative=true) {
 
         try {
 
@@ -243,7 +247,7 @@ class Dispatcher {
         } catch (Exception $e) {
 
             //debug error but do not stop dispatcher
-            $this->logger->warning( 'Unable to set route'.Array('SERVIVE' => $service) );
+            $this->logger->warning( 'Unable to set route', array('SERVIVE' => $service) );
 
         }
 
@@ -265,7 +269,7 @@ class Dispatcher {
         } catch (Exception $e) {
 
             //debug error but do not stop dispatcher
-            $this->logger->warning( 'Unable to unset route'.Array('SERVIVE' => $service) );
+            $this->logger->warning( 'Unable to unset route', array('SERVIVE' => $service) );
 
         }
 
@@ -287,7 +291,7 @@ class Dispatcher {
         } catch (Exception $e) {
 
             //debug error but do not stop dispatcher
-            $this->logger->warning( 'Unable to add hook'.Array(
+            $this->logger->warning( 'Unable to add hook', array(
                 'CALLBACK' => $callback,
                 'METHOD' => $method,
                 'EVENT' => $event
@@ -312,7 +316,7 @@ class Dispatcher {
         } catch (Exception $e) {
 
             //debug error but do not stop dispatcher
-            $this->logger->warning( 'Unable to remove hook'.Array(
+            $this->logger->warning( 'Unable to remove hook', array(
                 'CALLBACK' => $callback,
                 'EVENT' => $event
             ) );
@@ -378,9 +382,9 @@ class Dispatcher {
         // Before building dispatcher instance, fire THE level1 event "dispatcher"
         // This is the only way (out of dispatcher-config) to disable dispatcher
 
-        $fork = $this->events->fire("dispatcher", "DISPATCHER", $this->enabled);
+        $fork = $this->events->fire("dispatcher", "VOID", $this);
 
-        if ( is_bool($fork)  ) $this->enabled = $fork;
+        // if ( is_bool($fork)  ) $this->enabled = $fork;
 
         // After building dispatcher instance, fire THE level2 event "dispatcher.request"
         // This default hook will expose current request (ObjectRequest) to callbacks
@@ -390,13 +394,13 @@ class Dispatcher {
         if ( $fork instanceof \Comodojo\Dispatcher\ObjectRequest\ObjectRequest ) $this->request = $fork;
 
         // Fire level3 event "dispatcher.request.[method]"
-        
+
         $fork = $this->events->fire("dispatcher.request.".$this->request_method, "REQUEST", $this->request);
 
         if ( $fork instanceof \Comodojo\Dispatcher\ObjectRequest\ObjectRequest ) $this->request = $fork;
 
         // Fire level3 event "dispatcher.request.[service]"
-        
+
         $fork = $this->events->fire("dispatcher.request.".$this->request->getService(), "REQUEST", $this->request);
 
         if ( $fork instanceof \Comodojo\Dispatcher\ObjectRequest\ObjectRequest ) $this->request = $fork;
@@ -449,7 +453,7 @@ class Dispatcher {
             $t = pathinfo($preroute["target"]);
             $this->serviceroute->setClass(preg_replace('/\\.[^.\\s]{3,4}$/', '', $t["filename"]));
         }
-        
+
         if ( isset($preroute["parameters"]["redirectCode"]) ) {
             $this->serviceroute->setRedirectCode($preroute["parameters"]["redirectCode"]);
             unset($preroute["parameters"]["redirectCode"]);
@@ -539,59 +543,59 @@ class Dispatcher {
 
             case "ERROR":
 
-            $route = new ObjectError();
-            $route->setService($this->serviceroute->getService())
-                ->setStatusCode($this->serviceroute->getErrorCode())
-                ->setContent($this->serviceroute->getTarget())
-                ->setHeaders($this->serviceroute->getHeaders());
+                $route = new ObjectError();
+                $route->setService($this->serviceroute->getService())
+                    ->setStatusCode($this->serviceroute->getErrorCode())
+                    ->setContent($this->serviceroute->getTarget())
+                    ->setHeaders($this->serviceroute->getHeaders());
 
-            break;
+                break;
 
             case "REDIRECT":
 
-            $route = new ObjectRedirect();
-            $route->setService($this->serviceroute->getService())
-                ->setStatusCode($this->serviceroute->getRedirectCode())
-                ->setLocation($this->serviceroute->getTarget())
-                ->setHeaders($this->serviceroute->getHeaders());
+                $route = new ObjectRedirect();
+                $route->setService($this->serviceroute->getService())
+                    ->setStatusCode($this->serviceroute->getRedirectCode())
+                    ->setLocation($this->serviceroute->getTarget())
+                    ->setHeaders($this->serviceroute->getHeaders());
 
-            break;
+                break;
 
             case "ROUTE":
 
-            try {
+                try {
 
-                $route = $this->runService($this->request, $this->serviceroute);
+                    $route = $this->runService($this->request, $this->serviceroute);
 
-            } catch (DispatcherException $de) {
+                } catch (DispatcherException $de) {
 
-                $this->logger->error('Service returns a DispatcherException', Array(
-                    'SERVICE' => $this->serviceroute->getService(),
-                    'CODE'    => $de->getCode(),
-                    'MESSAGE' => $de->getMessage()
-                ));
+                    $this->logger->error('Service returns a DispatcherException', array(
+                        'SERVICE' => $this->serviceroute->getService(),
+                        'CODE'    => $de->getCode(),
+                        'MESSAGE' => $de->getMessage()
+                    ));
 
-                $route = new ObjectError();
-                $route->setService($this->serviceroute->getService())
-                    ->setStatusCode($de->getCode())
-                    ->setContent($de->getMessage());
+                    $route = new ObjectError();
+                    $route->setService($this->serviceroute->getService())
+                        ->setStatusCode($de->getCode())
+                        ->setContent($de->getMessage());
 
-            } catch (Exception $e) {
+                } catch (Exception $e) {
 
-                $this->logger->error('Error processing service', Array(
-                    'SERVICE' => $this->serviceroute->getService(),
-                    'CODE'    => $e->getCode(),
-                    'MESSAGE' => $e->getMessage()
-                ));
+                    $this->logger->error('Error processing service', array(
+                        'SERVICE' => $this->serviceroute->getService(),
+                        'CODE'    => $e->getCode(),
+                        'MESSAGE' => $e->getMessage()
+                    ));
 
-                $route = new ObjectError();
-                $route->setService($this->serviceroute->getService())
-                    ->setStatusCode(500)
-                    ->setContent($e->getMessage());
+                    $route = new ObjectError();
+                    $route->setService($this->serviceroute->getService())
+                        ->setStatusCode(500)
+                        ->setContent($e->getMessage());
 
-            }
+                }
 
-            break;
+                break;
 
         }
 
@@ -638,7 +642,7 @@ class Dispatcher {
             else {
 
                 $service_requested = "default";
-                $service_attributes = Array();
+                $service_attributes = array();
 
             }
 
@@ -657,13 +661,13 @@ class Dispatcher {
             else {
 
                 $service_requested = "";
-                $service_attributes = Array();
+                $service_attributes = array();
 
             }
 
         }
 
-        return Array($service_requested, $service_attributes);
+        return array($service_requested, $service_attributes);
 
     }
 
@@ -730,7 +734,7 @@ class Dispatcher {
      */
     private function deserializeParameters($method) {
 
-        $parameters = Array();
+        $parameters = array();
 
         switch($method) {
 
@@ -749,7 +753,7 @@ class Dispatcher {
 
         }
 
-        return Array($parameters, file_get_contents('php://input'));
+        return array($parameters, file_get_contents('php://input'));
 
     }
 
@@ -757,7 +761,7 @@ class Dispatcher {
 
         if ( $this->working_mode == "STANDARD" ) return $this->parametersMatch($provided, $expected, $liked);
 
-        $attributes = Array();
+        $attributes = array();
 
         $psize = sizeof($provided);
         $esize = sizeof($expected);
@@ -791,7 +795,7 @@ class Dispatcher {
 
             $lvaluessize = sizeof($lvalues);
 
-            $l_attributes = Array();
+            $l_attributes = array();
 
             if ( $lvaluessize < $lsize ) {
 
@@ -824,7 +828,7 @@ class Dispatcher {
             $attributes = array_merge($e_attributes, $l_attributes);
 
         }
-        
+
         return $attributes;
 
     }
@@ -883,11 +887,11 @@ class Dispatcher {
 
         $service_class = "\\Comodojo\\Dispatcher\\Service\\".$service_class;
 
-        $theservice = new $service_class($this->logger, $this->cacher);
-
         // Setup service
 
         try {
+
+            $theservice = new $service_class($this->logger, $this->cacher);
 
             $theservice->setup();
 
@@ -930,7 +934,7 @@ class Dispatcher {
             throw $de;
 
         }
-        
+
         // Fill service with dispatcher pieces
 
         $theservice->setAttributes($validated_attributes);
@@ -955,7 +959,7 @@ class Dispatcher {
                 ->setHeaders( array_merge($theservice->getHeaders(), $route->getHeaders()) )
                 ->setContentType($theservice->getContentType())
                 ->setCharset($theservice->getCharset());
-            
+
         } catch (DispatcherException $de) {
 
             throw $de;
@@ -1035,9 +1039,9 @@ class Dispatcher {
 
         $cache = $route instanceof \Comodojo\Dispatcher\ObjectResult\ObjectSuccess ? $this->serviceroute->getCache() : null;
 
-        if ( $this->request_method == "GET" AND 
+        if ( $this->request_method == "GET" AND
             ( $cache == "SERVER" OR $cache == "BOTH" ) AND
-            $this->result_comes_from_cache == false AND 
+            $this->result_comes_from_cache == false AND
             $route instanceof \Comodojo\Dispatcher\ObjectResult\ObjectSuccess )
         {
 
