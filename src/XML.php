@@ -3,7 +3,7 @@
 use \SimpleXMLElement;
 use \Comodojo\Exception\XMLException;
 
-/** 
+/**
  * XML data transformation class
  *
  * @package     Comodojo dispatcher
@@ -11,7 +11,7 @@ use \Comodojo\Exception\XMLException;
  * @license     GPL-3.0+
  *
  * LICENSE:
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -29,79 +29,79 @@ class XML {
 
     /**
      * XML version
-     * 
+     *
      * @var string
      */
     private $version = "1.0";
-    
+
     /**
      * XML encoding (header)
-     * 
+     *
      * @var string
      */
     private $encoding = null;
-    
+
     /**
      * XML parent element (XML body)
-     * 
-     * @var string  
+     *
+     * @var string
      */
     private $parent = "content";
-    
+
     /**
      * Include/exclude header in XML construction
-     * 
+     *
      * @var bool
      */
     private $includeHeader = true;
-    
+
     /**
      * Controls whether case-folding is enabled for XML parser
-     * 
+     *
      * @var integer
      */
     private $caseFolding = 0;
-    
+
     /**
-     * Whether XML parser should skip values consisting of whitespace characters. 
-     * 
+     * Whether XML parser should skip values consisting of whitespace characters.
+     *
      * @var integer
      */
     private $skipWhite = 1;
-    
+
     /**
      * Header string to prepend to xml data
-     * 
+     *
      * @var string
      */
     private $header_string = '<?xml version="__VERSION__" encoding="__ENCODING__"?>';
 
     /**
      * Internal pointer to SimpleXMLElement
-     * 
+     *
      */
     private $ObjectXML;
 
     /**
      * Internal pointer to xml_parser
-     * 
+     *
      */
     private $parser;
 
     /**
      * Internal pointer to parsed xml structs
-     * 
+     *
      * @var array
      */
     private $struct = array();
 
     /**
      * Number of elements retrieved from parser
-     * 
+     *
      * @var integer
      */
     private $counter;
-    
+
     /**
      * XML class constructor
      */
@@ -112,8 +112,8 @@ class XML {
     }
 
     /**
-     * Set if header should be included in xml encoding 
-     * 
+     * Set if header should be included in xml encoding
+     *
      * @param bool $bool
      *
      * @return Object $this
@@ -128,7 +128,7 @@ class XML {
 
     /**
      * Enable case-folding for XML parser
-     * 
+     *
      * @param int $int
      *
      * @return Object $this
@@ -143,7 +143,7 @@ class XML {
 
     /**
      * Enable whitespace characters skip for XML parser
-     * 
+     *
      * @param int $int
      *
      * @return Object $this
@@ -158,7 +158,7 @@ class XML {
 
     /**
      * Set xml parser and encoder encoding
-     * 
+     *
      * @param string $encoding
      *
      * @return Object $this
@@ -183,7 +183,7 @@ class XML {
         return str_replace(array("__VERSION__", "__ENCODING__"), array($this->version, $this->encoding), $this->header_string);
 
     }
-    
+
     /**
      * Get XML header
      *
@@ -196,58 +196,58 @@ class XML {
     }
 
     /**
-     * Encode array to XML string 
-     * 
-     * @return string   
+     * Encode array to XML string
+     *
+     * @return string
      */
-    public function encode(array $data) {
+    public function encode($data) {
 
         $structure = ($this->includeHeader ? $this->getHeader() : "") . $this->getParent();
-        
+
         $this->ObjectXML = new SimpleXMLElement($structure);
-        
+
         $this->pushElement($this->ObjectXML, $data);
-        
+
         $xml = $this->ObjectXML->asXML();
 
         if ( $xml === false ) throw new XMLException("Error formatting object");
-        
+
         return $xml;
-        
+
     }
 
     /**
-     * encode XML string into array 
-     * 
-     * @return array    
+     * encode XML string into array
+     *
+     * @return array
      */
-    public function decode(string $xml, $encoding=null) {
+    public function decode($xml, $encoding=null) {
 
         $this->parser = is_null($encoding) ? xml_parser_create() : xml_parser_create($encoding);
 
         xml_parser_set_option($this->parser,XML_OPTION_TARGET_ENCODING,$this->encoding);
         xml_parser_set_option($this->parser,XML_OPTION_CASE_FOLDING,$this->caseFolding);
         xml_parser_set_option($this->parser,XML_OPTION_SKIP_WHITE,$this->skipWhite);
-        
+
         $parser_structs = xml_parse_into_struct($this->parser, $xml, $this->struct, $index);
-        
+
         if ( $parser_structs === 0 ) throw new XMLException("Failed to parse xml data into structs");
-        
+
         $this->counter = count($this->struct);
 
         array_walk($this->struct, array($this, 'sanitizeKeys'));
-        
+
         $this->free();
-        
+
         $t = $this->getTree();
-        
-        return $t; 
-        
+
+        return $t;
+
     }
-    
+
     /**
      * convert keys created from XML::encode() into array numeric keys
-     * 
+     *
      */
     private function sanitizeKeys($input, $key) {
 
@@ -260,7 +260,7 @@ class XML {
         }
 
     }
-    
+
     /**
      * Free xml parser and unset resource
      */
@@ -273,9 +273,9 @@ class XML {
             unset($this->parser);
 
         }
-        
+
     }
-    
+
     /**
      * Get composed tree into array and unset resource
      *
@@ -326,12 +326,12 @@ class XML {
                 $child = $this->getChilds($i);
                 $children = $this->addNode($children, $tagname, $attributes, $child, $value);
                 break;
-                
+
                 case "complete":
                 $child = "";
                 $children = $this->addNode($children, $tagname, $attributes, $child, $value);
                 break;
-                
+
                 case "close":
                 return $children;
                 break;
@@ -347,19 +347,19 @@ class XML {
      *
      */
     private function addNode($target, $key, $attributes, $child, $value) {
-        
+
         if ( !isset($target[$key]) ) {
-            
+
             if ($child != "") $target[$key] = $child;
 
             if ($attributes != "") foreach($attributes as $akey => $avalue) $target[$key][$akey] = $avalue;
 
             else if ( $value != "" ) $target[$key] = $value;
-            
+
         } else {
 
             if (!isset($target[$key][0])) {
-                
+
                 $oldval = $target[$key];
                 $target[$key] = array();
                 $target[$key][0] = $oldval;
@@ -400,5 +400,5 @@ class XML {
         }
 
     }
-    
+
 }
