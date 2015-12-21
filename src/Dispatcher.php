@@ -422,7 +422,7 @@ class Dispatcher {
 
             ob_end_clean();
 
-            exit($return);
+            return $return;
 
         }
 
@@ -521,7 +521,7 @@ class Dispatcher {
 
                 ob_end_clean();
 
-                exit($return);
+                return $return;
 
             }
 
@@ -603,7 +603,7 @@ class Dispatcher {
 
         ob_end_clean();
 
-        self::end($return);
+        return $return;
 
     }
 
@@ -1069,20 +1069,6 @@ class Dispatcher {
         // Return the content (stuff that will go on screen)
 
         return $message;
-
-    }
-
-    private static function end($result) {
-
-        if ( defined('DISPATCHER_PHPUNIT_TEST') && @constant('DISPATCHER_PHPUNIT_TEST') === true ) {
-
-            return $result;
-
-        } else {
-
-            exit($result);
-
-        }
 
     }
 
