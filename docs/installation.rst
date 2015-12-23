@@ -26,11 +26,3 @@ This will install a new instance of dispatcher and required dependencies in "dis
 If you need also default content and tests, install the package::
 
     php composer.phar require comodojo/dispatcher.servicebundle.default
-
-## Downloading as archive
-
-Stable releases are published on `dispatcher.comodojo.org`_.
-
-To install, download latest package and type (in the package folder)::
-
-    php composer.phar install

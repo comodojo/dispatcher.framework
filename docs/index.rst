@@ -26,7 +26,6 @@ Contents:
 
    installation
    configuration
-   howitworks
    services
    routing
    events
