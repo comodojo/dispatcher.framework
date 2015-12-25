@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Request;
 
-use Monolog\Logger;
+use \Comodojo\Dispatcher\Components\Headers as HeadersTrait;
 
 /**
  *
@@ -26,54 +26,18 @@ use Monolog\Logger;
 
 class Headers {
 
-    private $headers = array();
+    use HeadersTrait;
 
-    private $logger = null;
-
-    public function __construct(Logger $logger) {
-
-        $this->logger = $logger;
+    public function __construct() {
 
         $this->headers = self::getHeaders();
 
     }
 
-    public function get($header) {
-
-        if ( isset($this->headers[$header]) ) return $this->headers[$header];
-
-        return null;
-
-    }
-
-    public function set($header, $value=null) {
-
-        if ( is_null($value) ) {
-
-            $header = explode(":", $header);
-
-            $this->headers[$header[0]] = isset($header[1]) ? $header[1] : '';
-
-        } else {
-
-            $this->headers[$header] = $value;
-
-        }
-
-        return $this;
-
-    }
-
-    public function raw() {
-
-        return $this->headers;
-
-    }
-
     /**
-     * Get request headers
+     * Get request headers both in apache and nginx
      *
-     * @return  Array   Headers sent with request
+     * @return array
      */
     private static function getHeaders() {
 

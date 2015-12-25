@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Request;
 
-use Monolog\Logger;
+use \Comodojo\Dispatcher\Components\Parameters as ParametersTrait;
 
 /**
  *
@@ -24,33 +24,58 @@ use Monolog\Logger;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class UserAgent {
+class Post {
 
-    private $user_agent = null;
+    use ParametersTrait;
+
+    protected $raw_parameters = null;
 
     public function __construct() {
 
-        $this->user_agent = $_SERVER['HTTP_USER_AGENT'];
+        $this->parameters = self::getParameters();
+
+        $this->raw_parameters = self::getRawParameters();
 
     }
 
-    public function get() {
+    public function raw() {
 
-        return $this->user_agent;
-
-    }
-
-    public function set($ua) {
-
-        $this->user_agent = $ua;
-
-        return $this;
+        return $this->raw_parameters;
 
     }
 
-    public function browser() {
+    private static function getParameters() {
 
-        return get_browser($this->browser);
+        switch( $_SERVER['REQUEST_METHOD'] ) {
+
+            case 'POST':
+
+                $parameters = $_POST;
+
+                break;
+
+            case 'PUT':
+            case 'DELETE':
+
+                parse_str(file_get_contents('php://input'), $parameters);
+
+                break;
+
+            default:
+
+                $parameters = array();
+
+                break;
+
+        }
+
+        return $parameters;
+
+    }
+
+    private static function getRawParameters() {
+
+        return file_get_contents('php://input');
 
     }
 

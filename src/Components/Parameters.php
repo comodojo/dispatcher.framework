@@ -1,6 +1,4 @@
-<?php namespace Comodojo\Dispatcher\Request;
-
-use Monolog\Logger;
+<?php namespace Comodojo\Dispatcher\Components;
 
 /**
  *
@@ -24,33 +22,43 @@ use Monolog\Logger;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class UserAgent {
+trait Parameters {
 
-    private $user_agent = null;
+    protected $parameters = array();
 
-    public function __construct() {
+    public function get($parameter=null) {
 
-        $this->user_agent = $_SERVER['HTTP_USER_AGENT'];
+        if ( is_null($parameter) ) return $this->parameters;
+
+        else if ( array_key_exists($parameter, $this->parameters) ) {
+
+            return $this->parameters[$parameter];
+
+        }
+
+        else return null;
 
     }
 
-    public function get() {
+    public function set($parameter, $value) {
 
-        return $this->user_agent;
-
-    }
-
-    public function set($ua) {
-
-        $this->user_agent = $ua;
+        $this->parameters[$parameter] = $value;
 
         return $this;
 
     }
 
-    public function browser() {
+    public function unset($parameter) {
 
-        return get_browser($this->browser);
+        if ( array_key_exists($parameter, $this->parameters) ) {
+
+            unset($this->parameters[$parameter]);
+
+            return true;
+
+        }
+
+        return false;
 
     }
 

@@ -3,6 +3,7 @@
 use \Monolog\Logger;
 use \League\Uri\Schemes\Http as HttpUri;
 use \Comodojo\Dispatcher\Request\Headers;
+use \Comodojo\Dispatcher\Request\Post;
 use \Comodojo\Dispatcher\Request\UserAgent;
 
 /**
@@ -37,15 +38,19 @@ class Model {
 
     private $user_agent = null;
 
+    private $post = null;
+
     public function __construct(Logger $logger) {
 
         $this->logger = $logger;
 
-        $this->headers = new Headers($logger);
+        $this->headers = new Headers();
 
         $this->uri = HttpUri::createFromServer($_SERVER);
 
-        $this->user_agent = new UserAgent($logger);
+        $this->post = new Post();
+
+        $this->user_agent = new UserAgent();
 
     }
 
@@ -64,6 +69,12 @@ class Model {
     public function uri() {
 
         return $this->uri;
+
+    }
+
+    public function post() {
+
+        return $this->post;
 
     }
 
