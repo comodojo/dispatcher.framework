@@ -1,11 +1,11 @@
-<?php namespace Comodojo\Dispatcher\Request;
+<?php namespace Comodojo\Dispatcher\Response;
 
 use \Comodojo\Components\Model as DispatcherClassModel;
-use \League\Uri\Schemes\Http as HttpUri;
-use \Comodojo\Dispatcher\Request\Headers;
-use \Comodojo\Dispatcher\Request\Post;
-use \Comodojo\Dispatcher\Request\UserAgent;
-use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
+use \Comodojo\Dispatcher\Response\Headers;
+use \Comodojo\Dispatcher\Response\Status;
+use \Comodojo\Dispatcher\Response\Content;
+use \Comodojo\Dispatcher\Response\Location;
+use \Comodojo\Cookies\CookieManager;
 
 /**
  *
@@ -31,29 +31,33 @@ use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 
 class Model extends DispatcherClassModel {
 
-    use TimestampTrait;
-
     private $headers = null;
 
-    private $uri = null;
+    private $cookies = null;
 
-    private $useragent = null;
+    private $status = null;
 
-    private $post = null;
+    private $content = null;
+
+    private $location = null;
+
+    private $content_type = "text/plain";
+
+    private $charset = null;
 
     public function __construct(Configuration $configuration, Logger $logger) {
 
         parent::__construct($configuration, $logger);
 
-        $this->setTimestamp($_SERVER['REQUEST_TIME_FLOAT']);
-
         $this->headers = new Headers();
 
-        $this->uri = HttpUri::createFromServer($_SERVER);
+        $this->cookies = new CookieManager();
 
-        $this->post = new Post();
+        $this->status = new Status();
 
-        $this->useragent = new UserAgent();
+        $this->content = new Content();
+
+        $this->location = new Location();
 
     }
 
@@ -63,21 +67,27 @@ class Model extends DispatcherClassModel {
 
     }
 
-    public function uri() {
+    public function cookies() {
 
-        return $this->uri;
-
-    }
-
-    public function post() {
-
-        return $this->post;
+        return $this->cookies;
 
     }
 
-    public function useragent() {
+    public function status() {
 
-        return $this->useragent;
+        return $this->status;
+
+    }
+
+    public function content() {
+
+        $return $this->content;
+
+    }
+
+    public function location() {
+
+        return $this->location;
 
     }
 

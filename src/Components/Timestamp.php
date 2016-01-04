@@ -22,51 +22,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait Parameters {
+trait Timestamp {
 
-    protected $parameters = array();
+    protected $timestamp = null;
 
-    final public function get($parameter=null) {
+    final public function getTimestamp() {
 
-        if ( is_null($parameter) ) return $this->parameters;
-
-        else if ( array_key_exists($parameter, $this->parameters) ) {
-
-            return $this->parameters[$parameter];
-
-        }
-
-        else return null;
+        return $this->timestamp;
 
     }
 
-    final public function set($parameter, $value) {
+    final public function setTimestamp($time = null) {
 
-        $this->parameters[$parameter] = $value;
+        $this->timestamp = filter_var($time, FILTER_VALIDATE_FLOAT, array(
+            'options' => array(
+                'decimal' => '.',
+                'default' => microtime(true)
+            )
+        ));
 
         return $this;
-
-    }
-
-    final public function unset($parameter = null) {
-
-        if ( is_null($parameter) ) {
-
-            $this->parameters = array();
-
-            return true;
-
-        } else if ( array_key_exists($parameter, $this->parameters) ) {
-
-            unset($this->parameters[$parameter]);
-
-            return true;
-
-        } else {
-
-            return false;
-
-        }
 
     }
 

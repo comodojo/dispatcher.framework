@@ -1,4 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Request;
+<?php namespace Comodojo\Dispatcher\Response;
+
+use \Comodojo\Dispatcher\Components\Headers as HeadersTrait;
 
 /**
  *
@@ -22,33 +24,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class UserAgent {
+class Headers {
 
-    private $user_agent = null;
+    use HeadersTrait;
 
-    public function __construct() {
+    public function persist() {
 
-        $this->user_agent = $_SERVER['HTTP_USER_AGENT'];
+        foreach ($this->headers as $header => $value) {
 
-    }
+            header($header.": ".$value, true);
 
-    public function get() {
-
-        return $this->user_agent;
-
-    }
-
-    public function set($ua) {
-
-        $this->user_agent = $ua;
-
-        return $this;
-
-    }
-
-    public function browser() {
-
-        return get_browser($this->browser);
+        }
 
     }
 

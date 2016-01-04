@@ -1,4 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Components;
+<?php namespace Comodojo\Dispatcher\Response;
+
+use \Exception;
 
 /**
  *
@@ -22,51 +24,59 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait Parameters {
+class Content {
 
-    protected $parameters = array();
+    private $content = null;
 
-    final public function get($parameter=null) {
+    private $type = "text/plain";
 
-        if ( is_null($parameter) ) return $this->parameters;
+    private $charset = "utf-8";
 
-        else if ( array_key_exists($parameter, $this->parameters) ) {
+    public function get() {
 
-            return $this->parameters[$parameter];
-
-        }
-
-        else return null;
+        return $this->content;
 
     }
 
-    final public function set($parameter, $value) {
+    public function set($content) {
 
-        $this->parameters[$parameter] = $value;
+        if ( !is_scalar($content) ) {
+
+            throw new Exception("Invalid HTTP content");
+
+        }
+
+        $this->content = $content;
 
         return $this;
 
     }
 
-    final public function unset($parameter = null) {
+    public function type($type = null) {
 
-        if ( is_null($parameter) ) {
+        if ( is_null($type) ) {
 
-            $this->parameters = array();
-
-            return true;
-
-        } else if ( array_key_exists($parameter, $this->parameters) ) {
-
-            unset($this->parameters[$parameter]);
-
-            return true;
-
-        } else {
-
-            return false;
+            return $this->type;
 
         }
+
+        $this->type = $type;
+
+        return $this;
+
+    }
+
+    public function charset($charset = null) {
+
+        if ( is_null($charset) ) {
+
+            return $this->charset;
+
+        }
+
+        $this->charset = $charset;
+
+        return $this;
 
     }
 

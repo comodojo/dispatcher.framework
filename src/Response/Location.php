@@ -1,4 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Components;
+<?php namespace Comodojo\Dispatcher\Response;
+
+use \Exception;
 
 /**
  *
@@ -22,51 +24,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait Parameters {
+class Location {
 
-    protected $parameters = array();
+    private $location = null;
 
-    final public function get($parameter=null) {
+    public function get() {
 
-        if ( is_null($parameter) ) return $this->parameters;
-
-        else if ( array_key_exists($parameter, $this->parameters) ) {
-
-            return $this->parameters[$parameter];
-
-        }
-
-        else return null;
+        return $this->location;
 
     }
 
-    final public function set($parameter, $value) {
+    public function set($location) {
 
-        $this->parameters[$parameter] = $value;
+        $this->location = filter_var($location, FILTER_SANITIZE_URL);
 
         return $this;
-
-    }
-
-    final public function unset($parameter = null) {
-
-        if ( is_null($parameter) ) {
-
-            $this->parameters = array();
-
-            return true;
-
-        } else if ( array_key_exists($parameter, $this->parameters) ) {
-
-            unset($this->parameters[$parameter]);
-
-            return true;
-
-        } else {
-
-            return false;
-
-        }
 
     }
 

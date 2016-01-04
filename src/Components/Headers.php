@@ -26,7 +26,7 @@ trait Headers {
 
     protected $headers = array();
 
-    public function get($header = null) {
+    final public function get($header = null) {
 
         if ( is_null($header) ) return $this->headers;
 
@@ -36,7 +36,7 @@ trait Headers {
 
     }
 
-    public function set($header, $value=null) {
+    final public function set($header, $value=null) {
 
         if ( is_null($value) ) {
 
@@ -54,17 +54,25 @@ trait Headers {
 
     }
 
-    public function unset($header) {
+    final public function unset($header = null) {
 
-        if ( array_key_exists($header, $this->headers) ) {
+        if ( is_null($header) ) {
+
+            $this->headers = array();
+
+            return true;
+
+        } else if ( array_key_exists($header, $this->headers) ) {
 
             unset($this->headers[$header]);
 
             return true;
 
-        }
+        } else {
 
-        return false;
+            return false;
+
+        }
 
     }
 
