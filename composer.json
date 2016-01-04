@@ -32,10 +32,14 @@
         }
     },
     "require": {
-        "php": ">=5.3.3",
-        "mustangostang/spyc": "0.5.*",
+        "php": ">=5.6.0",
+        "symfony/yaml": "^3.0",
         "monolog/monolog": "^1.0",
-        "comodojo/exceptions": "@stable"
+        "comodojo/exceptions": "@stable",
+        "comodojo/cookies": "^1.1",
+        "comodojo/cache": "^1.0",
+        "league/uri": "^4.0",
+        "league/event": "^2.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.0|^5.0",
