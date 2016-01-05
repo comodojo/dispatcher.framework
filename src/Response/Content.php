@@ -80,4 +80,10 @@ class Content {
 
     }
 
+    public function length() {
+
+        return sizeof($this->content);
+
+    }
+
 }

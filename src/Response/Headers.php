@@ -28,11 +28,11 @@ class Headers {
 
     use HeadersTrait;
 
-    public function persist() {
+    public function send($replace = false) {
 
         foreach ($this->headers as $header => $value) {
 
-            header($header.": ".$value, true);
+            header($header.": ".$value, $replace);
 
         }
 

@@ -97,7 +97,7 @@ class Status {
 
     }
 
-    public function definition($code=null) {
+    public function description($code=null) {
 
         if ( is_null($code) || !array_key_exists($code, $this->http_status_codes) ) {
 

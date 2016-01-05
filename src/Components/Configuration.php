@@ -69,7 +69,7 @@ class Configuration {
         'DISPATCHER_AUTO_ROUTE' => false
     );
 
-    public function __construct( $service = null ) {
+    public function __construct() {
 
         $this->attributes['DISPATCHER_BASE_URL'] = self::urlGetAbsolute();
 
