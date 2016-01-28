@@ -122,9 +122,9 @@ class Dispatcher {
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route') );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->route()->type) );
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getType()) );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->route()->service) );
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getService()) );
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.#') );
 

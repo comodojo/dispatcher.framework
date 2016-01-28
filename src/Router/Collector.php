@@ -33,15 +33,17 @@ class Collector extends DispatcherClassModel {
 
     private $bypass     = false;
 
-    private $cache      = null;
-
     private $classname  = "";
 
     private $type       = "";
 
-    private $parameters = array();
+    private $service    = "";
 
     private $cache      = null;
+
+    private $request    = null;
+
+    private $response   = null;
 
     private $table      = array();
 
@@ -50,9 +52,53 @@ class Collector extends DispatcherClassModel {
         parent::__construct($configuration, $logger);
         
         $this->table = $routing_table->get();
+        
+        $this->cache = $cache;
 
         $this->setTimestamp();
 
+    }
+    
+    public function getType() {
+        
+        return $this->type;
+        
+    }
+    
+    public function getService() {
+        
+        return $this->service;
+        
+    }
+    
+    public function getParameters() {
+        
+        return $this->parameters;
+        
+    }
+    
+    public function getClassName() {
+        
+        return $this->classname;
+        
+    }
+    
+    public function getInstance() {
+        
+        $class = $this->classname;
+        
+        if (class_exists($class)) {
+            
+            return new $class(
+                $this->service, 
+                $this->logger,
+                $this,
+                $this->response
+            );
+            
+        }
+        else return null;
+        
     }
 
     public function bypass($mode = true) {
@@ -65,80 +111,92 @@ class Collector extends DispatcherClassModel {
 
     public function route(Request $request) {
         
-        $value = $this->parse($request);
+        $this->request = $request;
         
-        $this->query($request);
-        
-        $this->classname  = $value['class'];
-        $this->type       = $value['type'];
-        $this->parameters = array_merge($value['parameters'], $request->post()->get());
-        
-    }
-    
-    private function query(Request $request) {
-        
-        $keys = $request->uri()->query->keys();
-        
-        foreach ($keys as $key) {
+        if (!$this->parse()) {
             
-            $request->post()->set(rawurldecode($key), $request->uri()->query->getValue($key));
+            throw new DispatcherException("Unable to find a valid route for the specified uri");
             
         }
         
+        
+    }
+
+    public function compose(Response $response) {
+        
+        $this->response = $response;
+        
+        $service = $this->getInstance();
+        
+        if (!is_null($service)) {
+            
+            $result = $service->run();
+            
+            $this->response->content()->set($result);
+            
+        } else {
+            
+            throw new DispatcherException(sprintf("Unable to execute service '%s'", $this->service));
+            
+        }
+        
+        
     }
     
-    private function parse(Request $request) {
+    private function parse() {
         
-        $path = $request->uri()->getPath();
+        $path = $this->request->uri()->getPath();
         
         foreach ($this->table as $regex => $value) {
             
             if (preg_match("/" . $regex . "/", $path, $matches)) {
                 
-                array_shift($matches);
+                $this->evalUri($value['query'], $matches);
                 
-                $this->setParameters($value['query'], $matches, $request);
-                
-                return $value;
-                
-            }
-            
-        }
-        
-    }
-    
-    private function setParameters($parameters, $values, Request $request) {
-        
-        $params = array_keys($parameters);
-        
-        $count  = 0;
-        
-        foreach ($values as $paramValue) {
-            
-            while ($count < count($params)) {
-                
-                $parameter   = $params[$count];
-                
-                $param_regex = $parameters[$parameter];
-                
-                $count++;
-                
-                if (preg_match("/" . $param_regex . "/", $paramValue)) {
+                foreach ($value['parameters'] as $parameter => $value) {
                     
-                    $request->post()->set($parameter, $paramValue);
-                    
-                    break;
+                    $this->request->query()->set($parameter, $value);
                     
                 }
                 
+                $this->classname  = $value['class'];
+                $this->type       = $value['type'];
+                $this->service    = implode('.', $value['service']);
+                
+                return true;
+                
             }
             
         }
         
+        return $false;
+        
     }
-
-    public function compose(Response $response) {
-
+    
+    private function evalUri($parameters, $bits) {
+        
+        $count  = 0;
+        
+        foreach ($parameters as $key => $value) {
+            
+            if (isset($bits[$key])) {
+                
+                if (preg_match('/' . $value['regex'] . '/', $bits[$key], $matches)) {
+                    
+                    if (count($matches) == 1) $matches = $matches[0];
+                    
+                    $this->request->query()->set($key, $matches);
+                    
+                }
+                
+            } elseif ($value['required']) {
+                
+                throw new DispatcherException(sprintf("Required parameter '%s' not specified.", $key));
+                
+            }
+            
+        }
+        
     }
 
 }

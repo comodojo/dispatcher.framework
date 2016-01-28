@@ -4,6 +4,7 @@ use \Comodojo\Components\Model as DispatcherClassModel;
 use \League\Uri\Schemes\Http as HttpUri;
 use \Comodojo\Dispatcher\Request\Headers;
 use \Comodojo\Dispatcher\Request\Post;
+use \Comodojo\Dispatcher\Request\Query;
 use \Comodojo\Dispatcher\Request\UserAgent;
 use \Comodojo\Dispatcher\Request\Method;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
@@ -42,6 +43,8 @@ class Model extends DispatcherClassModel {
 
     private $post = null;
 
+    private $query = null;
+
     private $method = null;
 
     public function __construct(Configuration $configuration, Logger $logger) {
@@ -55,6 +58,8 @@ class Model extends DispatcherClassModel {
         $this->uri = HttpUri::createFromServer($_SERVER);
 
         $this->post = new Post();
+
+        $this->query = new Query();
 
         $this->useragent = new UserAgent();
 
@@ -77,6 +82,12 @@ class Model extends DispatcherClassModel {
     public function post() {
 
         return $this->post;
+
+    }
+
+    public function query() {
+
+        return $this->query;
 
     }
 

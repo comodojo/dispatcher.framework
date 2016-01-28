@@ -42,6 +42,7 @@ class RoutingTable implements RoutingTableInterface {
         $value   = array(
             "type"       => $type,
             "class"      => $class,
+            "service"    => array(),
             "parameters" => $parameters,
             "query"      => array()
         );
@@ -83,44 +84,64 @@ class RoutingTable implements RoutingTableInterface {
         
     }
     
-    private function readpath($folders, &$value = null, $regex = '\/') {
+    private function readpath($folders, &$value = null, $regex = '') {
         
         if (empty($folders)) {
             
-            return $regex;
+            return '^'.$regex.'[\/]?$';
             
         } else {
             
-            $folder = array_shift($folders);
+            $folder  = array_shift($folders);
             
             $decoded = json_decode($folder, true);
             
             if (!is_null($decoded) && is_array($decoded)) {
                 
-                $key = array_keys($decoded);
+                $keys = array_keys($decoded);
                 
-                $key = $key[0];
+                $param_regex    = '';
                 
-                $required = isset($decoded['required'])?
-                    filter_var($decoded['required'], FILTER_VALIDATE_BOOLEAN) :
-                    false;
+                $param_required = false;
+                
+                foreach ($decoded as $key => $value) {
                     
-                if (!empty($value)) {
-                    $value['query'][$key] = $decoded[$key];
+                    $field_required = false;
+                    
+                    if (preg_match('/^(.+)\*$/', $key, $bits)) {
+                        
+                        $key            = $bits[1];
+                        $field_required = true;
+                        $param_required = true;
+                        
+                    }
+                    
+                    $value['query'][$key] = array(
+                        'regex'    => $value,
+                        'required' => $required
+                    );
+                    
+                    $value = preg_replace('/(?<!\\)\((?!\?)/', '(?:', $value);
+                    $value = preg_replace('/\.([\*\+])(?!\?)/', '.\${1}?', $value);
+                    
+                    $param_regex .= '(?P<' . $key . '>' . $value . ')' . (($field_required)?'{1}':'?');
+                    
                 }
                 
                 $this->readpath( 
                     $folders,
                     $value,
-                    $regex.'('.$decoded[$key].'\/)'. (($required)?'{1}':'?')
+                    $regex.'(?:\/'.$param_regex.')'. (($param_required)?'{1}':'?')
                 );
                 
             } else {
                 
+                array_push($value['service'], $folder);
+                
                 $this->readpath(
                     $folders,
                     $value,
-                    $regex.$folder.'\/'
+                    $regex.'\/'.$folder
                 );
                 
             }

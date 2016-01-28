@@ -17,7 +17,7 @@ class ServiceEvent extends AbstractEvent {
     private $response = null;
 
     public function __construct(
-        $name
+        $name,
         Logger $logger,
         Request $request,
         Router $router,
