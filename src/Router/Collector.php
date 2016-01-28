@@ -31,11 +31,25 @@ class Collector extends DispatcherClassModel {
 
     use TimestampTrait;
 
-    private $bypass = false;
+    private $bypass     = false;
 
-    public function __construct() {
+    private $cache      = null;
+
+    private $classname  = "";
+
+    private $type       = "";
+
+    private $parameters = array();
+
+    private $cache      = null;
+
+    private $table      = array();
+
+    public function __construct($routing_table, $configuration = null, $logger = null, $cache = null) {
 
         parent::__construct($configuration, $logger);
+        
+        $this->table = $routing_table->get();
 
         $this->setTimestamp();
 
@@ -50,7 +64,77 @@ class Collector extends DispatcherClassModel {
     }
 
     public function route(Request $request) {
-
+        
+        $value = $this->parse($request);
+        
+        $this->query($request);
+        
+        $this->classname  = $value['class'];
+        $this->type       = $value['type'];
+        $this->parameters = array_merge($value['parameters'], $request->post()->get());
+        
+    }
+    
+    private function query(Request $request) {
+        
+        $keys = $request->uri()->query->keys();
+        
+        foreach ($keys as $key) {
+            
+            $request->post()->set(rawurldecode($key), $request->uri()->query->getValue($key));
+            
+        }
+        
+    }
+    
+    private function parse(Request $request) {
+        
+        $path = $request->uri()->getPath();
+        
+        foreach ($this->table as $regex => $value) {
+            
+            if (preg_match("/" . $regex . "/", $path, $matches)) {
+                
+                array_shift($matches);
+                
+                $this->setParameters($value['query'], $matches, $request);
+                
+                return $value;
+                
+            }
+            
+        }
+        
+    }
+    
+    private function setParameters($parameters, $values, Request $request) {
+        
+        $params = array_keys($parameters);
+        
+        $count  = 0;
+        
+        foreach ($values as $paramValue) {
+            
+            while ($count < count($params)) {
+                
+                $parameter   = $params[$count];
+                
+                $param_regex = $parameters[$parameter];
+                
+                $count++;
+                
+                if (preg_match("/" . $param_regex . "/", $paramValue)) {
+                    
+                    $request->post()->set($parameter, $paramValue);
+                    
+                    break;
+                    
+                }
+                
+            }
+            
+        }
+        
     }
 
     public function compose(Response $response) {

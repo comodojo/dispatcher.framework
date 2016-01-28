@@ -54,7 +54,7 @@ trait Headers {
 
     }
 
-    final public function unset($header = null) {
+    final public function remove($header = null) {
 
         if ( is_null($header) ) {
 

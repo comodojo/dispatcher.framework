@@ -81,7 +81,7 @@ class Model extends DispatcherClassModel {
 
     public function content() {
 
-        $return $this->content;
+        return $this->content;
 
     }
 

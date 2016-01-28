@@ -48,7 +48,7 @@ trait Parameters {
 
     }
 
-    final public function unset($parameter = null) {
+    final public function remove($parameter = null) {
 
         if ( is_null($parameter) ) {
 

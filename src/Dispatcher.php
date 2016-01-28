@@ -154,7 +154,7 @@ class Dispatcher {
             $this->request,
             $this->router,
             $this->response
-        ) );
+        );
 
     }
 
