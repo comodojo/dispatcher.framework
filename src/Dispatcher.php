@@ -5,10 +5,13 @@ use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Collector as RouteCollector;
 use \Comodojo\Dispatcher\Response\Model as Response;
+use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Output\Processor;
 use \Comodojo\Dispatcher\Events\DispatcherEvent;
 use \Comodojo\Dispatcher\Events\ServiceEvent;
+use \Comodojo\Dispatcher\Router\RoutingTableInterface;
+use \Comodojo\Dispatcher\Log\DispatcherLogger;
 use \Comodojo\Cache\CacheManager;
 use \League\Event\Emitter;
 
@@ -38,37 +41,49 @@ class Dispatcher {
 
     use TimestampTrait;
 
-    private $configuration = null;
+    private $configuration;
 
-    private $request = null;
+    private $request;
 
-    private $router = null;
+    private $router;
 
-    private $response = null;
+    private $response;
+    
+    private $extra;
 
-    private $logger = null;
+    private $logger;
 
-    private $cache = null;
+    private $cache;
 
-    private $events = null;
+    private $events;
 
-    public function __construct() {
+    public function __construct(
+        Emitter $events = null,
+        CacheManager $cache = null,
+        Logger $logger = null
+    ) {
 
         ob_start();
 
         $this->setTimestamp();
 
         $this->configuration = new Configuration();
-
-        $this->events = new Emitter();
-
-        $this->cache = new CacheManager( CacheManager::PICK_FIRST );
-
+        
+        $this->events = is_null($events) ? new Emitter() : $emitter;
+        
+        $this->logger = is_null($logger) ? DispatcherLogger::create($this->configuration) : $logger;
+        
+        $this->cache = is_null($cache) ? new CacheManager( CacheManager::PICK_FIRST, $this->logger ) : $cache;
+        
         $this->request = new Request($this->configuration, $this->logger);
-
+        
         $this->router = new RouteCollector($this->configuration, $this->logger, $this->cache);
-
+        
         $this->response = new Response($this->configuration, $this->logger);
+        
+        $this->extra = new Extra($this->logger);
+        
+        $this->router->load( $routing_table );
 
     }
 
@@ -105,6 +120,12 @@ class Dispatcher {
     public function response() {
 
         return $this->response;
+
+    }
+    
+    public function extra() {
+
+        return $this->extra;
 
     }
 
@@ -153,7 +174,8 @@ class Dispatcher {
             $this->logger,
             $this->request,
             $this->router,
-            $this->response
+            $this->response,
+            $this->extra
         );
 
     }
