@@ -24,12 +24,16 @@
 
 interface RoutingTableInterface {
 
-    public function get();
+    public function set($route, $type, $class, $parameters);
     
-    public function add();
+    public function put($route, $type, $class, $parameters);
     
-    public function remove();
+    public function get($route);
+
+    public function remove($route);
     
-    public function update();
+    public function routes();
+
+    public function defaultRoute();
 
 }

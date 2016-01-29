@@ -28,7 +28,7 @@ class Post {
 
     use ParametersTrait;
 
-    protected $raw_parameters = null;
+    protected $raw_parameters;
 
     public function __construct() {
 

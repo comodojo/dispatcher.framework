@@ -35,17 +35,17 @@ class Model extends DispatcherClassModel {
 
     use TimestampTrait;
 
-    private $headers = null;
+    private $headers;
 
-    private $uri = null;
+    private $uri;
 
-    private $useragent = null;
+    private $useragent;
 
-    private $post = null;
+    private $post;
 
-    private $query = null;
+    private $query;
 
-    private $method = null;
+    private $method;
 
     public function __construct(Configuration $configuration, Logger $logger) {
 

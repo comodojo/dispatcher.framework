@@ -62,8 +62,8 @@ use \Comodojo\Dispatcher\Response\Model as Response;
 
 class Processor extends DispatcherClassModel {
 
-    private $response = mull;
-
+    private $response;
+    
     public function __construct(Configuration $configuration, Logger $logger, Response $response) {
 
         parent::__construct($configuration, $logger);
@@ -138,12 +138,12 @@ class Processor extends DispatcherClassModel {
 
                 } else {
 
-                    header('Last-Modified: '.$last_modified), true, 304);
+                    header('Last-Modified: '.$last_modified, true, 304);
 
                 }
 
                 header('Content-Length: '.$content->length());
-                $headers->unset('Last-Modified');
+                $headers->remove('Last-Modified');
 
                 break;
 
@@ -207,9 +207,9 @@ class Processor extends DispatcherClassModel {
 
         }
 
-        $this->headers->send();
+        $headers->send();
 
-        $this->cookies->save();
+        $cookies->save();
 
         return $content;
 

@@ -26,7 +26,7 @@ use \Exception;
 
 class Content {
 
-    private $content = null;
+    private $content;
 
     private $type = "text/plain";
 

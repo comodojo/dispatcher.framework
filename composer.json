@@ -1,6 +1,6 @@
 {
     "name": "comodojo/dispatcher.framework",
-    "description": "REST services microframework",
+    "description": "Hackable REST framework",
     "license": "GPL-3.0+",
     "type": "library",
     "keywords": [
@@ -13,7 +13,8 @@
         "comodojo",
         "services",
         "webservices",
-        "extensible"
+        "extensible",
+        "hackable"
     ],
     "homepage": "https://dispatcher.comodojo.org",
      "support": {

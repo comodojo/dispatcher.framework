@@ -24,7 +24,7 @@
 
 class UserAgent {
 
-    private $user_agent = null;
+    private $user_agent;
 
     public function __construct() {
 

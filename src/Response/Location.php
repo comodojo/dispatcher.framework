@@ -26,7 +26,7 @@ use \Exception;
 
 class Location {
 
-    private $location = null;
+    private $location;
 
     public function get() {
 
