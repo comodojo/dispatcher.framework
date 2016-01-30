@@ -24,7 +24,7 @@
 
 trait Timestamp {
 
-    protected $timestamp = null;
+    protected $timestamp;
 
     final public function getTimestamp() {
 

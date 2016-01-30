@@ -8,7 +8,7 @@ abstract class AbstractEvent extends LeagueAbstractEvent {
 
     use TimestampTrait;
 
-    private $name = null;
+    private $name;
 
     public function __construct($name) {
 

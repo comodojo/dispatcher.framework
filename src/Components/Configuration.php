@@ -22,89 +22,91 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
- // define('DISPATCHER_LOG_ENABLED', false);
- //
- // define('DISPATCHER_LOG_NAME', 'dispatcher');
- //
- // define('DISPATCHER_LOG_TARGET', null);
- //
- // define('DISPATCHER_LOG_LEVEL', 'ERROR');
- //
- // define("DISPATCHER_REAL_PATH", realpath(dirname(__FILE__)."/../")."/");
- //
- // define("DISPATCHER_BASEURL","");
- //
- // define ('DISPATCHER_ENABLED', true);
- //
- // define ('DISPATCHER_USE_REWRITE', true);
- //
- // define('DISPATCHER_AUTO_ROUTE', false);
- //
- // define('DISPATCHER_CACHE_ENABLED', true);
- //
- // define('DISPATCHER_CACHE_DEFAULT_TTL', 600);
- //
- // define('DISPATCHER_CACHE_FAIL_SILENTLY', true);
- //
- // define('DISPATCHER_DEFAULT_ENCODING', 'UTF-8');
- //
- // define('DISPATCHER_SUPPORTED_METHODS', 'GET,PUT,POST,DELETE,OPTIONS,HEAD');
- //
- // define('DISPATCHER_CACHE_FOLDER', DISPATCHER_REAL_PATH."cache/");
- //
- // define('DISPATCHER_SERVICES_FOLDER', DISPATCHER_REAL_PATH."services/");
- //
- // define('DISPATCHER_PLUGINS_FOLDER', DISPATCHER_REAL_PATH."plugins/");
- //
- // define('DISPATCHER_TEMPLATES_FOLDER', DISPATCHER_REAL_PATH."templates/");
- //
- // define('DISPATCHER_LOG_FOLDER', DISPATCHER_REAL_PATH."logs/");
-
 class Configuration {
 
-    private $attributes = array(
-        'DISPATCHER_ENABLED' => true,
-        'DISPATCHER_SUPPORTED_METHODS' => 'GET,PUT,POST,DELETE,OPTIONS,HEAD',
-        'DISPATCHER_DEFAULT_ENCODING' => 'UTF-8',
-        'DISPATCHER_AUTO_ROUTE' => false
+    protected $attributes = array(
+        'dispatcher-enabled' => true,
+        'dispatcher-disabled-status' => 503,
+        'dispatcher-disabled-message' => 'Dispatcher offline',
+        'dispatcher-log-name' => 'dispatcher',
+        'dispatcher-log-enabled' => false,
+        'dispatcher-log-level' => 'INFO',
+        'dispatcher-log-target' => '%dispatcher-log-folder%/dispatcher.log',
+        'dispatcher-log-folder' => '/log',
+        'dispatcher-supported-methods' => 'GET,PUT,POST,DELETE,OPTIONS,HEAD',
+        'dispatcher-default-encoding' => 'UTF-8',
+        'dispatcher-cache-enabled' => true,
+        'dispatcher-cache-ttl' => 3600,
+        'dispatcher-cache-folder' => '/cache',
+        'dispatcher-cache-algorithm'  => 'PICK_FIRST'
+        // should we implement this?
+        //'dispatcher-autoroute' => false
     );
 
-    public function __construct() {
+    public function __construct( $configuration = array() ) {
 
-        $this->attributes['DISPATCHER_BASE_URL'] = self::urlGetAbsolute();
+        $this->attributes['dispatcher-base-url'] = self::urlGetAbsolute();
+        
+        $this->attributes['dispatcher-real-path'] = self::pathGetAbsolute();
 
-        $constants = get_defined_constants(true);
-
-        if ( !isset($constants['user']) ) return;
-
-        $dispatcher_constants = preg_grep("/^DISPATCHER_/", array_keys($constants['user']));
-
-        if ( sizeof($dispatcher_constants) > 0 ) {
-
-            $filtered_constants = array_intersect_key($constants['user'], array_flip($dispatcher_constants));
-
-            $this->attributes = array_merge($this->attributes, $filtered_constants);
-
-        }
+        $this->attributes = array_merge($this->attributes, $configuration);
 
     }
 
-    final public function __get($property) {
+    final public function get($property) {
 
         if (array_key_exists($property, $this->attributes)) {
 
-            return $this->attributes[$property];
+            $value = $this->attributes[$property];
+            
+            if ( preg_match_all('/%(.+?)%/', $value, $matches) ) {
+                
+                $substitutions = array();
+                
+                foreach ( $matches as $match ) {
+                    
+                    $backreference = $match[1];
+                    
+                    if ( $backreference != $property && !isset($substitutions['/%'.$backreference.'%/']) ) {
+                        
+                        $substitutions['/%'.$backreference.'%/'] = $this->$backreference;
+                        
+                    }
+                    
+                }
+                
+                $value = preg_replace(array_keys($substitutions), array_values($substitutions), $value);
+                
+            }
+            
+            return $value;
 
         }
 
         return null;
 
     }
+    
+    final public function set($property, $value) {
 
-    final public function __isset($property) {
+        $this->attributes[$property] = $value;
+
+        return $this;
+
+    }
+
+    final public function isDefined($property) {
 
         return isset($this->attributes[$property]);
 
+    }
+    
+    final public function erase() {
+        
+        $this->attributes = array();
+        
+        return $this;
+        
     }
 
     private static function urlGetAbsolute() {
@@ -114,6 +116,12 @@ class Configuration {
         $uri = preg_replace("/\/index.php(.*?)$/i", "", $_SERVER['PHP_SELF']);
 
         return ( $http . $_SERVER['HTTP_HOST'] . $uri . "/" );
+
+    }
+    
+    private static function pathGetAbsolute() {
+
+        return realpath(dirname(__FILE__)."/../../../../../")."/";
 
     }
 

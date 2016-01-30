@@ -5,7 +5,7 @@ use \Comodojo\Dispatcher\Dispatcher;
 
 class DispatcherEvent extends AbstractEvent {
 
-    private $dispatcher = null;
+    private $dispatcher;
 
     public function __construct(
         Dispatcher $dispatcher

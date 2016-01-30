@@ -31,19 +31,19 @@ use \Comodojo\Cookies\CookieManager;
 
 class Model extends DispatcherClassModel {
 
-    private $headers = null;
+    private $headers;
 
-    private $cookies = null;
+    private $cookies;
 
-    private $status = null;
+    private $status;
 
-    private $content = null;
+    private $content;
 
-    private $location = null;
+    private $location;
 
     private $content_type = "text/plain";
 
-    private $charset = null;
+    private $charset;
 
     public function __construct(Configuration $configuration, Logger $logger) {
 
