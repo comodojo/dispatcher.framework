@@ -33,32 +33,45 @@ use \Exception;
 class RoutingTable implements RoutingTableInterface {
 
     private $routes = array();
-    private $def_route = array();
     
-    public function add($route, $type, $class, $parameters = array()) {
+    public function put($route, $type, $class, $parameters = array()) {
         
         $folders = explode("/", $route);
         
-        $value   = array(
-            "type"       => $type,
-            "class"      => $class,
-            "service"    => array(),
-            "parameters" => $parameters,
-            "query"      => array()
-        );
+        $regex = $this->readpath($folders);
         
-        if (count($folders) > 1 && empty($folders[0]))
-            array_shift($folders);
-        
-        if (count($folders) == 1 && empty($folders[0])) {
-            $this->def_route = $value;
+        if (!isset($this->routes[$regex])) {
             
-            return $this;
+            $this->add($folders, $type, $class, $parameters);
+            
         }
         
-        $regex = $this->readpath($folders, $value);
+    }
+    
+    public function set($route, $type, $class, $parameters = array()) {
         
-        $this->routes[$regex] = $value;
+        $folders = explode("/", $route);
+        
+        $regex = $this->readpath($folders);
+        
+        if (isset($this->routes[$regex])) {
+            
+            $this->add($folders, $type, $class, $parameters);
+            
+        }
+        
+    }
+    
+    public function get($route) {
+        
+        $folders = explode("/", $route);
+        
+        $regex = $this->readpath($folders);
+        
+        if (isset($this->routes[$regex])) 
+            return $this->routes[$regex];
+        else 
+            return null;
         
     }
     
@@ -80,11 +93,13 @@ class RoutingTable implements RoutingTableInterface {
     
     public function defaultRoute() {
         
-        return $this->def_route;
+        return $this->get('/');
         
     }
     
-    private function readpath($folders, &$value = null, $regex = '') {
+    private function readpath($folders = array(), &$value = null, $regex = '') {
+        
+        if (!empty($folders) && empty($folders[0])) array_shift($folders);
         
         if (empty($folders)) {
             
@@ -104,27 +119,9 @@ class RoutingTable implements RoutingTableInterface {
                 
                 $param_required = false;
                 
-                foreach ($decoded as $key => $value) {
+                foreach ($decoded as $key => $string) {
                     
-                    $field_required = false;
-                    
-                    if (preg_match('/^(.+)\*$/', $key, $bits)) {
-                        
-                        $key            = $bits[1];
-                        $field_required = true;
-                        $param_required = true;
-                        
-                    }
-                    
-                    $value['query'][$key] = array(
-                        'regex'    => $value,
-                        'required' => $required
-                    );
-                    
-                    $value = preg_replace('/(?<!\\)\((?!\?)/', '(?:', $value);
-                    $value = preg_replace('/\.([\*\+])(?!\?)/', '.\${1}?', $value);
-                    
-                    $param_regex .= '(?P<' . $key . '>' . $value . ')' . (($field_required)?'{1}':'?');
+                    $param_regex .= $this->readparam($key, $string, $param_required);
                     
                 }
                 
@@ -147,6 +144,52 @@ class RoutingTable implements RoutingTableInterface {
             }
             
         }
+        
+    }
+    
+    private function readparam($key, $string, &$param_required) {
+        
+        $field_required = false;
+        
+        if (preg_match('/^(.+)\*$/', $key, $bits)) {
+            
+            $key            = $bits[1];
+            $field_required = true;
+            $param_required = true;
+            
+        }
+        
+        if (!is_null($value)) {
+            
+            $value['query'][$key] = array(
+                'regex'    => $string,
+                'required' => $required
+            );
+            
+        }
+        
+        $string = preg_replace('/(?<!\\)\((?!\?)/', '(?:', $string);
+        $string = preg_replace('/\.([\*\+])(?!\?)/', '.\${1}?', $string);
+        
+        return '(?P<' . $key . '>' . $string . ')' . (($field_required)?'{1}':'?');
+        
+    }
+    
+    private function add($folders, $type, $class, $parameters) {
+        
+        $folders = explode("/", $route);
+        
+        $value   = array(
+            "type"       => $type,
+            "class"      => $class,
+            "service"    => array(),
+            "parameters" => $parameters,
+            "query"      => array()
+        );
+        
+        $regex = $this->readpath($folders, $value);
+        
+        $this->routes[$regex] = $value;
         
     }
 

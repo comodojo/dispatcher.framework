@@ -130,7 +130,35 @@ class Collector extends DispatcherClassModel {
         
         if (!is_null($service)) {
             
-            $result = $service->run();
+            $result = "";
+
+            switch( $_SERVER['REQUEST_METHOD'] ) {
+    
+                case 'POST':
+    
+                    $result = $service->post();
+    
+                    break;
+    
+                case 'PUT':
+    
+                    $result = $service->put();
+    
+                    break;
+                    
+                case 'DELETE':
+    
+                    $result = $service->delete();
+    
+                    break;
+    
+                default:
+    
+                    $result = $service->get();
+    
+                    break;
+    
+            }
             
             $this->response->content()->set($result);
             
@@ -162,6 +190,7 @@ class Collector extends DispatcherClassModel {
                 $this->classname  = $value['class'];
                 $this->type       = $value['type'];
                 $this->service    = implode('.', $value['service']);
+                $this->service    = empty($this->service)?"default":$this->service;
                 
                 return true;
                 
@@ -181,7 +210,7 @@ class Collector extends DispatcherClassModel {
             
             if (isset($bits[$key])) {
                 
-                if (preg_match('/' . $value['regex'] . '/', $bits[$key], $matches)) {
+                if (preg_match('/^' . $value['regex'] . '$/', $bits[$key], $matches)) {
                     
                     if (count($matches) == 1) $matches = $matches[0];
                     
