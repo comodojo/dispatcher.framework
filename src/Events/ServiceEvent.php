@@ -1,6 +1,5 @@
 <?php namespace Comodojo\Dispatcher\Events;
 
-use \Comodojo\Events\AbstractEvent;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Collector as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;

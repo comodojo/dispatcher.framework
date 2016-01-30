@@ -1,6 +1,5 @@
 <?php namespace Comodojo\Dispatcher\Events;
 
-use \Comodojo\Events\AbstractEvent;
 use \Comodojo\Dispatcher\Dispatcher;
 
 /**

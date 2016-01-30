@@ -175,11 +175,14 @@ class Processor extends DispatcherClassModel {
 
                 break;
 
-            case 405: //Not allowed
-
-            header('Allow: ' . $value, true, 405);
-
-            break;
+            /**
+            * @todo: how to get reverse allowed methods reference?
+            */
+            // case 405: //Not allowed
+            //
+            // header('Allow: ' . $value, true, 405);
+            //
+            // break;
 
             case 500: //Internal Server Error
 
@@ -188,11 +191,14 @@ class Processor extends DispatcherClassModel {
 
                 break;
 
-            case 501: //Not implemented
-
-            header('Allow: ' . $value, true, 501);
-
-            break;
+            /**
+            * @todo: how to get reverse allowed methods reference?
+            */
+            // case 501: //Not implemented
+            //
+            // header('Allow: ' . $value, true, 501);
+            //
+            // break;
 
             case 503: //Service Unavailable
 

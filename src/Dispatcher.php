@@ -60,7 +60,7 @@ class Dispatcher {
 
     public function __construct(
         $configuration = array(),
-        Emitter $events = null,
+        Emitter $emitter = null,
         CacheManager $cache = null,
         Logger $logger = null
     ) {

@@ -205,7 +205,7 @@ class Collector extends DispatcherClassModel {
 
         }
 
-        return $false;
+        return false;
 
     }
 

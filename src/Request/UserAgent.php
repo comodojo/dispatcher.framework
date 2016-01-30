@@ -48,7 +48,7 @@ class UserAgent {
 
     public function browser() {
 
-        return get_browser($this->browser);
+        return get_browser($this->user_agent);
 
     }
 
