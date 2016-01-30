@@ -3,9 +3,9 @@
 use \Comodojo\Dispatcher\Components\Parameters as ParametersTrait;
 
 /**
- *
- * @package     Comodojo dispatcher
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -23,6 +23,7 @@ use \Comodojo\Dispatcher\Components\Parameters as ParametersTrait;
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 
 class Model {
 

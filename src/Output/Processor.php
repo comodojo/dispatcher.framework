@@ -2,15 +2,13 @@
 
 use \Comodojo\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Response\Model as Response;
+use \Comodojo\Dispatcher\Components\Configuration;
+use \Monolog\Logger;
 
 /**
- * Header manipulation class for dispatcher
- *
- * This class manage response headers, from the status code to the custom
- * header the service will return.
- *
- * @package     Comodojo dispatcher
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -29,7 +27,16 @@ use \Comodojo\Dispatcher\Response\Model as Response;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Missing statuses:
+// Missing status codes
+//         _______
+//        j_______j
+//       /_______/_\
+//       |Missing| |
+//       |  ___  | |
+//       | !100! | |
+//       | !___! | |
+//       |_______|,'
+//
 //      // Informational 1xx
 //      100 => "Continue",
 //      101 => "Switching Protocols",
@@ -63,7 +70,7 @@ use \Comodojo\Dispatcher\Response\Model as Response;
 class Processor extends DispatcherClassModel {
 
     private $response;
-    
+
     public function __construct(Configuration $configuration, Logger $logger, Response $response) {
 
         parent::__construct($configuration, $logger);

@@ -3,11 +3,10 @@
 use \Monolog\Logger;
 use \Monolog\Handler\StreamHandler;
 use \Monolog\Handler\NullHandler;
+use \Comodojo\Dispatcher\Components\Configuration;
 
 /**
- *
- *
- * @package     Comodojo Framework
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     GPL-3.0+
@@ -28,8 +27,9 @@ use \Monolog\Handler\NullHandler;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 class DispatcherLogger {
-    
+
     /**
      * Create the logger
      *
@@ -38,31 +38,31 @@ class DispatcherLogger {
      * @return \Monolog\Logger
      */
     public static function create(Configuration $configuration) {
-    
+
         $name = $configuration->get('dispatcher-log-name');
-        
+
         $enabled = $configuration->get('dispatcher-log-enabled');
-        
+
         $level = self::getLevel( $configuration->get('dispatcher-log-level') );
-        
+
         $target = $configuration->get('dispatcher-log-target');
-    
+
         $logger = new Logger($name);
-        
+
         if ( $enabled === true ) {
-            
+
             $logger->pushHandler( new StreamHandler( $target, $level) );
-            
+
         } else {
-            
+
             $logger->pushHandler( new NullHandler($level) );
-            
+
         }
-        
+
         return $logger;
-        
+
     }
-    
+
     /**
      * Map provided log level to level code
      *
@@ -112,5 +112,5 @@ class DispatcherLogger {
         return $logger_level;
 
     }
-    
+
 }

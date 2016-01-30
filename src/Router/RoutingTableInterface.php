@@ -1,9 +1,9 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
 /**
- *
- * @package     Comodojo dispatcher
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -19,19 +19,19 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/   >.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 interface RoutingTableInterface {
 
     public function set($route, $type, $class, $parameters);
-    
+
     public function put($route, $type, $class, $parameters);
-    
+
     public function get($route);
 
     public function remove($route);
-    
+
     public function routes();
 
     public function defaultRoute();

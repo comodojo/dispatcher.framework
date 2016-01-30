@@ -3,9 +3,9 @@
 use \Comodojo\Dispatcher\Components\Headers as HeadersTrait;
 
 /**
- *
- * @package     Comodojo dispatcher
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     GPL-3.0+
  *
  * LICENSE:

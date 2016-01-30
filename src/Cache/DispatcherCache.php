@@ -3,11 +3,10 @@
 use \Monolog\Logger;
 use \Comodojo\Cache\CacheManager;
 use \Comodojo\Cache\FileCache;
+use \comodojo\Dispatcher\Components\Configuration;
 
 /**
- *
- *
- * @package     Comodojo Framework
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     GPL-3.0+
@@ -29,40 +28,40 @@ use \Comodojo\Cache\FileCache;
  */
 
 class DispatcherCache {
-    
+
     /**
      * Create the Cache Manager
      *
      * @return \Comodojo\Cache\CacheManager
      */
     public static function create(Configuration $configuration, Logger $logger) {
-    
+
         $enabled = $configuration->get('dispatcher-cache-enabled');
-        
+
         $ttl = $configuration->get('dispatcher-cache-ttl');
-        
+
         if ( $ttl !== null && !defined('COMODOJO_CACHE_DEFAULT_TTL') ) {
-            
+
             define('COMODOJO_CACHE_DEFAULT_TTL', $ttl);
-            
+
         }
-        
+
         $folder = $configuration->get('dispatcher-cache-folder');
-        
+
         $algorithm = self::getAlgorithm( $configuration->get('dispatcher-cache-algorithm') );
-    
+
         $manager = new CacheManager( $algorithm );
-        
+
         if ( $enabled === true ) {
-            
+
             $manager->addProvider( new FileCache($folder) );
-            
+
         }
-        
+
         return $manager;
-        
+
     }
-    
+
     /**
      * Map provided log level to level code
      *
@@ -100,5 +99,5 @@ class DispatcherCache {
         return $selected;
 
     }
-    
+
 }

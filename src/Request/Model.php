@@ -8,11 +8,12 @@ use \Comodojo\Dispatcher\Request\Query;
 use \Comodojo\Dispatcher\Request\UserAgent;
 use \Comodojo\Dispatcher\Request\Method;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
+use \Comodojo\Dispatcher\Components\Configuration;
 
 /**
- *
- * @package     Comodojo dispatcher
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     GPL-3.0+
  *
  * LICENSE:

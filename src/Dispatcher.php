@@ -17,9 +17,9 @@ use \Comodojo\Cache\CacheManager;
 use \League\Event\Emitter;
 
 /**
- *
- * @package     Comodojo dispatcher
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     GPL-3.0+
  *
  * LICENSE:
@@ -49,7 +49,7 @@ class Dispatcher {
     private $router;
 
     private $response;
-    
+
     private $extra;
 
     private $logger;
@@ -70,21 +70,21 @@ class Dispatcher {
         $this->setTimestamp();
 
         $this->configuration = new Configuration($configuration);
-        
+
         $this->events = is_null($events) ? new Emitter() : $emitter;
-        
+
         $this->logger = is_null($logger) ? DispatcherLogger::create($this->configuration) : $logger;
-        
+
         $this->cache = is_null($cache) ? DispatcherCache::create($this->configuration, $this->logger) : $cache;
-        
+
         $this->request = new Request($this->configuration, $this->logger);
-        
+
         $this->router = new RouteCollector($this->configuration, $this->logger, $this->cache);
-        
+
         $this->response = new Response($this->configuration, $this->logger);
-        
+
         $this->extra = new Extra($this->logger);
-        
+
         $this->router->load( $routing_table );
 
     }
@@ -124,7 +124,7 @@ class Dispatcher {
         return $this->response;
 
     }
-    
+
     public function extra() {
 
         return $this->extra;
@@ -134,45 +134,45 @@ class Dispatcher {
     public function dispatch() {
 
         $this->events->emit( new DispatcherEvent($this) );
-        
+
         if ( $this->configuration()->get('dispatcher-enabled') === false ) {
-            
+
             $status = $this->configuration()->get('dispatcher-disabled-status');
-            
+
             $content = $this->configuration()->get('dispatcher-disabled-message');
-            
+
             $this->response()->status()->set($status);
-            
+
             $this->response()->content()->set($content);
-            
+
         } else {
-            
+
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request') );
 
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.'.$this->request->method()->get()) );
-    
+
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
-    
+
             $this->router->route($this->request);
-    
+
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route') );
-    
+
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getType()) );
-    
+
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getService()) );
-    
+
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.#') );
-    
+
             // translate route to service
-    
+
             $this->router->compose($this->response);
-    
+
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response') );
-    
+
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.'.$this->response->status()->get()) );
-    
+
             $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.#') );
-            
+
         }
 
         $return = Processor::parse($this->configuration, $this->logger, $this->response);

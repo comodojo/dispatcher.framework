@@ -1,6 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Events;
+<?php namespace Comodojo\Dispatcher\Service;
 
-use \Comodojo\Events\AbstractEvent;
+use \Comodojo\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Base\Configuration;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Collector as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
@@ -29,21 +30,18 @@ use \Monolog\Logger;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+abstract class AbstractService extends DispatcherClassModel {
 
-class ServiceEvent extends AbstractEvent {
+    protected $request;
 
-    private $logger;
+    protected $router;
 
-    private $request;
+    protected $response;
 
-    private $router;
-
-    private $response;
-
-    private $extra;
+    protected $extra;
 
     public function __construct(
-        $name,
+        Configuration $configuration,
         Logger $logger,
         Request $request,
         Router $router,
@@ -51,9 +49,7 @@ class ServiceEvent extends AbstractEvent {
         Extra $extra
     ) {
 
-        parent::__construct($name);
-
-        $this->logger = $logger;
+        parent::__construct($configuration, $logger);
 
         $this->request = $request;
 
@@ -62,12 +58,6 @@ class ServiceEvent extends AbstractEvent {
         $this->response = $response;
 
         $this->extra = $extra;
-
-    }
-
-    final public function logger() {
-
-        return $this->logger;
 
     }
 
@@ -92,6 +82,55 @@ class ServiceEvent extends AbstractEvent {
     final public function extra() {
 
         return $this->extra;
+
+    }
+
+    /**
+     * Get service-implemented HTTP methods
+     *
+     * @return  array   Headers array
+     */
+    final public function getImplementedMethods() {
+
+        $supported_methods = $this->configuration()->get('dispatcher-supported-methods');
+
+        if ( method_exists($this, 'any') ) {
+
+            return $supported_methods;
+
+        }
+
+        $implemented_methods = array();
+
+        foreach ( $supported_methods as $method ) {
+
+            if ( method_exists($this, strtolower($method)) ) array_push($implemented_methods,$method);
+
+        }
+
+        return $implemented_methods;
+
+    }
+
+    /**
+     * Return the callable class method that reflect the requested one
+     *
+     */
+    final public function getMethod($method) {
+
+        if ( method_exists($this, strtolower($method)) ) {
+
+            return strtolower($method);
+
+        } else if ( method_exists($this, strtolower('any')) ) {
+
+            return 'any';
+
+        } else {
+
+            return "any";
+
+        }
 
     }
 

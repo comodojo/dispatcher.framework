@@ -1,6 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Response;
 
 use \Comodojo\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Response\Headers;
 use \Comodojo\Dispatcher\Response\Status;
 use \Comodojo\Dispatcher\Response\Content;
@@ -8,9 +9,9 @@ use \Comodojo\Dispatcher\Response\Location;
 use \Comodojo\Cookies\CookieManager;
 
 /**
- *
- * @package     Comodojo dispatcher
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     GPL-3.0+
  *
  * LICENSE:
