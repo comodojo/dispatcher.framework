@@ -65,7 +65,7 @@ class DispatcherCache {
     /**
      * Map provided log level to level code
      *
-     * @param   string    $level
+     * @param   string    $algorithm
      *
      * @return  integer
      */

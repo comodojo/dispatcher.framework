@@ -15,6 +15,8 @@ use \Comodojo\Dispatcher\Log\DispatcherLogger;
 use \Comodojo\Dispatcher\Cache\DispatcherCache;
 use \Comodojo\Cache\CacheManager;
 use \League\Event\Emitter;
+use \Comodojo\Exception\DispatcherException;
+use \Exception;
 
 /**
  * @package     Comodojo Dispatcher
@@ -71,7 +73,7 @@ class Dispatcher {
 
         $this->configuration = new Configuration($configuration);
 
-        $this->events = is_null($events) ? new Emitter() : $emitter;
+        $this->events = is_null($emitter) ? new Emitter() : $emitter;
 
         $this->logger = is_null($logger) ? DispatcherLogger::create($this->configuration) : $logger;
 
@@ -84,8 +86,6 @@ class Dispatcher {
         $this->response = new Response($this->configuration, $this->logger);
 
         $this->extra = new Extra($this->logger);
-
-        $this->router->load( $routing_table );
 
     }
 
@@ -145,41 +145,53 @@ class Dispatcher {
 
             $this->response()->content()->set($content);
 
-        } else {
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request') );
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.'.$this->request->method()->get()) );
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
-
-            $this->router->route($this->request);
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route') );
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getType()) );
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getService()) );
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.#') );
-
-            // translate route to service
-
-            $this->router->compose($this->response);
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response') );
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.'.$this->response->status()->get()) );
-
-            $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.#') );
+            return $this->shutdown();
 
         }
 
-        $return = Processor::parse($this->configuration, $this->logger, $this->response);
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request') );
 
-        ob_end_clean();
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.'.$this->request->method()->get()) );
 
-        return $return;
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
+
+        try {
+
+            $this->router->route($this->request);
+
+        } catch (DispatcherException $de) {
+
+            $this->response()->status()->set( $de->getStatus() );
+
+            $this->response()->content()->set( $de->getContent() );
+
+            return $this->shutdown();
+
+        }
+
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route') );
+
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getType()) );
+
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getService()) );
+
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.#') );
+
+        // translate route to service
+
+        try {
+
+            $this->router->compose($this->response);
+
+        } catch (DispatcherException $de) {
+
+            $this->response()->status()->set( $de->getStatus() );
+
+            $this->response()->content()->set( $de->getContent() );
+
+        }
+
+        return $this->shutdown();
 
     }
 
@@ -193,6 +205,22 @@ class Dispatcher {
             $this->response,
             $this->extra
         );
+
+    }
+
+    private function shutdown() {
+
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response') );
+
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.'.$this->response->status()->get()) );
+
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.#') );
+
+        $return = Processor::parse($this->configuration, $this->logger, $this->response);
+
+        ob_end_clean();
+
+        return $return;
 
     }
 

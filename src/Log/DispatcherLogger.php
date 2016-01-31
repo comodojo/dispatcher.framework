@@ -33,9 +33,9 @@ class DispatcherLogger {
     /**
      * Create the logger
      *
-     * @param bool $verbose
+     * @param Configuration $configuration
      *
-     * @return \Monolog\Logger
+     * @return Logger
      */
     public static function create(Configuration $configuration) {
 
