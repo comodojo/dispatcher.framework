@@ -4,6 +4,7 @@ use \Comodojo\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
+use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheManager;
 
@@ -47,20 +48,23 @@ class Collector extends DispatcherClassModel {
 
     private $response;
 
-    private $table = array();
+    private $table;
 
     public function __construct(
         RoutingTable $routing_table,
         Configuration $configuration,
         Logger $logger,
-        CacheManager $cache
+        CacheManager $cache,
+        Extra $extra = null
     ) {
 
         parent::__construct($configuration, $logger);
 
-        $this->table = $routing_table->get();
+        $this->table = $routing_table;
 
         $this->cache = $cache;
+
+        $this->extra = $extra;
 
         $this->setTimestamp();
 
@@ -97,10 +101,12 @@ class Collector extends DispatcherClassModel {
         if (class_exists($class)) {
 
             return new $class(
-                $this->service,
+                $this->configuration,
                 $this->logger,
+                $this->request,
                 $this,
-                $this->response
+                $this->response,
+                $this->extra
             );
 
         }
@@ -122,7 +128,7 @@ class Collector extends DispatcherClassModel {
 
         if (!$this->parse()) {
 
-            throw new DispatcherException("Unable to find a valid route for the specified uri");
+            throw new DispatcherException("Unable to find a valid route for the specified uri", 1, null, 404);
 
         }
 
@@ -138,40 +144,38 @@ class Collector extends DispatcherClassModel {
         if (!is_null($service)) {
 
             $result = "";
-
-            switch( $_SERVER['REQUEST_METHOD'] ) {
-
-                case 'POST':
-
-                    $result = $service->post();
-
-                    break;
-
-                case 'PUT':
-
-                    $result = $service->put();
-
-                    break;
-
-                case 'DELETE':
-
-                    $result = $service->delete();
-
-                    break;
-
-                default:
-
-                    $result = $service->get();
-
-                    break;
-
+            
+            $method = $this->request->method()->get();
+            
+            if (in_array($method, $service->getImplementedMethods())) {
+                
+                $callable = $service->getMethod($method);
+                
+                try {
+                
+                    $result = call_user_func(array($service, $callable));
+                    
+                } catch (DispatcherException $de) {
+                    
+                    throw new DispatcherException(sprintf("Service '%s' exception for method '%s': %s", $this->service, $method, $de->getMessage()), 1, $de, 500);
+                    
+                } catch (Exception $e) {
+                    
+                    throw new DispatcherException(sprintf("Service '%s' execution failed for method '%s': %s", $this->service, $method, $e->getMessage()), 1, $e, 500);
+                    
+                }
+                
+            } else {
+                
+                throw new DispatcherException(sprintf("Service '%s' doesn't implement method '%s'", $this->service, $method), 1, null, 500);
+                
             }
 
             $this->response->content()->set($result);
 
         } else {
 
-            throw new DispatcherException(sprintf("Unable to execute service '%s'", $this->service));
+            throw new DispatcherException(sprintf("Unable to execute service '%s'", $this->service), 1, null, 500);
 
         }
 
@@ -182,7 +186,7 @@ class Collector extends DispatcherClassModel {
 
         $path = $this->request->uri()->getPath();
 
-        foreach ($this->table as $regex => $value) {
+        foreach ($this->table->routes() as $regex => $value) {
 
             if (preg_match("/" . $regex . "/", $path, $matches)) {
 
@@ -227,7 +231,7 @@ class Collector extends DispatcherClassModel {
 
             } elseif ($value['required']) {
 
-                throw new DispatcherException(sprintf("Required parameter '%s' not specified.", $key));
+                throw new DispatcherException(sprintf("Required parameter '%s' not specified.", $key), 1, null, 500);
 
             }
 

@@ -1,4 +1,4 @@
-<?php namespace Comodojo\Routes;
+<?php namespace Comodojo\Dispatcher\Routes;
 
 use \Comodojo\Database\Database;
 use \Comodojo\Base\Element;
