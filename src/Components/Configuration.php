@@ -33,9 +33,13 @@ class Configuration {
 
     }
 
-    final public function get($property) {
+    final public function get($property = null) {
 
-        if (array_key_exists($property, $this->attributes)) {
+        if ( is_null($property) ) {
+            
+            return $this->attributes;
+            
+        } else if (array_key_exists($property, $this->attributes)) {
 
             $value = $this->attributes[$property];
 
@@ -61,9 +65,11 @@ class Configuration {
 
             return $value;
 
+        } else {
+            
+            return null;
+            
         }
-
-        return null;
 
     }
 
