@@ -25,30 +25,9 @@
 
 class Configuration {
 
-    protected $attributes = array(
-        'dispatcher-enabled' => true,
-        'dispatcher-disabled-status' => 503,
-        'dispatcher-disabled-message' => 'Dispatcher offline',
-        'dispatcher-log-name' => 'dispatcher',
-        'dispatcher-log-enabled' => false,
-        'dispatcher-log-level' => 'INFO',
-        'dispatcher-log-target' => '%dispatcher-log-folder%/dispatcher.log',
-        'dispatcher-log-folder' => '/log',
-        'dispatcher-supported-methods' => array('GET','PUT','POST','DELETE','OPTIONS','HEAD'),
-        'dispatcher-default-encoding' => 'UTF-8',
-        'dispatcher-cache-enabled' => true,
-        'dispatcher-cache-ttl' => 3600,
-        'dispatcher-cache-folder' => '/cache',
-        'dispatcher-cache-algorithm'  => 'PICK_FIRST'
-        // should we implement this?
-        //'dispatcher-autoroute' => false
-    );
+    protected $attributes = array();
 
     public function __construct( $configuration = array() ) {
-
-        $this->attributes['dispatcher-base-url'] = self::urlGetAbsolute();
-
-        $this->attributes['dispatcher-real-path'] = self::pathGetAbsolute();
 
         $this->attributes = array_merge($this->attributes, $configuration);
 
@@ -102,27 +81,31 @@ class Configuration {
 
     }
 
-    final public function erase() {
+    final public function delete($property = null) {
 
-        $this->attributes = array();
+        if ( is_null($property) ) {
 
-        return $this;
+            $this->attributes = array();
+
+            return true;
+
+        } else if ( $this->isDefined($property) ) {
+
+            unset($this->attributes[$property]);
+
+            return true;
+
+        } else {
+
+            return false;
+
+        }
 
     }
 
-    private static function urlGetAbsolute() {
+    final public function merge($properties) {
 
-        $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
-
-        $uri = preg_replace("/\/index.php(.*?)$/i", "", $_SERVER['PHP_SELF']);
-
-        return ( $http . $_SERVER['HTTP_HOST'] . $uri . "/" );
-
-    }
-
-    private static function pathGetAbsolute() {
-
-        return realpath(dirname(__FILE__)."/../../../../../")."/";
+        return array_replace($this->attributes, $properties);
 
     }
 

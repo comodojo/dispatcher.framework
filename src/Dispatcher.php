@@ -76,7 +76,9 @@ class Dispatcher {
 
         $this->extra = new Extra($this->logger);
 
-        $this->configuration = new Configuration($configuration);
+        $this->configuration = new Configuration($this->getDefaultConfiguration());
+
+        $this->configuration->merge($configuration);
 
         $this->events = is_null($emitter) ? new Emitter() : $emitter;
 
@@ -232,6 +234,47 @@ class Dispatcher {
         ob_end_clean();
 
         return $return;
+
+    }
+
+    private function getDefaultConfiguration() {
+
+        return array(
+            'dispatcher-enabled' => true,
+            'dispatcher-disabled-status' => 503,
+            'dispatcher-disabled-message' => 'Dispatcher offline',
+            'dispatcher-log-name' => 'dispatcher',
+            'dispatcher-log-enabled' => false,
+            'dispatcher-log-level' => 'INFO',
+            'dispatcher-log-target' => '%dispatcher-log-folder%/dispatcher.log',
+            'dispatcher-log-folder' => '/log',
+            'dispatcher-supported-methods' => array('GET','PUT','POST','DELETE','OPTIONS','HEAD'),
+            'dispatcher-default-encoding' => 'UTF-8',
+            'dispatcher-cache-enabled' => true,
+            'dispatcher-cache-ttl' => 3600,
+            'dispatcher-cache-folder' => '/cache',
+            'dispatcher-cache-algorithm'  => 'PICK_FIRST',
+            // should we implement this?
+            //'dispatcher-autoroute' => false,
+            'dispatcher-base-url' => self::urlGetAbsolute(),
+            'dispatcher-real-path' => self::pathGetAbsolute()
+        );
+
+    }
+
+    private static function urlGetAbsolute() {
+
+        $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
+
+        $uri = preg_replace("/\/index.php(.*?)$/i", "", $_SERVER['PHP_SELF']);
+
+        return ( $http . $_SERVER['HTTP_HOST'] . $uri . "/" );
+
+    }
+
+    private static function pathGetAbsolute() {
+
+        return realpath(dirname(__FILE__)."/../../../../")."/";
 
     }
 
