@@ -4,7 +4,6 @@ use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Collector as RouteCollector;
-use \Comodojo\Dispatcher\Routes\RoutingTable;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
@@ -51,8 +50,6 @@ class Dispatcher {
 
     private $router;
 
-    private $table;
-
     private $response;
 
     private $extra;
@@ -88,9 +85,7 @@ class Dispatcher {
 
         $this->request = new Request($this->configuration, $this->logger);
 
-        $this->table = new RoutingTable();
-
-        $this->router = new RouteCollector($this->table, $this->configuration, $this->logger, $this->cache, $this->extra);
+        $this->router = new RouteCollector($this->configuration, $this->logger, $this->cache, $this->extra);
 
         $this->response = new Response($this->configuration, $this->logger);
 
@@ -117,12 +112,6 @@ class Dispatcher {
     public function request() {
 
         return $this->request;
-
-    }
-
-    public function table() {
-
-        return $this->table;
 
     }
 

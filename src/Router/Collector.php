@@ -1,6 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
 use \Comodojo\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Routes\RoutingTable;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
@@ -51,7 +52,6 @@ class Collector extends DispatcherClassModel {
     private $table;
 
     public function __construct(
-        RoutingTable $routing_table,
         Configuration $configuration,
         Logger $logger,
         CacheManager $cache,
@@ -60,7 +60,7 @@ class Collector extends DispatcherClassModel {
 
         parent::__construct($configuration, $logger);
 
-        $this->table = $routing_table;
+        $this->table = new RoutingTable($logger);
 
         $this->cache = $cache;
 
@@ -112,6 +112,34 @@ class Collector extends DispatcherClassModel {
         }
         else return null;
 
+    }
+    
+    public function add($route, $type, $class, $parameters = array()) {
+        
+        $routeData = $this->get($route);
+        
+        if (is_null($routeData)) {
+            
+            $this->table->put($route, $type, $class, $parameters);
+            
+        } else {
+            
+            $this->table->set($route, $type, $class, $parameters);
+            
+        }
+        
+    }
+    
+    public function get($route) {
+        
+        return $this->table->get($route);
+        
+    }
+    
+    public function remove($route) {
+        
+        return $this->table->remove($route);
+        
     }
 
     public function bypass($mode = true) {
