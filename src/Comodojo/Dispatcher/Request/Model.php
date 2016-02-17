@@ -1,7 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Request;
 
-use \Comodojo\Components\Model as DispatcherClassModel;
-use \League\Uri\Schemes\Http as HttpUri;
+use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Request\Headers;
 use \Comodojo\Dispatcher\Request\Post;
 use \Comodojo\Dispatcher\Request\Query;
@@ -9,6 +8,8 @@ use \Comodojo\Dispatcher\Request\UserAgent;
 use \Comodojo\Dispatcher\Request\Method;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Components\Configuration;
+use \League\Uri\Schemes\Http as HttpUri;
+use \Monolog\Logger;
 
 /**
  * @package     Comodojo Dispatcher

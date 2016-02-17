@@ -1,12 +1,13 @@
 <?php namespace Comodojo\Dispatcher\Response;
 
-use \Comodojo\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Response\Headers;
 use \Comodojo\Dispatcher\Response\Status;
 use \Comodojo\Dispatcher\Response\Content;
 use \Comodojo\Dispatcher\Response\Location;
 use \Comodojo\Cookies\CookieManager;
+use \Monolog\Logger;
 
 /**
  * @package     Comodojo Dispatcher

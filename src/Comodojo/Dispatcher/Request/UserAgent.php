@@ -1,7 +1,4 @@
-<?php namespace Comodojo\Components\Model;
-
-use \Monolog\Logger;
-use \Comodojo\Dispatcher\Components\Configuration;
+<?php namespace Comodojo\Dispatcher\Request;
 
 /**
  * @package     Comodojo Dispatcher
@@ -25,30 +22,33 @@ use \Comodojo\Dispatcher\Components\Configuration;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+class UserAgent {
 
-abstract class Model {
+    private $user_agent;
 
-    private $configuration;
+    public function __construct() {
 
-    private $logger;
-
-    public function __construct(Configuration $configuration, Logger $logger) {
-
-        $this->configuration = $configuration;
-
-        $this->logger = $logger;
+        $this->user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
 
     }
 
-    public function configuration() {
+    public function get() {
 
-        return $this->configuration;
+        return $this->user_agent;
 
     }
 
-    public function logger() {
+    public function set($ua) {
 
-        return $this->logger;
+        $this->user_agent = $ua;
+
+        return $this;
+
+    }
+
+    public function browser() {
+
+        return get_browser($this->user_agent);
 
     }
 

@@ -1,9 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Routes;
+<?php namespace Comodojo\Dispatcher\Router;
 
-use \Comodojo\Database\Database;
-use \Comodojo\Base\Element;
-use \Comodojo\Exception\DatabaseException;
-use \Comodojo\Exception\ConfigurationException;
+use \Monolog\Logger;
 use \Exception;
 
 /**
@@ -32,11 +29,11 @@ class RoutingTable implements RoutingTableInterface {
 
     private $routes = array();
     private $logger;
-    
+
     public function __construct(Logger $logger) {
-        
+
         $this->logger = $logger;
-        
+
     }
 
     public function put($route, $type, $class, $parameters = array()) {
@@ -105,9 +102,9 @@ class RoutingTable implements RoutingTableInterface {
     private function readpath($folders = array(), &$value = null, $regex = '') {
 
         while (!empty($folders) && empty($folders[0])) {
-            
+
             array_shift($folders);
-            
+
         }
 
         if (empty($folders)) {
@@ -127,13 +124,13 @@ class RoutingTable implements RoutingTableInterface {
                 $param_required = false;
 
                 foreach ($decoded as $key => $string) {
-                    
+
                     $this->logger->debug("PARAMETER KEY: " . $key);
-                    
+
                     $this->logger->debug("PARAMETER STRING: " . $string);
 
                     $param_regex .= $this->readparam($key, $string, $param_required);
-                    
+
                     $this->logger->debug("PARAMETER REGEX: " . $param_regex);
 
                 }
@@ -199,15 +196,15 @@ class RoutingTable implements RoutingTableInterface {
             "parameters" => $parameters,
             "query"      => array()
         );
-        
+
         $this->logger->debug("ROUTE: " . $route);
-        
+
         $this->logger->debug("PARAMETERS: " . var_export($value, true));
 
         $regex = $this->readpath($folders, $value);
-        
+
         $this->logger->debug("ROUTE: " . $regex);
-        
+
         $this->logger->debug("PARAMETERS: " . var_export($value, true));
 
         $this->routes[$regex] = $value;

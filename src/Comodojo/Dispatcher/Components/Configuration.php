@@ -36,14 +36,14 @@ class Configuration {
     final public function get($property = null) {
 
         if ( is_null($property) ) {
-            
+
             return $this->attributes;
-            
+
         } else if (array_key_exists($property, $this->attributes)) {
 
             $value = $this->attributes[$property];
 
-            if ( is_scalar($value) && preg_match_all('/%(.+?)%/', $value, $matches) ) {
+            if ( is_scalar($value) && preg_match_all('/%(.+?)%/', $value, $matches, PREG_SET_ORDER) ) {
 
                 $substitutions = array();
 
@@ -53,7 +53,7 @@ class Configuration {
 
                     if ( $backreference != $property && !isset($substitutions['/%'.$backreference.'%/']) ) {
 
-                        $substitutions['/%'.$backreference.'%/'] = $this->$backreference;
+                        $substitutions['/%'.$backreference.'%/'] = $this->get($backreference);
 
                     }
 
@@ -66,9 +66,9 @@ class Configuration {
             return $value;
 
         } else {
-            
+
             return null;
-            
+
         }
 
     }

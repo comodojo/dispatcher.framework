@@ -1,13 +1,14 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
-use \Comodojo\Components\Model as DispatcherClassModel;
-use \Comodojo\Dispatcher\Routes\RoutingTable;
+use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Router\RoutingTable;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheManager;
+use \Monolog\Logger;
 
 /**
  * @package     Comodojo Dispatcher
@@ -113,33 +114,33 @@ class Collector extends DispatcherClassModel {
         else return null;
 
     }
-    
+
     public function add($route, $type, $class, $parameters = array()) {
-        
+
         $routeData = $this->get($route);
-        
+
         if (is_null($routeData)) {
-            
+
             $this->table->put($route, $type, $class, $parameters);
-            
+
         } else {
-            
+
             $this->table->set($route, $type, $class, $parameters);
-            
+
         }
-        
+
     }
-    
+
     public function get($route) {
-        
+
         return $this->table->get($route);
-        
+
     }
-    
+
     public function remove($route) {
-        
+
         return $this->table->remove($route);
-        
+
     }
 
     public function bypass($mode = true) {
@@ -172,31 +173,31 @@ class Collector extends DispatcherClassModel {
         if (!is_null($service)) {
 
             $result = "";
-            
+
             $method = $this->request->method()->get();
-            
+
             if (in_array($method, $service->getImplementedMethods())) {
-                
+
                 $callable = $service->getMethod($method);
-                
+
                 try {
-                
+
                     $result = call_user_func(array($service, $callable));
-                    
+
                 } catch (DispatcherException $de) {
-                    
+
                     throw new DispatcherException(sprintf("Service '%s' exception for method '%s': %s", $this->service, $method, $de->getMessage()), 1, $de, 500);
-                    
+
                 } catch (Exception $e) {
-                    
+
                     throw new DispatcherException(sprintf("Service '%s' execution failed for method '%s': %s", $this->service, $method, $e->getMessage()), 1, $e, 500);
-                    
+
                 }
-                
+
             } else {
-                
+
                 throw new DispatcherException(sprintf("Service '%s' doesn't implement method '%s'", $this->service, $method), 1, null, 500);
-                
+
             }
 
             $this->response->content()->set($result);

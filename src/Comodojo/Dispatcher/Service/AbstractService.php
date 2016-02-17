@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Service;
 
-use \Comodojo\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Base\Configuration;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Collector as Router;

@@ -25,11 +25,15 @@
             "name": "Marco Giovinazzi",
             "email": "marco.giovinazzi@comodojo.org",
             "homepage": "http://jme.altervista.org"
+        },
+        {
+            "name": "Marco Castiello",
+            "email": "marco.castiello@gmail.com"
         }
     ],
     "autoload": {
         "psr-4": {
-            "Comodojo\\Dispatcher\\": "src"
+            "Comodojo\\Dispatcher\\": "src/Comodojo/Dispatcher"
         }
     },
     "require": {
