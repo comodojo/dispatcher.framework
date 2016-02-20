@@ -49,7 +49,7 @@ trait Parameters {
 
     }
 
-    final public function remove($parameter = null) {
+    final public function delete($parameter = null) {
 
         if ( is_null($parameter) ) {
 

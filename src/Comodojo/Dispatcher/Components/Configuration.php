@@ -43,25 +43,27 @@ class Configuration {
 
             $value = $this->attributes[$property];
 
-            if ( is_scalar($value) && preg_match_all('/%(.+?)%/', $value, $matches, PREG_SET_ORDER) ) {
-
-                $substitutions = array();
-
-                foreach ( $matches as $match ) {
-
-                    $backreference = $match[1];
-
-                    if ( $backreference != $property && !isset($substitutions['/%'.$backreference.'%/']) ) {
-
-                        $substitutions['/%'.$backreference.'%/'] = $this->get($backreference);
-
-                    }
-
-                }
-
-                $value = preg_replace(array_keys($substitutions), array_values($substitutions), $value);
-
-            }
+            // substitution by backreference is cool but hard compute for a large set of values :(
+            //
+            // if ( is_scalar($value) && preg_match_all('/%(.+?)%/', $value, $matches, PREG_SET_ORDER) ) {
+            //
+            //     $substitutions = array();
+            //
+            //     foreach ( $matches as $match ) {
+            //
+            //         $backreference = $match[1];
+            //
+            //         if ( $backreference != $property && !isset($substitutions['/%'.$backreference.'%/']) ) {
+            //
+            //             $substitutions['/%'.$backreference.'%/'] = $this->get($backreference);
+            //
+            //         }
+            //
+            //     }
+            //
+            //     $value = preg_replace(array_keys($substitutions), array_values($substitutions), $value);
+            //
+            // }
 
             return $value;
 
@@ -111,7 +113,9 @@ class Configuration {
 
     final public function merge($properties) {
 
-        return array_replace($this->attributes, $properties);
+        $this->attributes = array_replace($this->attributes, $properties);
+
+        return $this;
 
     }
 

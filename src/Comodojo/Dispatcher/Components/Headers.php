@@ -27,7 +27,7 @@ trait Headers {
 
     protected $headers = array();
 
-    final public function get($header = null) {
+    public function get($header = null) {
 
         if ( is_null($header) ) return $this->headers;
 
@@ -37,7 +37,24 @@ trait Headers {
 
     }
 
-    final public function set($header, $value=null) {
+    public function getAsString($header = null) {
+
+        if ( is_null($header) ) {
+
+            return array_map( function($header, $value) {
+                return (string)($header.':'.$value);
+            },
+            $this->headers);
+
+        } else if ( array_key_exists($header, $this->headers) ) {
+
+            return (string)($header.':'.$this->headers[$header]);
+
+        } else return null;
+
+    }
+
+    public function set($header, $value=null) {
 
         if ( is_null($value) ) {
 
@@ -55,7 +72,7 @@ trait Headers {
 
     }
 
-    final public function remove($header = null) {
+    public function delete($header = null) {
 
         if ( is_null($header) ) {
 

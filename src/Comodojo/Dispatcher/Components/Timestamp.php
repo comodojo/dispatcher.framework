@@ -35,14 +35,19 @@ trait Timestamp {
 
     final public function setTimestamp($time = null) {
 
-        $this->timestamp = filter_var($time, FILTER_VALIDATE_FLOAT, array(
-            'options' => array(
-                'decimal' => '.',
-                'default' => microtime(true)
-            )
-        ));
+        if ( is_float($time) ) $this->timestamp = $time;
+
+        else $this->timestamp = microtime(true);
 
         return $this;
+
+        // $this->timestamp = filter_var($time, FILTER_VALIDATE_FLOAT, array(
+        //     'options' => array(
+        //         'decimal' => '.',
+        //         'default' => false
+        //     ),
+        //     'flags' =>  FILTER_FLAG_ALLOW_THOUSAND
+        // ));
 
     }
 
