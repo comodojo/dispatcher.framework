@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Output;
 
-use \Comodojo\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Monolog\Logger;
@@ -224,7 +224,7 @@ class Processor extends DispatcherClassModel {
 
         $cookies->save();
 
-        return $content;
+        return $return;
 
     }
 

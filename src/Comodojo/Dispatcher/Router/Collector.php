@@ -9,6 +9,8 @@ use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheManager;
 use \Monolog\Logger;
+use \Comodojo\Exception\DispatcherException;
+use \Exception;
 
 /**
  * @package     Comodojo Dispatcher
