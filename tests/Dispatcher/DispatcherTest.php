@@ -30,4 +30,25 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    /**
+     * @runInSeparateProcess
+     */
+    public function testOutput() {
+
+        $r = 'Unable to find a valid route for the specified uri';
+
+        $result = $this->dispatcher->dispatch();
+
+        $uri = $this->dispatcher->request()->uri()->getPath();
+
+        $headers = $this->dispatcher->response()->headers()->get();
+
+        $status = $this->dispatcher->response()->status()->get();
+
+        $this->assertEquals($r, $result);
+
+        $this->assertEquals(404, $status);
+
+    }
+
 }

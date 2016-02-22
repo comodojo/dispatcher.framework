@@ -8,6 +8,7 @@ $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
 $_SERVER['REMOTE_PORT'] = "51124";
 $_SERVER['SERVER_PROTOCOL'] = "HTTP/1.1";
 $_SERVER['REQUEST_METHOD'] = "GET";
+$_SERVER['REQUEST_URI'] = "/";
 
 // Simple bootloader for phpunit using composer autoloader
 
