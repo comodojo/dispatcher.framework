@@ -2,6 +2,7 @@
 
 use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Dispatcher\Components\DefaultConfiguration;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Collector as RouteCollector;
 use \Comodojo\Dispatcher\Response\Model as Response;
@@ -13,6 +14,7 @@ use \Comodojo\Dispatcher\Events\ServiceEvent;
 use \Comodojo\Dispatcher\Router\RoutingTableInterface;
 use \Comodojo\Dispatcher\Log\DispatcherLogger;
 use \Comodojo\Dispatcher\Cache\DispatcherCache;
+use \Comodojo\Dispatcher\Events\EventsManager;
 use \Comodojo\Cache\CacheManager;
 use \League\Event\Emitter;
 use \Comodojo\Exception\DispatcherException;
@@ -73,11 +75,11 @@ class Dispatcher {
 
         $this->extra = new Extra($this->logger);
 
-        $this->configuration = new Configuration($this->getDefaultConfiguration());
+        $this->configuration = new Configuration( DefaultConfiguration::get() );
 
         $this->configuration->merge($configuration);
 
-        $this->events = is_null($emitter) ? new Emitter() : $emitter;
+        $this->events = is_null($emitter) ? new EventsManager() : $emitter;
 
         $this->logger = is_null($logger) ? DispatcherLogger::create($this->configuration) : $logger;
 
@@ -137,11 +139,11 @@ class Dispatcher {
 
         $this->events->emit( new DispatcherEvent($this) );
 
-        if ( $this->configuration()->get('dispatcher-enabled') === false ) {
+        if ( $this->configuration()->get('enabled') === false ) {
 
-            $status = $this->configuration()->get('dispatcher-disabled-status');
+            $status = $this->configuration()->get('disabled-status');
 
-            $content = $this->configuration()->get('dispatcher-disabled-message');
+            $content = $this->configuration()->get('disabled-message');
 
             $this->response()->status()->set($status);
 
@@ -223,47 +225,6 @@ class Dispatcher {
         ob_end_clean();
 
         return $return;
-
-    }
-
-    private function getDefaultConfiguration() {
-
-        return array(
-            'dispatcher-enabled' => true,
-            'dispatcher-disabled-status' => 503,
-            'dispatcher-disabled-message' => 'Dispatcher offline',
-            'dispatcher-log-name' => 'dispatcher',
-            'dispatcher-log-enabled' => false,
-            'dispatcher-log-level' => 'INFO',
-            'dispatcher-log-target' => '%dispatcher-log-folder%/dispatcher.log',
-            'dispatcher-log-folder' => '/log',
-            'dispatcher-supported-methods' => array('GET','PUT','POST','DELETE','OPTIONS','HEAD'),
-            'dispatcher-default-encoding' => 'UTF-8',
-            'dispatcher-cache-enabled' => true,
-            'dispatcher-cache-ttl' => 3600,
-            'dispatcher-cache-folder' => '/cache',
-            'dispatcher-cache-algorithm'  => 'PICK_FIRST',
-            // should we implement this?
-            //'dispatcher-autoroute' => false,
-            'dispatcher-base-url' => self::urlGetAbsolute(),
-            'dispatcher-real-path' => self::pathGetAbsolute()
-        );
-
-    }
-
-    private static function urlGetAbsolute() {
-
-        $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
-
-        $uri = preg_replace("/\/index.php(.*?)$/i", "", $_SERVER['PHP_SELF']);
-
-        return ( $http . $_SERVER['HTTP_HOST'] . $uri . "/" );
-
-    }
-
-    private static function pathGetAbsolute() {
-
-        return realpath(dirname(__FILE__)."/../../../../")."/";
 
     }
 

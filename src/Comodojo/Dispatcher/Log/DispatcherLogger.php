@@ -1,5 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Log;
 
+use \Monolog\Handler\HandlerInterface;
 use \Monolog\Logger;
 use \Monolog\Handler\StreamHandler;
 use \Monolog\Handler\NullHandler;
@@ -30,6 +31,48 @@ use \Comodojo\Dispatcher\Components\Configuration;
 
 class DispatcherLogger {
 
+    private $configuration;
+
+    public function __construct(Configuration $configuration) {
+
+        $this->configuration = $configuration;
+
+    }
+
+    public function init() {
+
+        $log = $this->configuration->get('log');
+
+        if (
+            empty($log) ||
+            ( isset($log['enabled']) && $log['enabled'] === false ) ||
+            empty($log['providers'])
+        ) {
+
+            $logger = new Logger('dispatcher');
+
+            $logger->pushHandler( new NullHandler( self::getLevel() ) );
+
+        } else {
+
+            $name = empty($log['name']) ? 'dispatcher' : $log['name'];
+
+            $logger = new Logger($name);
+
+            foreach ($log['providers'] as $provider => $parameters) {
+
+                $handler = $this->getHandler($provider, $parameters);
+
+                if ( $handler instanceof HandlerInterface ) $logger->pushHandler($handler);
+
+            }
+
+        }
+
+        return $logger;
+
+    }
+
     /**
      * Create the logger
      *
@@ -39,27 +82,34 @@ class DispatcherLogger {
      */
     public static function create(Configuration $configuration) {
 
-        $name = $configuration->get('dispatcher-log-name');
+        $log = new DispatcherLogger($configuration);
 
-        $enabled = $configuration->get('dispatcher-log-enabled');
+        return $log->init();
 
-        $level = self::getLevel( $configuration->get('dispatcher-log-level') );
+    }
 
-        $target = $configuration->get('dispatcher-log-target');
+    protected function getHandler($provider, $parameters) {
 
-        $logger = new Logger($name);
+        switch ( strtolower($parameters['type']) ) {
 
-        if ( $enabled === true ) {
+            case 'streamhandler':
 
-            $logger->pushHandler( new StreamHandler( $target, $level) );
+                $target = empty($parameters['target']) ? 'dispatcher.log' : $parameters['target'];
 
-        } else {
+                $file = $this->configuration->get('base-path').'/'.$target;
 
-            $logger->pushHandler( new NullHandler($level) );
+                $level = self::getLevel( empty($parameters['level']) ? 'info' : $parameters['level'] );
 
+                $handler = new StreamHandler($file, $level);
+
+                break;
+
+            default:
+                $handler = null;
+                break;
         }
 
-        return $logger;
+        return $handler;
 
     }
 
@@ -70,7 +120,7 @@ class DispatcherLogger {
      *
      * @return  integer
      */
-    protected static function getLevel($level) {
+    protected static function getLevel($level = null) {
 
         switch ( strtoupper($level) ) {
 

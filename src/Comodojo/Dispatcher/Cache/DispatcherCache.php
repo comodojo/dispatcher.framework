@@ -1,6 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Cache;
 
-use \Monolog\Logger;
+use \Psr\Log\LoggerInterface;
+use \Comodojo\Cache\CacheInterface\CacheInterface;
 use \Comodojo\Cache\CacheManager;
 use \Comodojo\Cache\FileCache;
 use \comodojo\Dispatcher\Components\Configuration;
@@ -29,36 +30,85 @@ use \comodojo\Dispatcher\Components\Configuration;
 
 class DispatcherCache {
 
+    private $configuration;
+
+    private $logger;
+
+    public function __construct(Configuration $configuration, LoggerInterface $logger) {
+
+        $this->configuration = $configuration;
+
+        $this->logger = $logger;
+
+    }
+
+    public function init() {
+
+        $cache = $this->configuration->get('cache');
+
+        if ( empty($cache) ) {
+
+            $manager = new CacheManager(self::getAlgorithm(), $this->logger);
+
+        } else {
+
+            $enabled = ( empty($cache['enabled']) || $cache['enabled'] === true ) ? true : false;
+
+            $algorithm = self::getAlgorithm( empty($cache['algorithm']) ? null : $cache['algorithm']);
+
+            $manager = new CacheManager($algorithm, $this->logger);
+
+            if ( $enabled && !empty($cache['providers']) ) {
+
+                foreach ($cache['providers'] as $provider => $parameters) {
+
+                    $handler = $this->getHandler($provider, $parameters);
+
+                    if ( $handler instanceof CacheInterface ) $manager->addProvider($handler);
+
+                }
+
+            }
+
+        }
+
+        return $manager;
+
+    }
+
     /**
      * Create the Cache Manager
      *
      * @return \Comodojo\Cache\CacheManager
      */
-    public static function create(Configuration $configuration, Logger $logger) {
+    public static function create(Configuration $configuration, LoggerInterface $logger) {
 
-        $enabled = $configuration->get('dispatcher-cache-enabled');
+        $cache = new DispatcherCache($configuration, $logger);
 
-        $ttl = $configuration->get('dispatcher-cache-ttl');
+        return $cache->init();
 
-        if ( $ttl !== null && !defined('COMODOJO_CACHE_DEFAULT_TTL') ) {
+    }
 
-            define('COMODOJO_CACHE_DEFAULT_TTL', $ttl);
+    protected function getHandler($provider, $parameters) {
 
+        switch ( strtolower($parameters['type']) ) {
+
+            case 'filecache':
+
+                $folder = empty($parameters['folder']) ? '' : $parameters['$folder'];
+
+                $target = $this->configuration->get('base-path').'/'.$folder;
+
+                $handler = new FileCache($target);
+
+                break;
+
+            default:
+                $handler = null;
+                break;
         }
 
-        $folder = $configuration->get('dispatcher-cache-folder');
-
-        $algorithm = self::getAlgorithm( $configuration->get('dispatcher-cache-algorithm') );
-
-        $manager = new CacheManager( $algorithm );
-
-        if ( $enabled === true ) {
-
-            $manager->addProvider( new FileCache($folder) );
-
-        }
-
-        return $manager;
+        return $handler;
 
     }
 
@@ -69,7 +119,7 @@ class DispatcherCache {
      *
      * @return  integer
      */
-    protected static function getAlgorithm($algorithm) {
+    protected static function getAlgorithm($algorithm = null) {
 
         switch ( strtoupper($algorithm) ) {
 
