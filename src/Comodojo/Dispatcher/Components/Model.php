@@ -28,9 +28,9 @@ use \Comodojo\Dispatcher\Components\Configuration;
 
 abstract class Model {
 
-    private $configuration;
+    protected $configuration;
 
-    private $logger;
+    protected $logger;
 
     public function __construct(Configuration $configuration, Logger $logger) {
 

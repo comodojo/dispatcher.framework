@@ -4,46 +4,64 @@ use \Comodojo\Dispatcher\Dispatcher;
 
 class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
-    protected function setUp() {
+    protected static $config = array(
+        "cache" => array(
+            "algorithm" => "PICK_ALL",
+            "providers" => array(
+                "test" => array(
+                    "type" => "file",
+                    "folder" => "cache"
+                )
+            )
+        ),
+        "log" => array(
+            "name" => "test",
+            "providers" => array(
+                "test" => array(
+                    "type" => "streamhandler",
+                    "target" => "log/test.log",
+                    "level" => "debug"
+                )
+            )
+        )
+    );
 
-        $this->dispatcher = new Dispatcher();
+    protected static $dispatcher;
 
-    }
+    public static function setUpBeforeClass() {
 
-    protected function tearDown() {
+        $config = array_merge(self::$config, array(
+            "base-path" => realpath(dirname(__FILE__)."/../")
+        ));
 
-        unset($this->dispatcher);
-
-    }
-
-    public function testInstances() {
-
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Components\Configuration', $this->dispatcher->configuration());
-        $this->assertInstanceOf('\League\Event\Emitter', $this->dispatcher->events());
-        $this->assertInstanceOf('\Comodojo\Cache\CacheManager', $this->dispatcher->cache());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', $this->dispatcher->request());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Collector', $this->dispatcher->router());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Model', $this->dispatcher->response());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Extra\Model', $this->dispatcher->extra());
-
-        ob_end_clean();
+        self::$dispatcher = new Dispatcher($config);
 
     }
 
     /**
-     * @runInSeparateProcess
+    * @runInSeparateProcess
      */
-    public function testOutput() {
+    public function testAll() {
+
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Components\Configuration', self::$dispatcher->configuration());
+        $this->assertInstanceOf('\League\Event\Emitter', self::$dispatcher->events());
+        $this->assertInstanceOf('\Comodojo\Cache\CacheManager', self::$dispatcher->cache());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', self::$dispatcher->request());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Collector', self::$dispatcher->router());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Model', self::$dispatcher->response());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Extra\Model', self::$dispatcher->extra());
+
+        $this->assertCount(1, self::$dispatcher->cache()->getProviders());
 
         $r = 'Unable to find a valid route for the specified uri';
 
-        $result = $this->dispatcher->dispatch();
+        $result = self::$dispatcher->dispatch();
 
-        $uri = $this->dispatcher->request()->uri()->getPath();
+        $uri = self::$dispatcher->request()->uri()->getPath();
 
-        $headers = $this->dispatcher->response()->headers()->get();
+        $headers = self::$dispatcher->response()->headers()->get();
 
-        $status = $this->dispatcher->response()->status()->get();
+        $status = self::$dispatcher->response()->status()->get();
 
         $this->assertEquals($r, $result);
 

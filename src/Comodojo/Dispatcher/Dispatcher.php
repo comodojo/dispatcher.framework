@@ -91,6 +91,8 @@ class Dispatcher {
 
         $this->response = new Response($this->configuration, $this->logger);
 
+        $this->logger->debug("Dispatcher ready, current date ".date('c', $this->getTimestamp()));
+
     }
 
     public function configuration() {
@@ -135,11 +137,23 @@ class Dispatcher {
 
     }
 
+    public function logger() {
+
+        return $this->logger;
+
+    }
+
     public function dispatch() {
+
+        $this->logger->debug("Starting to dispatch.");
+
+        $this->logger->debug("Emitting global dispatcher event.");
 
         $this->events->emit( new DispatcherEvent($this) );
 
         if ( $this->configuration()->get('enabled') === false ) {
+
+            $this->logger->debug("Dispatcher disabled, shutting down gracefully.");
 
             $status = $this->configuration()->get('disabled-status');
 
@@ -159,29 +173,45 @@ class Dispatcher {
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
 
+        $this->logger->debug("Starting router.");
+
         try {
 
             $this->router->route($this->request);
 
         } catch (DispatcherException $de) {
 
-            $this->response()->status()->set( $de->getStatus() );
+            $status = $de->getStatus();
 
-            $this->response()->content()->set( $de->getMessage() );
+            $message = $de->getMessage();
+
+            $this->logger->debug("Route error ($status), shutting down dispatcher.");
+
+            $this->response()->status()->set($status);
+
+            $this->response()->content()->set($message);
 
             return $this->shutdown();
 
         }
 
+        $route_type = $this->router->getType();
+
+        $route_service = $this->router->getService();
+
+        $this->logger->debug("Route acquired, type $route_type directed to $route_service.");
+
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route') );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getType()) );
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$route_type) );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$this->router->getService()) );
+        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$route_service) );
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.#') );
 
         // translate route to service
+
+        $this->logger->debug("Running $route_service service.");
 
         try {
 
@@ -200,6 +230,8 @@ class Dispatcher {
     }
 
     private function emitServiceSpecializedEvents($name) {
+
+        $this->logger->debug("Emitting $name service-event.");
 
         return new ServiceEvent(
             $name,
@@ -220,7 +252,11 @@ class Dispatcher {
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.#') );
 
+        $this->logger->debug("Composing return value.");
+
         $return = Processor::parse($this->configuration, $this->logger, $this->response);
+
+        $this->logger->debug("Dispatcher run-cycle ends.");
 
         ob_end_clean();
 

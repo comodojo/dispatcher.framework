@@ -1,12 +1,13 @@
 <?php namespace Comodojo\Dispatcher\Service;
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \Comodojo\Dispatcher\Base\Configuration;
+use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Collector as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Monolog\Logger;
+use \Exception;
 
 /**
  * @package     Comodojo Dispatcher
@@ -88,11 +89,13 @@ abstract class AbstractService extends DispatcherClassModel {
     /**
      * Get service-implemented HTTP methods
      *
-     * @return  array   Headers array
+     * @return  array   Service implemented methods, in uppercase
+     * @throw Exception
      */
-    final public function getImplementedMethods() {
+    public function getImplementedMethods() {
 
-        $supported_methods = $this->configuration()->get('dispatcher-supported-methods');
+        $supported_methods = $this->configuration()->get('supported-methods');
+
 
         if ( method_exists($this, 'any') ) {
 
@@ -116,7 +119,7 @@ abstract class AbstractService extends DispatcherClassModel {
      * Return the callable class method that reflect the requested one
      *
      */
-    final public function getMethod($method) {
+    public function getMethod($method) {
 
         if ( method_exists($this, strtolower($method)) ) {
 

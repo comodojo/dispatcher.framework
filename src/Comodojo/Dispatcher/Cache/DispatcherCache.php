@@ -1,10 +1,11 @@
 <?php namespace Comodojo\Dispatcher\Cache;
 
-use \Psr\Log\LoggerInterface;
+use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
+use \comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheInterface\CacheInterface;
 use \Comodojo\Cache\CacheManager;
 use \Comodojo\Cache\FileCache;
-use \comodojo\Dispatcher\Components\Configuration;
+use \Psr\Log\LoggerInterface;
 
 /**
  * @package     Comodojo Dispatcher
@@ -28,23 +29,11 @@ use \comodojo\Dispatcher\Components\Configuration;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class DispatcherCache {
-
-    private $configuration;
-
-    private $logger;
-
-    public function __construct(Configuration $configuration, LoggerInterface $logger) {
-
-        $this->configuration = $configuration;
-
-        $this->logger = $logger;
-
-    }
+class DispatcherCache extends DispatcherClassModel{
 
     public function init() {
 
-        $cache = $this->configuration->get('cache');
+        $cache = $this->configuration()->get('cache');
 
         if ( empty($cache) ) {
 
@@ -93,13 +82,35 @@ class DispatcherCache {
 
         switch ( strtolower($parameters['type']) ) {
 
-            case 'filecache':
+            case 'file':
 
-                $folder = empty($parameters['folder']) ? '' : $parameters['$folder'];
+                $base = $this->configuration->get('base-path');
 
-                $target = $this->configuration->get('base-path').'/'.$folder;
+                if ( empty($parameters['folder']) ||  empty($base) ) {
+                    $this->logger->warning("Wrong cache provider, disabling $provider", $parameters);
+                    break;
+                }
+
+                $target = $base.'/'.$parameters['folder'];
 
                 $handler = new FileCache($target);
+
+                break;
+
+            case 'memcached':
+
+                if ( empty($parameters['host']) ) {
+                    $this->logger->warning("Wrong cache provider, disabling $provider", $parameters);
+                    break;
+                }
+
+                $port = empty($parameters['port']) ? 11211 : intval($parameters['port']);
+
+                $weight = empty($parameters['weight']) ? 0 : intval($parameters['weight']);
+
+                $persistentid = empty($parameters['persistent-id']) ? null : boolval($parameters['persistentid']);
+
+                $handler = new MemcachedCache($host, $port, $weight, $persistentid);
 
                 break;
 

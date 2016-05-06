@@ -14,4 +14,4 @@ $_SERVER['REQUEST_URI'] = "/";
 
 $loader = require __DIR__ . "/../vendor/autoload.php";
 
-$loader->addPsr4('Comodojo\\Dispatcher\\Tests\\', __DIR__ . "Dispatcher");
+$loader->addPsr4('Comodojo\\Dispatcher\\Tests\\', __DIR__ . "/Dispatcher");

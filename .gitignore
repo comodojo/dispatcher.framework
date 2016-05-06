@@ -4,3 +4,7 @@ coverage.clover
 vendor/
 build/
 docs/_build/
+tests/cache/*
+!tests/cache/.placeholder
+tests/log/*
+!tests/log/.placeholder
