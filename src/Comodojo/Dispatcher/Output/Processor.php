@@ -1,5 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Output;
 
+use \Comodojo\Dispatcher\Output\HttpStatus\StatusGeneric;
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Components\Configuration;
@@ -83,148 +84,25 @@ class Processor extends DispatcherClassModel {
 
         $status = $this->response->status()->get();
 
-        $content = $this->response->content();
+        $output_class_name = "\\Comodojo\\Dispatcher\\Output\\HttpStatus\\Status".$status;
 
-        $cookies = $this->response->cookies();
+        if ( class_exists($output_class_name) ) {
 
-        $headers = $this->response->headers();
+            $output = new $output_class_name($this->response);
 
-        $location = $this->response->location();
+        } else {
 
-        // return value, just in case...
-        $return = $content->get();
-
-        switch ($status) {
-
-            case 200: //OK
-
-                header('Content-Length: '.$content->length());
-
-                break;
-
-            case 202: //Accepted
-
-                //PLEASE NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description in body... just in case
-                header($_SERVER["SERVER_PROTOCOL"].' 202 Accepted');
-                header('Status: 202 Accepted');
-                header('Content-Length: '.$content->length());
-
-                break;
-
-            case 204: //OK - No Content
-
-                header($_SERVER["SERVER_PROTOCOL"].' 204 No Content');
-                header('Status: 204 No Content');
-                header('Content-Length: 0',true);
-
-                $return = null;
-
-                break;
-
-            case 201: //Created
-            case 301: //Moved Permanent
-            case 302: //Found
-            case 303: //See Other
-            case 307: //Temporary Redirect
-
-                header("Location: ".$location->get(),true,$status);
-
-                break;
-
-            case 304: //Not Modified
-
-                $last_modified = $headers->get('Last-Modified');
-
-                if ( is_null($last_modified) ) {
-
-                    header($_SERVER["SERVER_PROTOCOL"].' 304 Not Modified');
-
-                } else if ( is_int($last_modified) ) {
-
-                    header('Last-Modified: '.gmdate('D, d M Y H:i:s', $last_modified).' GMT', true, 304);
-
-                } else {
-
-                    header('Last-Modified: '.$last_modified, true, 304);
-
-                }
-
-                header('Content-Length: '.$content->length());
-                $headers->remove('Last-Modified');
-
-                break;
-
-            case 400: //Bad Request
-
-                header($_SERVER["SERVER_PROTOCOL"].' 400 Bad Request', true, 400);
-                header('Content-Length: '.$content->length());
-
-                break;
-
-            case 403:
-
-                header('Origin not allowed', true, 403); //Not originated from allowed source
-
-                break;
-
-            case 404: //Not Found
-
-                header($_SERVER["SERVER_PROTOCOL"].' 404 Not Found');
-                header('Status: 404 Not Found');
-                header('Content-Length: '.$content->length());
-
-                break;
-
-            /**
-            * @todo: how to get reverse allowed methods reference?
-            */
-            // case 405: //Not allowed
-            //
-            // header('Allow: ' . $value, true, 405);
-            //
-            // break;
-
-            case 500: //Internal Server Error
-
-                header('500 Internal Server Error', true, 500);
-                header('Content-Length: '.$content->length());
-
-                break;
-
-            /**
-            * @todo: how to get reverse allowed methods reference?
-            */
-            // case 501: //Not implemented
-            //
-            // header('Allow: ' . $value, true, 501);
-            //
-            // break;
-
-            case 503: //Service Unavailable
-
-                header($_SERVER["SERVER_PROTOCOL"].' 503 Service Temporarily Unavailable');
-                header('Status: 503 Service Temporarily Unavailable');
-
-                // if ( $value !== false AND @is_int($value) ) {
-                //     header('Retry-After: '.$value);
-                // }
-
-                break;
-
-            default:
-
-                header($_SERVER["SERVER_PROTOCOL"].' '.$this->response->status(), true, $status);
-                header('Content-Length: '.$content->length());
-
-                break;
+            $output = new StatusGeneric($this->response);
 
         }
 
-        $headers->send();
+        $output->consolidate();
 
-        $cookies->save();
+        $this->response->headers()->send();
 
-        return $return;
+        $this->response->cookies()->save();
+
+        return $this->response->content()->get();
 
     }
 

@@ -156,14 +156,25 @@ class Collector extends DispatcherClassModel {
 
     public function route(Request $request) {
 
+        $method = $request->method()->get();
+
+        $methods = $this->configuration->get('allowed-http-methods');
+
+        if ( ( $methods != null || !empty($methods) ) && in_array($method, $methods) === false ) {
+
+            throw new DispatcherException("Method not allowed", 0, null, 405, array(
+                "Allow" => implode(",",$methods)
+            ));
+
+        }
+
         $this->request = $request;
 
         if (!$this->parse()) {
 
-            throw new DispatcherException("Unable to find a valid route for the specified uri", 1, null, 404);
+            throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
 
         }
-
 
     }
 
@@ -175,11 +186,13 @@ class Collector extends DispatcherClassModel {
 
         if (!is_null($service)) {
 
-            $result = "";
+            $result;
 
             $method = $this->request->method()->get();
 
-            if (in_array($method, $service->getImplementedMethods())) {
+            $methods = $service->getImplementedMethods();
+
+            if ( in_array($method, $metods) ) {
 
                 $callable = $service->getMethod($method);
 
@@ -189,17 +202,19 @@ class Collector extends DispatcherClassModel {
 
                 } catch (DispatcherException $de) {
 
-                    throw new DispatcherException(sprintf("Service '%s' exception for method '%s': %s", $this->service, $method, $de->getMessage()), 1, $de, 500);
+                    throw new DispatcherException(sprintf("Service '%s' exception for method '%s': %s", $this->service, $method, $de->getMessage()), 0, $de, 500);
 
                 } catch (Exception $e) {
 
-                    throw new DispatcherException(sprintf("Service '%s' execution failed for method '%s': %s", $this->service, $method, $e->getMessage()), 1, $e, 500);
+                    throw new DispatcherException(sprintf("Service '%s' execution failed for method '%s': %s", $this->service, $method, $e->getMessage()), 0, $e, 500);
 
                 }
 
             } else {
 
-                throw new DispatcherException(sprintf("Service '%s' doesn't implement method '%s'", $this->service, $method), 1, null, 500);
+                throw new DispatcherException(sprintf("Service '%s' doesn't implement method '%s'", $this->service, $method), 0, null, 501, array(
+                    "Allow" => implode(",", $methods)
+                ));
 
             }
 
@@ -207,10 +222,9 @@ class Collector extends DispatcherClassModel {
 
         } else {
 
-            throw new DispatcherException(sprintf("Unable to execute service '%s'", $this->service), 1, null, 500);
+            throw new DispatcherException(sprintf("Unable to execute service '%s'", $this->service), 0, null, 500);
 
         }
-
 
     }
 

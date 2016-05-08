@@ -181,15 +181,9 @@ class Dispatcher {
 
         } catch (DispatcherException $de) {
 
-            $status = $de->getStatus();
+            $this->logger->debug("Route error (".$de->getStatus()."), shutting down dispatcher.");
 
-            $message = $de->getMessage();
-
-            $this->logger->debug("Route error ($status), shutting down dispatcher.");
-
-            $this->response()->status()->set($status);
-
-            $this->response()->content()->set($message);
+            $this->processDispatcherException($de);
 
             return $this->shutdown();
 
@@ -219,9 +213,9 @@ class Dispatcher {
 
         } catch (DispatcherException $de) {
 
-            $this->response()->status()->set( $de->getStatus() );
+            $this->logger->debug("Service exception (".$de->getStatus()."), shutting down dispatcher.");
 
-            $this->response()->content()->set( $de->getMessage() );
+            $this->processDispatcherException($de);
 
         }
 
@@ -241,6 +235,22 @@ class Dispatcher {
             $this->response,
             $this->extra
         );
+
+    }
+
+    private function processDispatcherException(DispatcherException $de) {
+
+        $status = $de->getStatus();
+
+        $message = $de->getMessage();
+
+        $headers = $de->getHeaders();
+
+        $this->response()->status()->set($status);
+
+        $this->response()->content()->set($message);
+
+        $this->response()->headers()->merge($headers);
 
     }
 

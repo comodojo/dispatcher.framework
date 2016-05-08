@@ -1,0 +1,38 @@
+<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+
+/**
+ * Status: Accepted
+ *
+ * @package     Comodojo Dispatcher
+ * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
+ * @license     GPL-3.0+
+ *
+ * LICENSE:
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+class Status202 extends AbstractHttpStatus {
+
+    public function consolidate() {
+
+        //PLEASE NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description in body... just in case
+        header($_SERVER["SERVER_PROTOCOL"].' 202 Accepted');
+        header('Status: 202 Accepted');
+        header('Content-Length: '.$this->response()->content()->length());
+
+    }
+
+}

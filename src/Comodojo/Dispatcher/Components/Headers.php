@@ -94,4 +94,14 @@ trait Headers {
 
     }
 
+    public function merge($headers) {
+
+        foreach ($headers as $key => $value) {
+            $this->set($key, $value);
+        }
+
+        return $this;
+
+    }
+
 }
