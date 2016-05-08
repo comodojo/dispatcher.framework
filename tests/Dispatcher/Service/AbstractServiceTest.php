@@ -57,6 +57,10 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase {
 
         $method = $service->getMethod("GET");
 
+        $status = $service->response()->status()->get();
+
+        $this->assertEquals(200, $status);
+
         $run = call_user_func(array($service, $method));
 
         $this->assertEquals('this is a test', $run);

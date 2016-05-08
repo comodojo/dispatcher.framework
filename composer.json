@@ -40,7 +40,7 @@
         "php": ">=5.6.0",
         "symfony/yaml": "^3.0",
         "monolog/monolog": "^1.0",
-        "comodojo/exceptions": "@stable",
+        "comodojo/exceptions": "dev-master",
         "comodojo/cookies": "^1.1",
         "comodojo/cache": "^1.0",
         "league/uri": "^4.0",
