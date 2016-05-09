@@ -98,23 +98,30 @@ class RoutingTable implements RoutingTableInterface {
         return $this->get('/');
 
     }
-
+    
+    // This method read the route (folder by folder recursively) and build 
+    // the global regular expression against which all the request URI will be compared
     private function readpath($folders = array(), &$value = null, $regex = '') {
-
+        
+        // if the first 'folder' is empty is removed
         while (!empty($folders) && empty($folders[0])) {
 
             array_shift($folders);
 
         }
 
+        // if the 'folder' array is empty, the route has been fully analyzed
+        // this is the exit condition from the recursive loop.
         if (empty($folders)) {
 
             return '^'.$regex.'[\/]?$';
 
         } else {
 
+            // The first element of the array 'folders' is taken in order to be analyzed
             $folder  = array_shift($folders);
-
+            
+            // All the parameters of the route must be json strings
             $decoded = json_decode($folder, true);
 
             if (!is_null($decoded) && is_array($decoded)) {
@@ -123,18 +130,32 @@ class RoutingTable implements RoutingTableInterface {
 
                 $param_required = false;
 
+                /* All the folders can include more than one parameter
+                 * Eg: /service_name/{'param1': 'regex1', 'param2': 'regex2'}/
+                 *     /calendar/{'ux_timestamp*': '\d{10}', 'microseconds': '\d{4}'}/
+                 *
+                 * The '*' at the end of the paramerter name implies that the parameter is required
+                 * This example can be read as a calendar service that accepts both 
+                 * timestamps in unix or javascript format.
+                 *
+                 * This is the reason of the following 'foreach'
+                 */
                 foreach ($decoded as $key => $string) {
 
                     $this->logger->debug("PARAMETER KEY: " . $key);
 
                     $this->logger->debug("PARAMETER STRING: " . $string);
-
-                    $param_regex .= $this->readparam($key, $string, $param_required);
+                    
+                    /* The key and the regex of every paramater is passed to the 'readparam'
+                     * method which will build an appropriate regular expression and will understand 
+                     * if the parameter is required and will build the $value['query'] object
+                     */
+                    $param_regex .= $this->readparam($key, $string, $param_required, $value);
 
                     $this->logger->debug("PARAMETER REGEX: " . $param_regex);
 
                 }
-
+                // Once the parameter is analyzed, the result is passed to the next iteration
                 $this->readpath(
                     $folders,
                     $value,
@@ -142,7 +163,7 @@ class RoutingTable implements RoutingTableInterface {
                 );
 
             } else {
-
+                // if the element is not a json string, I assume it's the service name
                 array_push($value['service'], $folder);
 
                 $this->readpath(
@@ -157,10 +178,12 @@ class RoutingTable implements RoutingTableInterface {
 
     }
 
-    private function readparam($key, $string, &$param_required) {
+    // This method read a single parameter and build the regular expression
+    private function readparam($key, $string, &$param_required, &$value) {
 
         $field_required = false;
 
+        // If the field name ends with a '*', the parameter is considered as required
         if (preg_match('/^(.+)\*$/', $key, $bits)) {
 
             $key            = $bits[1];
@@ -169,6 +192,7 @@ class RoutingTable implements RoutingTableInterface {
 
         }
 
+        // The $value['query'] field contains all regex which will be used by the collector to parse the route fields
         if (!is_null($value)) {
 
             $value['query'][$key] = array(
@@ -178,29 +202,48 @@ class RoutingTable implements RoutingTableInterface {
 
         }
 
+        /* Every parameter can include it's own logic into the regular expression,
+         * it can use backreferences and it's expected to be used against a single parameter.
+         * This means that it can't be used as is to build the route regular expression,
+         * Backreferences are not useful at this point and can make the regular expression more time consuming
+         * and resource hungry. This is why they are replaced with the grouping parenthesis.
+         * Eg: (value) changes in (?:value)
+         *
+         * Delimiting characters like '^' and '$' are also meaningless in the complete regular expression and
+         * need to be removed. Contrariwise, wildcards must be delimited in order to keet the whole regular
+         * expression consistent, hence a '?' is added to all the '.*' or '.+' that don't already have one.
+         */
         $string = preg_replace('/(?<!\\)\((?!\?)/', '(?:', $string);
         $string = preg_replace('/\.([\*\+])(?!\?)/', '.\${1}?', $string);
+        $string = preg_replace('/^[\^]/', '', $string);
+        $string = preg_replace('/[\$]$/', '', $string);
 
+        /* The produced regular expression is grouped and associated with its key (this means that the 'preg_match'
+         * function will generate an associative array where the key/value association is preserved).
+         * If the field is required, the regular expression is completed with a '{1}' (which make it compulsory),
+         * otherwise a '?' is added.
+         */
         return '(?P<' . $key . '>' . $string . ')' . (($field_required)?'{1}':'?');
 
     }
 
-    private function add($route, $type, $class, $parameters) {
+    // This method add a route to the supported list
+    private function add($folders, $type, $class, $parameters) {
 
-        $folders = explode("/", $route);
-
+        // The values associated with a route are as follows:
         $value   = array(
-            "type"       => $type,
-            "class"      => $class,
-            "service"    => array(),
-            "parameters" => $parameters,
-            "query"      => array()
+            "type"       => $type,       // Type of route
+            "class"      => $class,      // Class to be invoked
+            "service"    => array(),     // Service name (it can be a list of namespaces plus a final service name)
+            "parameters" => $parameters, // Parameters passed via the composer.json configuration (cache, ttl, etc...)
+            "query"      => array()      // List of parameters with their regular expression that must be added among the query parameters
         );
 
         $this->logger->debug("ROUTE: " . $route);
 
         $this->logger->debug("PARAMETERS: " . var_export($value, true));
 
+        // This method generate a global regular expression which will be able to match all the URI supported by the route
         $regex = $this->readpath($folders, $value);
 
         $this->logger->debug("ROUTE: " . $regex);

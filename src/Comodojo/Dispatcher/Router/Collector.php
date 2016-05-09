@@ -251,11 +251,15 @@ class Collector extends DispatcherClassModel {
         $path = $this->request->uri()->getPath();
 
         foreach ($this->table->routes() as $regex => $value) {
-
+            // The current uri is checked against all the global regular expressions associated with the routes
             if (preg_match("/" . $regex . "/", $path, $matches)) {
 
+                /* If a route is matched, all the bits of the route string are evalued in order to create
+                 * new query parameters which will be available for the service class
+                 */
                 $this->evalUri($value['query'], $matches);
 
+                // All the route parameters are also added to the query parameters
                 foreach ($value['parameters'] as $parameter => $value) {
 
                     $this->request->query()->set($parameter, $value);
@@ -281,14 +285,18 @@ class Collector extends DispatcherClassModel {
 
         $count  = 0;
 
+        // Because of the nature of the global regular expression, all the bits of the matched route are associated with a parameter key
         foreach ($parameters as $key => $value) {
 
             if (isset($bits[$key])) {
-
+                /* if it's available a bit associated with the parameter name, it is compared against
+                 * it's regular expression in order to extrect backreferences
+                 */
                 if (preg_match('/^' . $value['regex'] . '$/', $bits[$key], $matches)) {
-
-                    if (count($matches) == 1) $matches = $matches[0];
-
+                    
+                    if (count($matches) == 1) $matches = $matches[0]; // This is the case where no backreferences are present or available.
+                    
+                    // The extracted value (with any backreference available) is added to the query parameters.
                     $this->request->query()->set($key, $matches);
 
                 }
