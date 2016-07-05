@@ -41,6 +41,8 @@ class DefaultConfiguration {
 
         $config['base-url'] = self::urlGetAbsolute();
 
+        $config['base-uri'] = self::uriGetAbsolute();
+
         return $config;
 
     }
@@ -49,9 +51,15 @@ class DefaultConfiguration {
 
         $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
 
-        $uri = preg_replace("/\/index.php(.*?)$/i", "", $_SERVER['PHP_SELF']);
+        $uri = self::uriGetAbsolute();
 
         return ( $http . $_SERVER['HTTP_HOST'] . $uri . "/" );
+
+    }
+
+    private static function uriGetAbsolute() {
+
+        return preg_replace("/\/index.php(.*?)$/i", "", $_SERVER['PHP_SELF']);
 
     }
 

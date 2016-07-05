@@ -82,7 +82,7 @@ class Content {
 
     public function length() {
 
-        return sizeof($this->content);
+        return strlen($this->content);
 
     }
 

@@ -101,7 +101,7 @@ class RoutingTable implements RoutingTableInterface {
     
     // This method read the route (folder by folder recursively) and build 
     // the global regular expression against which all the request URI will be compared
-    private function readpath($folders = array(), &$value = null, $regex = '') {
+    private function readpath($folders = array(), &$value = array(), $regex = '') {
         
         // if the first 'folder' is empty is removed
         while (!empty($folders) && empty($folders[0])) {
@@ -156,7 +156,7 @@ class RoutingTable implements RoutingTableInterface {
 
                 }
                 // Once the parameter is analyzed, the result is passed to the next iteration
-                $this->readpath(
+                return $this->readpath(
                     $folders,
                     $value,
                     $regex.'(?:\/'.$param_regex.')'. (($param_required)?'{1}':'?')
@@ -164,9 +164,10 @@ class RoutingTable implements RoutingTableInterface {
 
             } else {
                 // if the element is not a json string, I assume it's the service name
+                if (!isset($value['service'])) $value['service'] = array();
                 array_push($value['service'], $folder);
 
-                $this->readpath(
+                return $this->readpath(
                     $folders,
                     $value,
                     $regex.'\/'.$folder
@@ -197,7 +198,7 @@ class RoutingTable implements RoutingTableInterface {
 
             $value['query'][$key] = array(
                 'regex'    => $string,
-                'required' => $required
+                'required' => $field_required
             );
 
         }
@@ -213,10 +214,10 @@ class RoutingTable implements RoutingTableInterface {
          * need to be removed. Contrariwise, wildcards must be delimited in order to keet the whole regular
          * expression consistent, hence a '?' is added to all the '.*' or '.+' that don't already have one.
          */
-        $string = preg_replace('/(?<!\\)\((?!\?)/', '(?:', $string);
-        $string = preg_replace('/\.([\*\+])(?!\?)/', '.\${1}?', $string);
-        $string = preg_replace('/^[\^]/', '', $string);
-        $string = preg_replace('/[\$]$/', '', $string);
+        $string = preg_replace("/(?<!\\\\)\\((?!\\?)/", '(?:', $string);
+        $string = preg_replace("/\\.([\\*\\+])(?!\\?)/", '.${1}?', $string);
+        $string = preg_replace("/^[\\^]/", '', $string);
+        $string = preg_replace("/[\\$]$/", '', $string);
 
         /* The produced regular expression is grouped and associated with its key (this means that the 'preg_match'
          * function will generate an associative array where the key/value association is preserved).
@@ -239,7 +240,7 @@ class RoutingTable implements RoutingTableInterface {
             "query"      => array()      // List of parameters with their regular expression that must be added among the query parameters
         );
 
-        $this->logger->debug("ROUTE: " . $route);
+        $this->logger->debug("ROUTE: " . implode("/", $folders));
 
         $this->logger->debug("PARAMETERS: " . var_export($value, true));
 

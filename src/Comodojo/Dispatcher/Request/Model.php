@@ -104,4 +104,9 @@ class Model extends DispatcherClassModel {
         return $this->method;
     }
 
+    public function route() {
+
+        return str_replace($this->configuration()->get("base-uri"), "", $this->uri->getPath());
+    }
+
 }

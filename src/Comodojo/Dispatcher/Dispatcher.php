@@ -244,7 +244,8 @@ class Dispatcher {
 
         $message = $de->getMessage();
 
-        $headers = $de->getHeaders();
+        //$headers = $de->getHeaders();
+        $headers = array();
 
         $this->response()->status()->set($status);
 

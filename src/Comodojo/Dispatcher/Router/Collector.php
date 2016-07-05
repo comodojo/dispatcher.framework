@@ -192,7 +192,7 @@ class Collector extends DispatcherClassModel {
 
             $methods = $service->getImplementedMethods();
 
-            if ( in_array($method, $metods) ) {
+            if ( in_array($method, $methods) ) {
 
                 $callable = $service->getMethod($method);
 
@@ -248,9 +248,10 @@ class Collector extends DispatcherClassModel {
 
     private function parse() {
 
-        $path = $this->request->uri()->getPath();
-
+        $path = $this->request->route();
+        
         foreach ($this->table->routes() as $regex => $value) {
+            
             // The current uri is checked against all the global regular expressions associated with the routes
             if (preg_match("/" . $regex . "/", $path, $matches)) {
 
