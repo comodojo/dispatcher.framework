@@ -242,8 +242,30 @@ class Collector extends DispatcherClassModel {
 
         }
 
-        return $this;
+        return $this->dumpCache();
 
+    }
+    
+    public function loadFromCache() {
+        
+        $routes = $this->cache->get("dispatcher_routes");
+        
+        if (is_null($routes)) return null;
+        
+        $this->table->routes($routes);
+        
+        return $this;
+        
+    }
+    
+    private function dumpCache() {
+        
+        $routes = $this->table->routes();
+        
+        $this->cache->set("dispatcher_routes", $routes, 24 * 60 * 60);
+        
+        return $this;
+        
     }
 
     private function parse() {

@@ -87,9 +87,19 @@ class RoutingTable implements RoutingTableInterface {
 
     }
 
-    public function routes() {
+    public function routes($routes = null) {
 
-        return $this->routes;
+        if (is_null($routes)) {
+            
+            return $this->routes;
+            
+        } else {
+            
+            $this->routes = $routes;
+            
+            return $this;
+            
+        }
 
     }
 

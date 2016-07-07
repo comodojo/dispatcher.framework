@@ -73,71 +73,121 @@ class Dispatcher {
 
         $this->setTimestamp();
 
-        $this->extra = new Extra($this->logger);
+        $this->configuration()->merge($configuration);
 
-        $this->configuration = new Configuration( DefaultConfiguration::get() );
+        if (!is_null($emitter)) {
+            
+            $this->events = $emitter;
+            
+        }
 
-        $this->configuration->merge($configuration);
+        if (!is_null($logger)) {
+            
+            $this->logger = $logger;
+            
+        }
 
-        $this->events = is_null($emitter) ? new EventsManager() : $emitter;
-
-        $this->logger = is_null($logger) ? DispatcherLogger::create($this->configuration) : $logger;
-
-        $this->cache = is_null($cache) ? DispatcherCache::create($this->configuration, $this->logger) : $cache;
-
-        $this->request = new Request($this->configuration, $this->logger);
-
-        $this->router = new RouteCollector($this->configuration, $this->logger, $this->cache, $this->extra);
-
-        $this->response = new Response($this->configuration, $this->logger);
-
-        $this->logger->debug("Dispatcher ready, current date ".date('c', $this->getTimestamp()));
-
+        if (!is_null($cache)) {
+            
+            $this->cache = $cache;
+            
+        }
+        
     }
 
     public function configuration() {
+        
+        if (empty($this->configuration)) {
+            
+            $this->configuration = new Configuration( DefaultConfiguration::get() );
+            
+        }
 
         return $this->configuration;
 
     }
 
     public function events() {
+        
+        if (empty($this->events)) {
+            
+            $this->events = new EventsManager();
+            
+        }
 
         return $this->events;
 
     }
 
     public function cache() {
-
+        
+        if (empty($this->cache)) {
+            
+            $this->cache = DispatcherCache::create($this->configuration(), $this->logger());
+            
+        }
+        
         return $this->cache;
 
     }
 
     public function request() {
+        
+        if (empty($this->request)) {
+            
+            $this->request = new Request($this->configuration(), $this->logger());
+            
+        }
 
         return $this->request;
 
     }
 
     public function router() {
+        
+        if (empty($this->router)) {
+            
+            $this->router = new RouteCollector($this->configuration(), $this->logger(), $this->cache(), $this->extra());
+            
+        }
 
         return $this->router;
 
     }
 
     public function response() {
+        
+        if (empty($this->response)) {
+            
+            $this->response = new Response($this->configuration(), $this->logger());
+            
+        }
 
         return $this->response;
 
     }
 
     public function extra() {
+        
+        if (empty($this->extra)) {
+            
+            $this->extra = new Extra($this->logger());
+            
+        }
 
         return $this->extra;
 
     }
 
     public function logger() {
+        
+        if (empty($this->logger)) {
+            
+            $this->logger = DispatcherLogger::create($this->configuration());
+            
+            $this->logger()->debug("Dispatcher ready, current date ".date('c', $this->getTimestamp()));
+            
+        }
 
         return $this->logger;
 
@@ -145,15 +195,15 @@ class Dispatcher {
 
     public function dispatch() {
 
-        $this->logger->debug("Starting to dispatch.");
+        $this->logger()->debug("Starting to dispatch.");
 
-        $this->logger->debug("Emitting global dispatcher event.");
+        $this->logger()->debug("Emitting global dispatcher event.");
 
-        $this->events->emit( new DispatcherEvent($this) );
+        $this->events()->emit( new DispatcherEvent($this) );
 
         if ( $this->configuration()->get('enabled') === false ) {
 
-            $this->logger->debug("Dispatcher disabled, shutting down gracefully.");
+            $this->logger()->debug("Dispatcher disabled, shutting down gracefully.");
 
             $status = $this->configuration()->get('disabled-status');
 
@@ -167,21 +217,21 @@ class Dispatcher {
 
         }
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request') );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.request') );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.'.$this->request->method()->get()) );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.request.'.$this->request()->method()->get()) );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
 
-        $this->logger->debug("Starting router.");
+        $this->logger()->debug("Starting router.");
 
         try {
 
-            $this->router->route($this->request);
+            $this->router()->route($this->request());
 
         } catch (DispatcherException $de) {
 
-            $this->logger->debug("Route error (".$de->getStatus()."), shutting down dispatcher.");
+            $this->logger()->debug("Route error (".$de->getStatus()."), shutting down dispatcher.");
 
             $this->processDispatcherException($de);
 
@@ -189,31 +239,31 @@ class Dispatcher {
 
         }
 
-        $route_type = $this->router->getType();
+        $route_type = $this->router()->getType();
 
-        $route_service = $this->router->getService();
+        $route_service = $this->router()->getService();
 
-        $this->logger->debug("Route acquired, type $route_type directed to $route_service.");
+        $this->logger()->debug("Route acquired, type $route_type directed to $route_service.");
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route') );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.route') );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$route_type) );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$route_type) );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$route_service) );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$route_service) );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.#') );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.route.#') );
 
         // translate route to service
 
-        $this->logger->debug("Running $route_service service.");
+        $this->logger()->debug("Running $route_service service.");
 
         try {
 
-            $this->router->compose($this->response);
+            $this->router()->compose($this->response());
 
         } catch (DispatcherException $de) {
 
-            $this->logger->debug("Service exception (".$de->getStatus()."), shutting down dispatcher.");
+            $this->logger()->debug("Service exception (".$de->getStatus()."), shutting down dispatcher.");
 
             $this->processDispatcherException($de);
 
@@ -225,15 +275,15 @@ class Dispatcher {
 
     private function emitServiceSpecializedEvents($name) {
 
-        $this->logger->debug("Emitting $name service-event.");
+        $this->logger()->debug("Emitting $name service-event.");
 
         return new ServiceEvent(
             $name,
-            $this->logger,
-            $this->request,
-            $this->router,
-            $this->response,
-            $this->extra
+            $this->logger(),
+            $this->request(),
+            $this->router(),
+            $this->response(),
+            $this->extra()
         );
 
     }
@@ -257,17 +307,17 @@ class Dispatcher {
 
     private function shutdown() {
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response') );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.response') );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.'.$this->response->status()->get()) );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.response.'.$this->response()->status()->get()) );
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.#') );
+        $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.response.#') );
 
-        $this->logger->debug("Composing return value.");
+        $this->logger()->debug("Composing return value.");
 
-        $return = Processor::parse($this->configuration, $this->logger, $this->response);
+        $return = Processor::parse($this->configuration(), $this->logger(), $this->response());
 
-        $this->logger->debug("Dispatcher run-cycle ends.");
+        $this->logger()->debug("Dispatcher run-cycle ends.");
 
         ob_end_clean();
 

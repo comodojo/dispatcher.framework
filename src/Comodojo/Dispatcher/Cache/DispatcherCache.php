@@ -82,7 +82,7 @@ class DispatcherCache extends DispatcherClassModel{
 
         switch ( strtolower($parameters['type']) ) {
 
-            case 'file':
+            case 'filecache':
 
                 $base = $this->configuration->get('base-path');
 
