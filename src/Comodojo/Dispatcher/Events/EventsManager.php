@@ -1,7 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Events;
 
 use \League\Event\Emitter;
-use \Symfony\Component\Yaml\Yaml;
 
 /**
  * @package     Comodojo Dispatcher
@@ -44,13 +43,11 @@ class EventsManager extends Emitter {
 
     }
 
-    public function loadFromYaml($yaml) {
+    public function loadPlugins($plugins) {
 
-        $events = Yaml::parse($yaml);
+        if ( !empty($plugins) ) {
 
-        if ( !empty($events) ) {
-
-            foreach( $events as $name => $event ) {
+            foreach( $plugins as $name => $event ) {
 
                 $callable = ( is_null($event['method']) ) ? $event["class"] : array($event["class"], $event["method"]);
 

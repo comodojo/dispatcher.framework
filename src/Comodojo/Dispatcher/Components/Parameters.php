@@ -27,13 +27,31 @@ trait Parameters {
 
     protected $parameters = array();
 
-    final public function get($parameter=null) {
+    final public function get($parameter=null, $index=null) {
 
         if ( is_null($parameter) ) return $this->parameters;
 
         else if ( array_key_exists($parameter, $this->parameters) ) {
+            
+            $value = $this->parameters[$parameter];
+            
+            if (is_array($value) && !is_null($index)) {
+                
+                if (isset($value[$index])) {
+                
+                    return $value[$index];
+                    
+                } else {
+                    
+                    return null;
+                    
+                }
+                
+            } else {
 
-            return $this->parameters[$parameter];
+                return $value;
+                
+            }
 
         }
 

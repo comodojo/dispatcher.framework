@@ -1,7 +1,5 @@
 <?php namespace Comodojo\Dispatcher\Components;
 
-use \Symfony\Component\Yaml\Yaml;
-
 /**
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -118,14 +116,6 @@ class Configuration {
         $this->attributes = array_replace($this->attributes, $properties);
 
         return $this;
-
-    }
-
-    public function loadFromYaml($yaml) {
-
-        $configuration = Yaml::parse($yaml);
-
-        return $this->merge($configuration);
 
     }
 

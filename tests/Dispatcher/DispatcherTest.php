@@ -9,7 +9,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
             "algorithm" => "PICK_ALL",
             "providers" => array(
                 "test" => array(
-                    "type" => "file",
+                    "type" => "FileCache",
                     "folder" => "cache"
                 )
             )

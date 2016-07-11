@@ -8,7 +8,6 @@ use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheManager;
-use \Symfony\Component\Yaml\Yaml;
 use \Monolog\Logger;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
@@ -228,9 +227,7 @@ class Collector extends DispatcherClassModel {
 
     }
 
-    public function loadFromYaml($yaml) {
-
-        $routes = Yaml::parse($yaml);
+    public function loadRoutes($routes) {
 
         if ( !empty($routes) ) {
 

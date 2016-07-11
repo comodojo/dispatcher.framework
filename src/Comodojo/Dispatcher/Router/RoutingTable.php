@@ -25,7 +25,7 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class RoutingTable implements RoutingTableInterface {
+class RoutingTable {
 
     private $routes = array();
     private $logger;
