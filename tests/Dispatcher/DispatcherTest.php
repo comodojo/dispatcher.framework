@@ -47,7 +47,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('\League\Event\Emitter', self::$dispatcher->events());
         $this->assertInstanceOf('\Comodojo\Cache\CacheManager', self::$dispatcher->cache());
         $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', self::$dispatcher->request());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Collector', self::$dispatcher->router());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Model', self::$dispatcher->router());
         $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Model', self::$dispatcher->response());
         $this->assertInstanceOf('\Comodojo\Dispatcher\Extra\Model', self::$dispatcher->extra());
 

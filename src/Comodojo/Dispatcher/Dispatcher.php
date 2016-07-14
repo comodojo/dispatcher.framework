@@ -4,14 +4,13 @@ use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Components\DefaultConfiguration;
 use \Comodojo\Dispatcher\Request\Model as Request;
-use \Comodojo\Dispatcher\Router\Collector as RouteCollector;
+use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Output\Processor;
 use \Comodojo\Dispatcher\Events\DispatcherEvent;
 use \Comodojo\Dispatcher\Events\ServiceEvent;
-use \Comodojo\Dispatcher\Router\RoutingTableInterface;
 use \Comodojo\Dispatcher\Log\DispatcherLogger;
 use \Comodojo\Dispatcher\Cache\DispatcherCache;
 use \Comodojo\Dispatcher\Events\EventsManager;
@@ -147,7 +146,7 @@ class Dispatcher {
         
         if (empty($this->router)) {
             
-            $this->router = new RouteCollector($this->configuration(), $this->logger(), $this->cache(), $this->extra());
+            $this->router = new Router($this->configuration(), $this->logger(), $this->cache(), $this->extra());
             
         }
 
@@ -227,7 +226,7 @@ class Dispatcher {
 
         try {
 
-            $this->router()->route($this->request());
+            $route = $this->router()->route($this->request());
 
         } catch (DispatcherException $de) {
 
@@ -239,9 +238,9 @@ class Dispatcher {
 
         }
 
-        $route_type = $this->router()->getType();
+        $route_type = $route->getType();
 
-        $route_service = $this->router()->getService();
+        $route_service = $route->getService();
 
         $this->logger()->debug("Route acquired, type $route_type directed to $route_service.");
 

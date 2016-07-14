@@ -1,7 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \Comodojo\Dispatcher\Router\RoutingTable;
+use \Comodojo\Dispatcher\Router\Table;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
@@ -34,17 +34,13 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Collector extends DispatcherClassModel {
+class Model extends DispatcherClassModel {
 
     use TimestampTrait;
 
     private $bypass = false;
-
-    private $classname = "";
-
-    private $type = "";
-
-    private $service = "";
+    
+    private $route = null;
 
     private $cache;
 
@@ -63,7 +59,7 @@ class Collector extends DispatcherClassModel {
 
         parent::__construct($configuration, $logger);
 
-        $this->table = new RoutingTable($logger);
+        $this->table = new Table($cache, $configuration, $logger);
 
         $this->cache = $cache;
 
@@ -73,75 +69,9 @@ class Collector extends DispatcherClassModel {
 
     }
 
-    public function getType() {
+    public function table() {
 
-        return $this->type;
-
-    }
-
-    public function getService() {
-
-        return $this->service;
-
-    }
-
-    public function getParameters() {
-
-        return $this->parameters;
-
-    }
-
-    public function getClassName() {
-
-        return $this->classname;
-
-    }
-
-    public function getInstance() {
-
-        $class = $this->classname;
-
-        if (class_exists($class)) {
-
-            return new $class(
-                $this->configuration,
-                $this->logger,
-                $this->request,
-                $this,
-                $this->response,
-                $this->extra
-            );
-
-        }
-        else return null;
-
-    }
-
-    public function add($route, $type, $class, $parameters = array()) {
-
-        $routeData = $this->get($route);
-
-        if (is_null($routeData)) {
-
-            $this->table->put($route, $type, $class, $parameters);
-
-        } else {
-
-            $this->table->set($route, $type, $class, $parameters);
-
-        }
-
-    }
-
-    public function get($route) {
-
-        return $this->table->get($route);
-
-    }
-
-    public function remove($route) {
-
-        return $this->table->remove($route);
+        return $this->table;
 
     }
 
@@ -173,6 +103,10 @@ class Collector extends DispatcherClassModel {
 
             throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
 
+        } else {
+            
+            return $this->route;
+            
         }
 
     }
@@ -180,8 +114,18 @@ class Collector extends DispatcherClassModel {
     public function compose(Response $response) {
 
         $this->response = $response;
+        
+        if (is_null($this->route)) {
+            
+            throw new DispatcherException("Route has not been loaded!");
+            
+        }
 
-        $service = $this->getInstance();
+        $service = $this->route->getInstance(
+            $this->request,
+            $this->response,
+            $this->extra
+        );
 
         if (!is_null($service)) {
 
@@ -227,44 +171,6 @@ class Collector extends DispatcherClassModel {
 
     }
 
-    public function loadRoutes($routes) {
-
-        if ( !empty($routes) ) {
-
-            foreach( $routes as $name => $route ) {
-
-                $this->add($route['route'], $route['type'], $route['class'], $route['parameters']);
-
-            }
-
-        }
-
-        return $this->dumpCache();
-
-    }
-    
-    public function loadFromCache() {
-        
-        $routes = $this->cache->get("dispatcher_routes");
-        
-        if (is_null($routes)) return null;
-        
-        $this->table->routes($routes);
-        
-        return $this;
-        
-    }
-    
-    private function dumpCache() {
-        
-        $routes = $this->table->routes();
-        
-        $this->cache->set("dispatcher_routes", $routes, 24 * 60 * 60);
-        
-        return $this;
-        
-    }
-
     private function parse() {
 
         $path = $this->request->route();
@@ -285,11 +191,14 @@ class Collector extends DispatcherClassModel {
                     $this->request->query()->set($parameter, $value);
 
                 }
-
-                $this->classname  = $value['class'];
-                $this->type       = $value['type'];
-                $this->service    = implode('.', $value['service']);
-                $this->service    = empty($this->service)?"default":$this->service;
+                
+                $service = implode('.', $value['service']);
+                
+                $this->route = new Route($this);
+                
+                $this->route->setClassName($value['class']);
+                $this->route->setType($value['type']);
+                $this->route->setService(empty($service)?"default":$service);
 
                 return true;
 

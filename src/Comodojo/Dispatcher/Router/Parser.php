@@ -1,6 +1,9 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
+use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Monolog\Logger;
+use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
 /**
@@ -25,93 +28,11 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class RoutingTable {
-
-    private $routes = array();
-    private $logger;
-
-    public function __construct(Logger $logger) {
-
-        $this->logger = $logger;
-
-    }
-
-    public function put($route, $type, $class, $parameters = array()) {
-
-        $folders = explode("/", $route);
-
-        $regex = $this->readpath($folders);
-
-        if (!isset($this->routes[$regex])) {
-
-            $this->add($folders, $type, $class, $parameters);
-
-        }
-
-    }
-
-    public function set($route, $type, $class, $parameters = array()) {
-
-        $folders = explode("/", $route);
-
-        $regex = $this->readpath($folders);
-
-        if (isset($this->routes[$regex])) {
-
-            $this->add($folders, $type, $class, $parameters);
-
-        }
-
-    }
-
-    public function get($route) {
-
-        $folders = explode("/", $route);
-
-        $regex = $this->readpath($folders);
-
-        if (isset($this->routes[$regex]))
-            return $this->routes[$regex];
-        else
-            return null;
-
-    }
-
-    public function remove($route) {
-
-        $folders = explode("/", $route);
-
-        $regex = $this->readpath($folders);
-
-        if (isset($this->routes[$regex])) unset($this->routes[$regex]);
-
-    }
-
-    public function routes($routes = null) {
-
-        if (is_null($routes)) {
-            
-            return $this->routes;
-            
-        } else {
-            
-            $this->routes = $routes;
-            
-            return $this;
-            
-        }
-
-    }
-
-    public function defaultRoute() {
-
-        return $this->get('/');
-
-    }
+class Parser extends DispatcherClassModel {
     
     // This method read the route (folder by folder recursively) and build 
     // the global regular expression against which all the request URI will be compared
-    private function readpath($folders = array(), &$value = array(), $regex = '') {
+    public function read($folders = array(), &$value = array(), $regex = '') {
         
         // if the first 'folder' is empty is removed
         while (!empty($folders) && empty($folders[0])) {
@@ -156,17 +77,17 @@ class RoutingTable {
 
                     $this->logger->debug("PARAMETER STRING: " . $string);
                     
-                    /* The key and the regex of every paramater is passed to the 'readparam'
+                    /* The key and the regex of every paramater is passed to the 'param'
                      * method which will build an appropriate regular expression and will understand 
                      * if the parameter is required and will build the $value['query'] object
                      */
-                    $param_regex .= $this->readparam($key, $string, $param_required, $value);
+                    $param_regex .= $this->param($key, $string, $param_required, $value);
 
                     $this->logger->debug("PARAMETER REGEX: " . $param_regex);
 
                 }
                 // Once the parameter is analyzed, the result is passed to the next iteration
-                return $this->readpath(
+                return $this->read(
                     $folders,
                     $value,
                     $regex.'(?:\/'.$param_regex.')'. (($param_required)?'{1}':'?')
@@ -177,7 +98,7 @@ class RoutingTable {
                 if (!isset($value['service'])) $value['service'] = array();
                 array_push($value['service'], $folder);
 
-                return $this->readpath(
+                return $this->read(
                     $folders,
                     $value,
                     $regex.'\/'.$folder
@@ -190,7 +111,7 @@ class RoutingTable {
     }
 
     // This method read a single parameter and build the regular expression
-    private function readparam($key, $string, &$param_required, &$value) {
+    private function param($key, $string, &$param_required, &$value) {
 
         $field_required = false;
 
@@ -235,33 +156,6 @@ class RoutingTable {
          * otherwise a '?' is added.
          */
         return '(?P<' . $key . '>' . $string . ')' . (($field_required)?'{1}':'?');
-
-    }
-
-    // This method add a route to the supported list
-    private function add($folders, $type, $class, $parameters) {
-
-        // The values associated with a route are as follows:
-        $value   = array(
-            "type"       => $type,       // Type of route
-            "class"      => $class,      // Class to be invoked
-            "service"    => array(),     // Service name (it can be a list of namespaces plus a final service name)
-            "parameters" => $parameters, // Parameters passed via the composer.json configuration (cache, ttl, etc...)
-            "query"      => array()      // List of parameters with their regular expression that must be added among the query parameters
-        );
-
-        $this->logger->debug("ROUTE: " . implode("/", $folders));
-
-        $this->logger->debug("PARAMETERS: " . var_export($value, true));
-
-        // This method generate a global regular expression which will be able to match all the URI supported by the route
-        $regex = $this->readpath($folders, $value);
-
-        $this->logger->debug("ROUTE: " . $regex);
-
-        $this->logger->debug("PARAMETERS: " . var_export($value, true));
-
-        $this->routes[$regex] = $value;
 
     }
 
