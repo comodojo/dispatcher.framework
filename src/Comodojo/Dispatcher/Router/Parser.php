@@ -2,6 +2,8 @@
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Monolog\Logger;
+use \Comodojo\Dispatcher\Router\Model as Router;
+use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
@@ -30,9 +32,27 @@ use \Exception;
 
 class Parser extends DispatcherClassModel {
     
+    private $router;
+
+    public function __construct(
+        Router $router
+    ) {
+
+        parent::__construct($router->configuration(), $router->logger());
+        
+        $this->router = $router;
+
+    }
+    
     // This method read the route (folder by folder recursively) and build 
     // the global regular expression against which all the request URI will be compared
-    public function read($folders = array(), &$value = array(), $regex = '') {
+    public function read($folders = array(), Route $value = null, $regex = '') {
+        
+        if (is_null($value)) {
+            
+            $value = new Route($this->router);
+            
+        }
         
         // if the first 'folder' is empty is removed
         while (!empty($folders) && empty($folders[0])) {
@@ -79,9 +99,11 @@ class Parser extends DispatcherClassModel {
                     
                     /* The key and the regex of every paramater is passed to the 'param'
                      * method which will build an appropriate regular expression and will understand 
-                     * if the parameter is required and will build the $value['query'] object
+                     * if the parameter is required and will build the Route query object
                      */
-                    $param_regex .= $this->param($key, $string, $param_required, $value);
+                    $param_regex .= $this->param($key, $string, $value);
+                    
+                    if ($value->isQueryRequired($key)) $param_required = true;
 
                     $this->logger->debug("PARAMETER REGEX: " . $param_regex);
 
@@ -95,8 +117,7 @@ class Parser extends DispatcherClassModel {
 
             } else {
                 // if the element is not a json string, I assume it's the service name
-                if (!isset($value['service'])) $value['service'] = array();
-                array_push($value['service'], $folder);
+                $value->addService($folder);
 
                 return $this->read(
                     $folders,
@@ -111,7 +132,7 @@ class Parser extends DispatcherClassModel {
     }
 
     // This method read a single parameter and build the regular expression
-    private function param($key, $string, &$param_required, &$value) {
+    private function param($key, $string, $value) {
 
         $field_required = false;
 
@@ -120,19 +141,11 @@ class Parser extends DispatcherClassModel {
 
             $key            = $bits[1];
             $field_required = true;
-            $param_required = true;
 
         }
 
-        // The $value['query'] field contains all regex which will be used by the collector to parse the route fields
-        if (!is_null($value)) {
-
-            $value['query'][$key] = array(
-                'regex'    => $string,
-                'required' => $field_required
-            );
-
-        }
+        // The $value query object contains all regex which will be used by the collector to parse the route fields
+        $value->setQuery($key, $string, $field_required);
 
         /* Every parameter can include it's own logic into the regular expression,
          * it can use backreferences and it's expected to be used against a single parameter.

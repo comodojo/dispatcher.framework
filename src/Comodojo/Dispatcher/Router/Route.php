@@ -35,13 +35,15 @@ class Route extends DispatcherClassModel {
 
     use TimestampTrait;
 
-    private $bypass = false;
-
     private $classname = "";
 
     private $type = "";
 
-    private $service = "";
+    private $service = array();
+
+    private $parameters = array();
+
+    private $query = array();
 
     private $router = null;
 
@@ -77,12 +79,91 @@ class Route extends DispatcherClassModel {
 
     }
 
+    public function getServiceName() {
+
+        return (empty($this->service))?"default":implode('.', $this->service);
+
+    }
+
     public function setService($service) {
 
         $this->service = $service;
         
         return $this;
 
+    }
+
+    public function addService($service) {
+
+        array_push($this->service, $service);
+        
+        return $this;
+
+    }
+
+    public function getParameter($key) {
+        
+        return (isset($this->parameters[$key]))?$this->parameters[$key]:null;
+
+    }
+
+    public function getParameters() {
+        
+        return $this->parameters;
+
+    }
+
+    public function setParameter($key, $value) {
+        
+        $this->parameters[$key] = $value;
+        
+        return $this;
+
+    }
+
+    public function setParameters($parameters) {
+
+        $this->parameters = $parameters;
+        
+        return $this;
+
+    }
+    
+    public function setQuery($key, $regex, $required = false) {
+        
+        $this->query[$key] = array(
+            "regex" => $regex,
+            "required" => $required
+        );
+        
+        return $this;
+        
+    }
+    
+    public function isQueryRequired($key) {
+        
+        return isset($this->query[$key])?$this->query[$key]["required"]:false;
+        
+    }
+    
+    public function getQueryRegex($key) {
+        
+        return isset($this->query[$key])?$this->query[$key]["regex"]:null;
+        
+    }
+    
+    public function getQueries() {
+        
+        return $this->query;
+        
+    }
+    
+    public function setQueries($query) {
+        
+        $this->query = $query;
+        
+        return $this;
+        
     }
 
     public function getClassName() {
@@ -108,6 +189,13 @@ class Route extends DispatcherClassModel {
         $class = $this->classname;
 
         if (class_exists($class)) {
+            
+            // All the route parameters are also added to the query parameters
+            foreach ($this->getParameters() as $parameter => $value) {
+
+                $request->query()->set($parameter, $value);
+
+            }
 
             return new $class(
                 $this->configuration,
@@ -121,6 +209,60 @@ class Route extends DispatcherClassModel {
         }
         else return null;
 
+    }
+    
+    public function path($path) {
+        
+        // Because of the nature of the global regular expression, all the bits of the matched route are associated with a parameter key
+        foreach ($this->query as $key => $value) {
+
+            if (isset($path[$key])) {
+                /* if it's available a bit associated with the parameter name, it is compared against
+                 * it's regular expression in order to extrect backreferences
+                 */
+                if (preg_match('/^' . $value['regex'] . '$/', $path[$key], $matches)) {
+                    
+                    if (count($matches) == 1) $matches = $matches[0]; // This is the case where no backreferences are present or available.
+                    
+                    // The extracted value (with any backreference available) is added to the query parameters.
+                    $this->setParameter($key, $matches);
+
+                }
+
+            } elseif ($value['required']) {
+
+                throw new DispatcherException(sprintf("Required parameter '%s' not specified.", $key), 1, null, 500);
+
+            }
+
+        }
+        
+        return $this;
+        
+    }
+    
+    public function getData() {
+        
+        return array(
+            "type"       => $this->getType(),
+            "class"      => $this->getClassName(),
+            "service"    => $this->getService(),
+            "parameters" => $this->getParameters(),
+            "query"      => $this->getQueries()
+        );
+        
+    }
+    
+    public function setData($data) {
+        
+        $this->setType($data['type'])
+            ->setClassName($data['class'])
+            ->setService($data['service'])
+            ->setParameters($data['parameters'])
+            ->setQueries($data['query']);
+            
+        return $this;
+        
     }
 
 }

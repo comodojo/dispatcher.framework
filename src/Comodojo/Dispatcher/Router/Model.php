@@ -2,6 +2,7 @@
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Router\Table;
+use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
@@ -59,7 +60,7 @@ class Model extends DispatcherClassModel {
 
         parent::__construct($configuration, $logger);
 
-        $this->table = new Table($cache, $configuration, $logger);
+        $this->table = new Table($cache, $this);
 
         $this->cache = $cache;
 
@@ -75,9 +76,11 @@ class Model extends DispatcherClassModel {
 
     }
 
-    public function bypass($mode = true) {
+    public function bypass(Route $route) {
 
-        $this->bypass = filter_var($mode, FILTER_VALIDATE_BOOLEAN);
+        $this->bypass = true;
+        
+        $this->route = $route;
 
         return $this;
 
@@ -99,15 +102,13 @@ class Model extends DispatcherClassModel {
 
         $this->request = $request;
 
-        if (!$this->parse()) {
-
-            throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
-
-        } else {
+        if (!$this->bypass) {
             
-            return $this->route;
-            
+            if (!$this->parse()) throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
+
         }
+        
+        return $this->route;
 
     }
 
@@ -183,22 +184,7 @@ class Model extends DispatcherClassModel {
                 /* If a route is matched, all the bits of the route string are evalued in order to create
                  * new query parameters which will be available for the service class
                  */
-                $this->evalUri($value['query'], $matches);
-
-                // All the route parameters are also added to the query parameters
-                foreach ($value['parameters'] as $parameter => $value) {
-
-                    $this->request->query()->set($parameter, $value);
-
-                }
-                
-                $service = implode('.', $value['service']);
-                
-                $this->route = new Route($this);
-                
-                $this->route->setClassName($value['class']);
-                $this->route->setType($value['type']);
-                $this->route->setService(empty($service)?"default":$service);
+                $this->route = $value->path($matches);
 
                 return true;
 
@@ -207,36 +193,6 @@ class Model extends DispatcherClassModel {
         }
 
         return false;
-
-    }
-
-    private function evalUri($parameters, $bits) {
-
-        $count  = 0;
-
-        // Because of the nature of the global regular expression, all the bits of the matched route are associated with a parameter key
-        foreach ($parameters as $key => $value) {
-
-            if (isset($bits[$key])) {
-                /* if it's available a bit associated with the parameter name, it is compared against
-                 * it's regular expression in order to extrect backreferences
-                 */
-                if (preg_match('/^' . $value['regex'] . '$/', $bits[$key], $matches)) {
-                    
-                    if (count($matches) == 1) $matches = $matches[0]; // This is the case where no backreferences are present or available.
-                    
-                    // The extracted value (with any backreference available) is added to the query parameters.
-                    $this->request->query()->set($key, $matches);
-
-                }
-
-            } elseif ($value['required']) {
-
-                throw new DispatcherException(sprintf("Required parameter '%s' not specified.", $key), 1, null, 500);
-
-            }
-
-        }
 
     }
 

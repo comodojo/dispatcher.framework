@@ -2,6 +2,8 @@
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Router\Parser;
+use \Comodojo\Dispatcher\Router\Route;
+use \Comodojo\Dispatcher\Router\Model as Router;
 use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheManager;
@@ -37,16 +39,19 @@ class Table extends DispatcherClassModel {
     private $parser;
     
     private $cache;
+    
+    private $router;
 
     public function __construct(
         CacheManager $cache,
-        Configuration $configuration,
-        Logger $logger
+        Router $router
     ) {
 
-        parent::__construct($configuration, $logger);
+        parent::__construct($router->configuration(), $router->logger());
+        
+        $this->router = $router;
 
-        $this->parser = new Parser($configuration, $logger);
+        $this->parser = new Parser($router);
         
         $this->cache = $cache;
         
@@ -167,7 +172,13 @@ class Table extends DispatcherClassModel {
         
         if (is_null($routes)) return null;
         
-        $this->routes($routes);
+        foreach ($routes as $name => $data) {
+            
+            $route = new Route($this->router);
+                
+            $this->routes[$name] = $route->setData($data);
+            
+        }
         
         $this->logger->debug("Routing table loaded from cache");
         
@@ -177,7 +188,13 @@ class Table extends DispatcherClassModel {
     
     private function dumpCache() {
         
-        $routes = $this->routes();
+        $routes = array();
+        
+        foreach($this->routes as $name => $route) {
+            
+            $routes[$name] = $route->getData();
+            
+        }
         
         $this->cache->set("dispatcher_routes", $routes, 24 * 60 * 60);
         
@@ -191,26 +208,23 @@ class Table extends DispatcherClassModel {
     private function register($folders, $type, $class, $parameters) {
 
         // The values associated with a route are as follows:
-        $value   = array(
-            "type"       => $type,       // Type of route
-            "class"      => $class,      // Class to be invoked
-            "service"    => array(),     // Service name (it can be a list of namespaces plus a final service name)
-            "parameters" => $parameters, // Parameters passed via the composer.json configuration (cache, ttl, etc...)
-            "query"      => array()      // List of parameters with their regular expression that must be added among the query parameters
-        );
+        $route = new Route($this->router);
+        $route->setType($type) // Type of route
+            ->setClassName($class) // Class to be invoked
+            ->setParameters($parameters); // Parameters passed via the composer.json configuration (cache, ttl, etc...)
 
         $this->logger->debug("ROUTE: " . implode("/", $folders));
 
         //$this->logger->debug("PARAMETERS: " . var_export($value, true));
 
         // This method generate a global regular expression which will be able to match all the URI supported by the route
-        $regex = $this->parser->read($folders, $value);
+        $regex = $this->parser->read($folders, $route);
 
         $this->logger->debug("ROUTE: " . $regex);
 
         //$this->logger->debug("PARAMETERS: " . var_export($value, true));
 
-        $this->routes[$regex] = $value;
+        $this->routes[$regex] = $route;
 
     }
 
