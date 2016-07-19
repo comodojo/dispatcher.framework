@@ -56,7 +56,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     public function testTableRoute() {
         
-        $path = 'test/{"name*": "\\w+"}';
+        $path = 'test/{"name*": "\\\\w+"}';
         
         $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Table', self::$router->table());
         
