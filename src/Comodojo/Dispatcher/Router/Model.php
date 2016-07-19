@@ -8,7 +8,7 @@ use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Configuration;
-use \Comodojo\Dispatcher\Components\CacheManager;
+use \Comodojo\Cache\CacheManager;
 use \Monolog\Logger;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
@@ -40,7 +40,7 @@ class Model extends DispatcherClassModel {
     use TimestampTrait;
 
     private $bypass = false;
-
+    
     private $route;
 
     private $cache;
@@ -55,7 +55,7 @@ class Model extends DispatcherClassModel {
         Configuration $configuration,
         Logger $logger,
         CacheManager $cache,
-        Extra $extra = null
+        Extra $extra
     ) {
 
         parent::__construct($configuration, $logger);
@@ -79,7 +79,7 @@ class Model extends DispatcherClassModel {
     public function bypass(Route $route) {
 
         $this->bypass = true;
-
+        
         $this->route = $route;
 
         return $this;
@@ -103,11 +103,11 @@ class Model extends DispatcherClassModel {
         $this->request = $request;
 
         if (!$this->bypass) {
-
+            
             if (!$this->parse()) throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
 
         }
-
+        
         return $this->route;
 
     }
@@ -115,11 +115,11 @@ class Model extends DispatcherClassModel {
     public function compose(Response $response) {
 
         $this->response = $response;
-
+        
         if (is_null($this->route)) {
-
+            
             throw new DispatcherException("Route has not been loaded!");
-
+            
         }
 
         $service = $this->route->getInstance(
@@ -175,9 +175,9 @@ class Model extends DispatcherClassModel {
     private function parse() {
 
         $path = $this->request->route();
-
+        
         foreach ($this->table->routes() as $regex => $value) {
-
+            
             // The current uri is checked against all the global regular expressions associated with the routes
             if (preg_match("/" . $regex . "/", $path, $matches)) {
 

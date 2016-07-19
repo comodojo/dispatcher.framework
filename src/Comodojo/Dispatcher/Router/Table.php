@@ -6,7 +6,7 @@ use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
-use \Comodojo\Dispatcher\Components\CacheManager;
+use \Comodojo\Cache\CacheManager;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -35,11 +35,11 @@ use \Exception;
 class Table extends DispatcherClassModel {
 
     private $routes = array();
-
+    
     private $parser;
     
     private $cache;
-
+    
     private $router;
 
     public function __construct(
@@ -48,13 +48,13 @@ class Table extends DispatcherClassModel {
     ) {
 
         parent::__construct($router->configuration(), $router->logger());
-
+        
         $this->router = $router;
 
         $this->parser = new Parser($router);
-
+        
         $this->cache = $cache;
-
+        
         $this->readCache();
 
     }
@@ -119,15 +119,15 @@ class Table extends DispatcherClassModel {
     public function routes($routes = null) {
 
         if (is_null($routes)) {
-
+            
             return $this->routes;
-
+            
         } else {
-
+            
             $this->routes = $routes;
-
+            
             return $this;
-
+            
         }
 
     }
@@ -149,49 +149,49 @@ class Table extends DispatcherClassModel {
             }
 
         }
-
+        
         $this->logger->debug("Routing table loaded");
 
         return $this->dumpCache();
 
     }
-
+    
     private function readCache() {
-
+        
         $routes = $this->cache->get("dispatcher_routes");
-
+        
         if (is_null($routes)) return null;
-
+        
         foreach ($routes as $name => $data) {
-
+            
             $route = new Route($this->router);
-
+                
             $this->routes[$name] = $route->setData($data);
-
+            
         }
-
+        
         $this->logger->debug("Routing table loaded from cache");
-
+        
         return $this;
-
+        
     }
-
+    
     private function dumpCache() {
-
+        
         $routes = array();
-
+        
         foreach($this->routes as $name => $route) {
-
+            
             $routes[$name] = $route->getData();
-
+            
         }
-
+        
         $this->cache->set("dispatcher_routes", $routes, 24 * 60 * 60);
-
+        
         $this->logger->debug("Routing table saved to cache");
-
+        
         return $this;
-
+        
     }
 
     // This method add a route to the supported list

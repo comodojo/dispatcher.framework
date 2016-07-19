@@ -87,13 +87,13 @@ class Dispatcher {
         $this->cache = is_null($cache) ? DispatcherCache::create($this->configuration(), $this->logger()) : $cache;
 
         // init models
+        $this->extra = new Extra($this->logger());
+        
         $this->request = new Request($this->configuration(), $this->logger());
 
         $this->router = new Router($this->configuration(), $this->logger(), $this->cache(), $this->extra());
 
         $this->response = new Response($this->configuration(), $this->logger());
-
-        $this->extra = new Extra($this->logger());
 
         // we're ready!
         $this->logger()->debug("Dispatcher ready, current date ".date('c', $this->getTimestamp()));

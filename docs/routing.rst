@@ -1,85 +1,66 @@
 Routing requests
 ================
 
-.. _dispatcher.plugin.test: https://github.com/comodojo/dispatcher.plugin.test
+Dispatcher includes an advanced embedded URL router that maps urls to services. It allows users to configure routes through Regular Expressions in order to convert url paths in parameters passed to the service.
 
-Dispatcher includes a minimal embedded URL router that maps urls to services, using an approach slightly different from the one used in other common framework.
+All the routes can be composed by 3 different parts: the base paths, the variable parameter paths and finally the query string. Except for the least, these are used to identify a service which is eventually invoked by the framework and initialized with the parameters extracted from the url itself and from the query string (and the post data).
 
-Instead of map methods (or functions) to full uris (plus HTTP verbs), dispatcher retrieves routes using only the first path in the URI. In practice, this variable *select* the route the request will follow.
+Let's see an example of how routes can be defined:
 
-This kind of next-hop approach leaves all logic to the service itself (for example, the ability to serve POST requests instead of GET), decoupling routing and service processing.
+.. routes/test/{"page": "p(\\d+)"}/{"ux_timestamp*": "\\d{10}", "microseconds": "\\d{4}"}/{"filename*": "\\S+", "format*": "\\.(jpg|gif|jpeg|png)"}
 
-.. note:: To understand how to handle HTTP methods jump to the service section.
+In the above example, the "routes/test" is the base path, you can add as many paths as you need. This is meant to be used to build a sort of hierarchical structure among the routes. For example, if you're building a framework which provides API REST, you can create routes with basic paths like "api/v2/users/add" or "api/v3/products/remove" and so on. This part is static and it must be present at the beginning of the HTTP request ight after the installation path of the framework.
 
-mod_rewrite
-***********
+The variable part is instead defined by json strings which provide an association between parameter names and regular expressions used to identify them. Unless there's at least a parameter whose name ends with an asterisk "*", the paths can be omitted and therefor those parameters won't be available to the service.
 
-Dispatcher uses the apache mod_rewrite extension to acquire requests and route those to relative services.
+The following urls can be intercepted by route above:
 
-It is also possible to disable this feature and force dispatcher to reply only to requests directed to index.php, settting the
-`DISPATCHER_USE_REWRITE` constant to false.
-
-In this case, parameters should be passed as a standard http query-string *key=value" pairs.
+- routes/test/p15/1467727094/image.jpg
+- routes/test/p4/14677270941234/test-case.png
+- routes/test/1467727094/smile.gif?user=test
 
 Attributes and Parameters
 *************************
 
-TBW
+To understand how it works, a little knowledge of regular expressions is required (https://en.wikipedia.org/wiki/Regular_expression).
+
+As you can see in the example above, the first parameter is called 'page' and, because it doesn't end with an asterisk, it's not required and can be omitted, when it's used, it must start with a 'p' followed by at least one number.
+
+The following path is composed by two different parameters, one of which (ux_timestamp) is required. This means that it must be part of the HTTP request and it have to be made of 10 digits, the second parameter tells you that you can add another 4 digits which will be accessible as "microseconds".
+
+The last path is similar to the previous, except that both parameters are required (they both end with an astersk).
+
+The request urls shown in the previous chapter will call the service associated with the route "routes/test" which will receive the following parameters:
+
+- routes/test/p15/1467727094/image.jpg
+"page" => array('p15', '15')
+"ux_timestamp" => '1467727094'
+"filename" => 'image'
+"format" => array('.jpg', 'jpg')
+
+- routes/test/p4/14677270941234/test-case.png
+"page" => array('p4', '4')
+"ux_timestamp" => '1467727094'
+"microseconds" => '1234'
+"filename" => 'test-case'
+"format" => array('.png', 'png')
+
+- routes/test/1467727094/smile.gif?user=test
+"ux_timestamp" => '1467727094'
+"filename" => 'smile'
+"format" => array('.gif', 'gif')
+"user" => 'test'
+
+When a regular expression contains a back-reference, the parameter will be an array where the first value is the full string while the other values are the content of the back-references.
+
+TBC
 
 Defining routes
 ***************
 
-To define a new route, the `setRoute()` method should be invoked before the `dispatch()`.
+TBW
 
-Syntax of method is::
-
-    setRoute( [route], [type], [target], [parameters], [relative] )
-
-So, an example route could be::
-
-    $dispatcher->setRoute("helloworld", "ROUTE", "HelloWorld.php", array(), true);
-
-Predefined routes
-*****************
-
-The router supports 2 special routes:
-
-- Landing route *""* (empty string)
-- Default route "default"
-
-Only the default route is initially defined and lands to a 404 "Service not found" error.
-
-Autorouting
-***********
-
-If enabled setting constant `DISPATCHER_AUTO_ROUTE`, dispatcher will try to map requests to service files using file names.
-
-Only files in the `DISPATCHER_SERVICES_FOLDER` are taken into account.
-
-Conditional routing
-*******************
-
-Thanks to the event subsystem, dispatcher can force or totally override the routing logic.
-
-This snippet (from `dispatcher.plugin.test`_) simply change the target service if a special request header is provided.::
-
-    public static function conditional_routing_header($ObjectRoute) {
-
-        $headers = self::getRequestHeaders();
-
-        if ( array_key_exists("C-Conditional-Route", $headers) ) {
-
-            $ObjectRoute
-                ->setClass("test_route_second")
-                ->setTarget("vendor/comodojo/dispatcher.servicebundle.test/services/test_route_second.php");
-
-        }
-
-        return $ObjectRoute;
-
-    }
-
-Router-side attributes inject
-*****************************
+Bypass Router
+*************
 
 TBW
