@@ -156,7 +156,7 @@ class Model extends DispatcherClassModel {
 
             } else {
 
-                throw new DispatcherException(sprintf("Service '%s' doesn't implement method '%s'", $this->service, $method), 0, null, 501, array(
+                throw new DispatcherException(sprintf("Service '%s' doesn't implement method '%s'", $service, $method), 0, null, 501, array(
                     "Allow" => implode(",", $methods)
                 ));
 
