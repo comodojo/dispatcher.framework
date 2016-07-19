@@ -8,7 +8,7 @@ use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Configuration;
-use \Comodojo\Cache\CacheManager;
+use \Comodojo\Dispatcher\Components\CacheManager;
 use \Monolog\Logger;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;

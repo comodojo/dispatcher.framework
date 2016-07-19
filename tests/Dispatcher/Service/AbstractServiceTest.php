@@ -22,7 +22,6 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase {
         $logger = new Logger('test');
         $cache = new CacheManager();
 
-        $extra = new Extra($configuration, $logger);
         $request = new Request($configuration, $logger);
         $router = new Router($configuration, $logger, $cache, $extra);
         $response = new Response($configuration, $logger);

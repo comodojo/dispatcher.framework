@@ -6,7 +6,7 @@ use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
-use \Comodojo\Cache\CacheManager;
+use \Comodojo\Dispatcher\Components\CacheManager;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -59,55 +59,31 @@ class Table extends DispatcherClassModel {
 
     }
 
-    public function put($route, $type, $class, $parameters = array()) {
-
-        $folders = explode("/", $route);
-
-        $regex = $this->parser->read($folders);
-
-        if (!isset($this->routes[$regex])) {
-
-            $this->register($folders, $type, $class, $parameters);
-
-        }
-
-    }
-
-    public function set($route, $type, $class, $parameters = array()) {
-
-        $folders = explode("/", $route);
-
-        $regex = $this->parser->read($folders);
-
-        if (isset($this->routes[$regex])) {
-
-            $this->register($folders, $type, $class, $parameters);
-
-        }
-
-    }
-
     public function add($route, $type, $class, $parameters = array()) {
 
         $routeData = $this->get($route);
 
-        if (is_null($routeData)) {
-
-            $this->put($route, $type, $class, $parameters);
+        if (!is_null($routeData)) {
+            
+            $routeData->setType($type)
+                ->setClassName($class)
+                ->setParameters($parameters);
 
         } else {
-
-            $this->set($route, $type, $class, $parameters);
+            
+            $folders = explode("/", $route);
+            
+            $this->register($folders, $type, $class, $parameters);
 
         }
+        
+        return $this;
 
     }
 
     public function get($route) {
 
-        $folders = explode("/", $route);
-
-        $regex = $this->parser->read($folders);
+        $regex = $this->regex($route);
 
         if (isset($this->routes[$regex]))
             return $this->routes[$regex];
@@ -116,13 +92,27 @@ class Table extends DispatcherClassModel {
 
     }
 
-    public function remove($route) {
+    public function regex($route) {
 
         $folders = explode("/", $route);
 
-        $regex = $this->parser->read($folders);
+        return $this->parser->read($folders);
 
-        if (isset($this->routes[$regex])) unset($this->routes[$regex]);
+    }
+
+    public function remove($route) {
+
+        $regex = $this->regex($route);
+
+        if (isset($this->routes[$regex])) {
+            
+            unset($this->routes[$regex]);
+            
+            return true;
+            
+        }
+        
+        return false;
 
     }
 
