@@ -3,7 +3,7 @@
 use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Components\DefaultConfiguration;
-use \Comodojo\Dispatcher\Components\CacheManager;
+use \Comodojo\Cache\CacheManager;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
