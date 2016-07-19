@@ -1,9 +1,9 @@
-<?php namespace Comodojo\Dispatcher\Cache;
+<?php namespace Comodojo\Dispatcher\Components;
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheInterface\CacheInterface;
-use \Comodojo\Cache\CacheManager;
+use \Comodojo\Cache\CacheManager as ComodojoCacheManager;
 use \Comodojo\Cache\FileCache;
 use \Psr\Log\LoggerInterface;
 
@@ -29,7 +29,7 @@ use \Psr\Log\LoggerInterface;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class DispatcherCache extends DispatcherClassModel{
+class CacheManager extends DispatcherClassModel{
 
     public function init() {
 
@@ -37,7 +37,7 @@ class DispatcherCache extends DispatcherClassModel{
 
         if ( empty($cache) ) {
 
-            $manager = new CacheManager(self::getAlgorithm(), $this->logger);
+            $manager = new ComodojoCacheManager(self::getAlgorithm(), $this->logger);
 
         } else {
 
@@ -45,7 +45,7 @@ class DispatcherCache extends DispatcherClassModel{
 
             $algorithm = self::getAlgorithm( empty($cache['algorithm']) ? null : $cache['algorithm']);
 
-            $manager = new CacheManager($algorithm, $this->logger);
+            $manager = new ComodojoCacheManager($algorithm, $this->logger);
 
             if ( $enabled && !empty($cache['providers']) ) {
 
@@ -72,7 +72,7 @@ class DispatcherCache extends DispatcherClassModel{
      */
     public static function create(Configuration $configuration, LoggerInterface $logger) {
 
-        $cache = new DispatcherCache($configuration, $logger);
+        $cache = new CacheManager($configuration, $logger);
 
         return $cache->init();
 
@@ -135,24 +135,24 @@ class DispatcherCache extends DispatcherClassModel{
         switch ( strtoupper($algorithm) ) {
 
             case 'PICK_LAST':
-                $selected = CacheManager::PICK_LAST;
+                $selected = ComodojoCacheManager::PICK_LAST;
                 break;
 
             case 'PICK_RANDOM':
-                $selected = CacheManager::PICK_RANDOM;
+                $selected = ComodojoCacheManager::PICK_RANDOM;
                 break;
 
             case 'PICK_BYWEIGHT':
-                $selected = CacheManager::PICK_BYWEIGHT;
+                $selected = ComodojoCacheManager::PICK_BYWEIGHT;
                 break;
 
             case 'PICK_ALL':
-                $selected = CacheManager::PICK_ALL;
+                $selected = ComodojoCacheManager::PICK_ALL;
                 break;
 
             case 'PICK_FIRST':
             default:
-                $selected = CacheManager::PICK_FIRST;
+                $selected = ComodojoCacheManager::PICK_FIRST;
                 break;
 
         }

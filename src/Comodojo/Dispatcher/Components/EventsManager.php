@@ -1,5 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Events;
+<?php namespace Comodojo\Dispatcher\Components;
 
+use \Monolog\Logger;
 use \League\Event\Emitter;
 
 /**
@@ -27,9 +28,28 @@ use \League\Event\Emitter;
 
 class EventsManager extends Emitter {
 
+    protected $logger;
+
+    public function __construct(Logger $logger) {
+
+        $this->logger = $logger;
+
+    }
+
+    public function logger() {
+
+        return $this->logger;
+
+    }
+
     public function subscribe($event, $class, $method = null, $priority = 0) {
 
         $callable = ( is_null($method) ) ? $class : array($class, $method);
+
+        $this->logger->debug("Subscribing handler $calss to event $event", array(
+            "CALLABLE" => $callable,
+            "PRIORITY" => $priority
+        ));
 
         return $this->addListener($event, $callable, $priority);
 
@@ -39,11 +59,38 @@ class EventsManager extends Emitter {
 
         $callable = ( is_null($method) ) ? $class : array($class, $method);
 
+        $this->logger->debug("Subscribing once handler $calss to event $event", array(
+            "CALLABLE" => $callable,
+            "PRIORITY" => $priority
+        ));
+
         return $this->addOneTimeListener($event, $callable, $priority);
 
     }
 
-    public function loadPlugins($plugins) {
+    public function unsubscribe($event, $class = null, $method = null) {
+
+        if ( is_null($class) ) {
+
+            $this->logger->debug("Unsubscribing all handlers from event $event");
+
+            return $this->removeAllListeners($event);
+
+        } else {
+
+            $callable = ( is_null($method) ) ? $class : array($class, $method);
+
+            $this->logger->debug("Unsubscribing handler $calss from event $event", array(
+                "CALLABLE" => $callable
+            ));
+
+            return $this->removeListener($event, $callable);
+
+        }
+
+    }
+
+    public function load($plugins) {
 
         if ( !empty($plugins) ) {
 

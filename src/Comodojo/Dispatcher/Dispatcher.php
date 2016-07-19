@@ -3,17 +3,17 @@
 use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Components\DefaultConfiguration;
+use \Comodojo\Dispatcher\Components\EventsManager;
+use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
+use \Comodojo\Dispatcher\Components\CacheManager as DispatcherCache;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
-use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Output\Processor;
 use \Comodojo\Dispatcher\Events\DispatcherEvent;
 use \Comodojo\Dispatcher\Events\ServiceEvent;
 use \Comodojo\Dispatcher\Log\DispatcherLogger;
-use \Comodojo\Dispatcher\Cache\DispatcherCache;
-use \Comodojo\Dispatcher\Events\EventsManager;
 use \Comodojo\Cache\CacheManager;
 use \League\Event\Emitter;
 use \Comodojo\Exception\DispatcherException;
@@ -63,130 +63,86 @@ class Dispatcher {
 
     public function __construct(
         $configuration = array(),
-        Emitter $emitter = null,
+        EventsManager $events = null,
         CacheManager $cache = null,
         Logger $logger = null
     ) {
 
+        // starting output buffer
         ob_start();
 
+        // fix current timestamp
         $this->setTimestamp();
+
+        // parsing configuration
+        $this->configuration = new Configuration( DefaultConfiguration::get() );
 
         $this->configuration()->merge($configuration);
 
-        if (!is_null($emitter)) {
-            
-            $this->events = $emitter;
-            
-        }
+        // init core components
+        $this->logger = is_null($logger) ? DispatcherLogger::create($this->configuration()) : $logger;
 
-        if (!is_null($logger)) {
-            
-            $this->logger = $logger;
-            
-        }
+        $this->events = is_null($events) ? new EventsManager($this->logger()) : $events;
 
-        if (!is_null($cache)) {
-            
-            $this->cache = $cache;
-            
-        }
-        
+        $this->cache = is_null($cache) ? DispatcherCache::create($this->configuration(), $this->logger()) : $cache;
+
+        // init models
+        $this->request = new Request($this->configuration(), $this->logger());
+
+        $this->router = new Router($this->configuration(), $this->logger(), $this->cache(), $this->extra());
+
+        $this->response = new Response($this->configuration(), $this->logger());
+
+        $this->extra = new Extra($this->logger());
+
+        // we're ready!
+        $this->logger()->debug("Dispatcher ready, current date ".date('c', $this->getTimestamp()));
+
     }
 
     public function configuration() {
-        
-        if (empty($this->configuration)) {
-            
-            $this->configuration = new Configuration( DefaultConfiguration::get() );
-            
-        }
 
         return $this->configuration;
 
     }
 
     public function events() {
-        
-        if (empty($this->events)) {
-            
-            $this->events = new EventsManager();
-            
-        }
 
         return $this->events;
 
     }
 
     public function cache() {
-        
-        if (empty($this->cache)) {
-            
-            $this->cache = DispatcherCache::create($this->configuration(), $this->logger());
-            
-        }
-        
+
         return $this->cache;
 
     }
 
     public function request() {
-        
-        if (empty($this->request)) {
-            
-            $this->request = new Request($this->configuration(), $this->logger());
-            
-        }
 
         return $this->request;
 
     }
 
     public function router() {
-        
-        if (empty($this->router)) {
-            
-            $this->router = new Router($this->configuration(), $this->logger(), $this->cache(), $this->extra());
-            
-        }
 
         return $this->router;
 
     }
 
     public function response() {
-        
-        if (empty($this->response)) {
-            
-            $this->response = new Response($this->configuration(), $this->logger());
-            
-        }
 
         return $this->response;
 
     }
 
     public function extra() {
-        
-        if (empty($this->extra)) {
-            
-            $this->extra = new Extra($this->logger());
-            
-        }
 
         return $this->extra;
 
     }
 
     public function logger() {
-        
-        if (empty($this->logger)) {
-            
-            $this->logger = DispatcherLogger::create($this->configuration());
-            
-            $this->logger()->debug("Dispatcher ready, current date ".date('c', $this->getTimestamp()));
-            
-        }
 
         return $this->logger;
 
