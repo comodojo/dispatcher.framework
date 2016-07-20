@@ -130,7 +130,7 @@ class Model extends DispatcherClassModel {
 
         if (!is_null($service)) {
 
-            $result;
+            $result = "";
 
             $method = $this->request->method()->get();
 
