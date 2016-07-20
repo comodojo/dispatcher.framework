@@ -98,6 +98,8 @@ class Processor extends DispatcherClassModel {
 
         $output->consolidate();
 
+        $this->processContentType();
+
         $this->response->headers()->send();
 
         $this->response->cookies()->save();
@@ -114,5 +116,19 @@ class Processor extends DispatcherClassModel {
 
     }
 
+    protected function processContentType() {
+
+        $content = $this->response->content();
+
+        $type = $this->response->content()->type();
+        $charset = $this->response->content()->charset();
+
+        if ( is_null($charset) ) {
+            $this->response->headers()->set("Content-type",strtolower($type));
+        } else {
+            $this->response->headers()->set("Content-type",strtolower($type)."; charset=".$charset);
+        }
+
+    }
 
 }
