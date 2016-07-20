@@ -2,6 +2,7 @@
 
 use \Monolog\Logger;
 use \League\Event\Emitter;
+use \League\Event\ListenerInterface;
 
 /**
  * @package     Comodojo Dispatcher
@@ -42,51 +43,49 @@ class EventsManager extends Emitter {
 
     }
 
-    public function subscribe($event, $class, $method = null, $priority = 0) {
+    public function subscribe($event, $class, $priority = 0) {
 
-        $callable = ( is_null($method) ) ? $class : array($class, $method);
+        $callable = $this->convertToListener($class, $event);
 
-        $this->logger->debug("Subscribing handler $calss to event $event", array(
-            "CALLABLE" => $callable,
-            "PRIORITY" => $priority
-        ));
+        if ( $callable === false ) return null;
 
         return $this->addListener($event, $callable, $priority);
 
     }
 
-    public function subscribeOnce($event, $class, $method = null, $priority = 0) {
+    public function subscribeOnce($event, $class, $priority = 0) {
 
-        $callable = ( is_null($method) ) ? $class : array($class, $method);
+        $callable = $this->convertToListener($class, $event);
 
-        $this->logger->debug("Subscribing once handler $calss to event $event", array(
-            "CALLABLE" => $callable,
-            "PRIORITY" => $priority
-        ));
+        if ( $callable === false ) return null;
 
         return $this->addOneTimeListener($event, $callable, $priority);
 
     }
 
-    public function unsubscribe($event, $class = null, $method = null) {
+    protected function convertToListener($class, $event) {
 
-        if ( is_null($class) ) {
+        if ( !class_exists($class) ) {
 
-            $this->logger->debug("Unsubscribing all handlers from event $event");
+            $this->logger->error("Cannot subscribe class $class to event $event: cannot find class");
 
-            return $this->removeAllListeners($event);
-
-        } else {
-
-            $callable = ( is_null($method) ) ? $class : array($class, $method);
-
-            $this->logger->debug("Unsubscribing handler $calss from event $event", array(
-                "CALLABLE" => $callable
-            ));
-
-            return $this->removeListener($event, $callable);
+            return false;
 
         }
+
+        $callable = new $class();
+
+        if ($callable instanceof ListenerInterface) {
+
+            $this->logger->debug("Subscribing handler $class to event $event");
+
+            return $callable;
+
+        }
+
+        $this->logger->error("Cannot subscribe class $class to event $event: class is not an instance of \League\Event\ListenerInterface");
+
+        return false;
 
     }
 
@@ -94,17 +93,25 @@ class EventsManager extends Emitter {
 
         if ( !empty($plugins) ) {
 
-            foreach( $plugins as $name => $event ) {
+            foreach( $plugins as $name => $plugin ) {
 
-                $callable = ( is_null($event['method']) ) ? $event["class"] : array($event["class"], $event["method"]);
+                if ( !isset($plugin['class']) || !isset($plugin["event"]) ) {
 
-                $this->addListener($event["event"], $callable, $event["priority"]);
+                    $this->logger->error("Invalid plugin definition", $plugin);
+
+                    continue;
+
+                }
+
+                $priority = isset($plugin['priority']) ? $plugin['priority'] : 0;
+                $onetime = isset($plugin['onetime']) ? $plugin['onetime'] : 0;
+
+                if ( $onetime ) $this->subscribeOnce($plugin['event'], $plugin['class'], $priority);
+                else $this->subscribe($plugin['event'], $plugin['class'], $priority);
 
             }
 
         }
-
-        return $this;
 
     }
 
