@@ -1,13 +1,17 @@
 Routing requests
 ================
 
+.. _regular expressions: https://en.wikipedia.org/wiki/Regular_expression
+
 Dispatcher includes an advanced embedded URL router that maps urls to services. It allows users to configure routes through Regular Expressions in order to convert url paths in parameters passed to the service.
 
 All the routes can be composed by 3 different parts: the base paths, the variable parameter paths and finally the query string. Except for the least, these are used to identify a service which is eventually invoked by the framework and initialized with the parameters extracted from the url itself and from the query string (and the post data).
 
 Let's see an example of how routes can be defined:
 
-.. routes/test/{"page": "p(\\d+)"}/{"ux_timestamp*": "\\d{10}", "microseconds": "\\d{4}"}/{"filename*": "\\S+", "format*": "\\.(jpg|gif|jpeg|png)"}
+.. code-block:: javascript
+
+    routes/test/{"page": "p(\\d+)"}/{"ux_timestamp*": "\\d{10}", "microseconds": "\\d{4}"}/{"filename*": "\\S+", "format*": "\\.(jpg|gif|jpeg|png)"}
 
 In the above example, the "routes/test" is the base path, you can add as many paths as you need. This is meant to be used to build a sort of hierarchical structure among the routes. For example, if you're building a framework which provides API REST, you can create routes with basic paths like "api/v2/users/add" or "api/v3/products/remove" and so on. This part is static and it must be present at the beginning of the HTTP request ight after the installation path of the framework.
 
@@ -22,7 +26,7 @@ The following urls can be intercepted by route above:
 Attributes and Parameters
 *************************
 
-To understand how it works, a little knowledge of regular expressions is required (https://en.wikipedia.org/wiki/Regular_expression).
+To understand how it works, a little knowledge of `regular expressions`_ is required.
 
 As you can see in the example above, the first parameter is called 'page' and, because it doesn't end with an asterisk, it's not required and can be omitted, when it's used, it must start with a 'p' followed by at least one number.
 
@@ -33,23 +37,32 @@ The last path is similar to the previous, except that both parameters are requir
 The request urls shown in the previous chapter will call the service associated with the route "routes/test" which will receive the following parameters:
 
 - routes/test/p15/1467727094/image.jpg
-"page" => array('p15', '15')
-"ux_timestamp" => '1467727094'
-"filename" => 'image'
-"format" => array('.jpg', 'jpg')
+
+.. code-block:: php
+
+    "page" => array('p15', '15')
+    "ux_timestamp" => '1467727094'
+    "filename" => 'image'
+    "format" => array('.jpg', 'jpg')
 
 - routes/test/p4/14677270941234/test-case.png
-"page" => array('p4', '4')
-"ux_timestamp" => '1467727094'
-"microseconds" => '1234'
-"filename" => 'test-case'
-"format" => array('.png', 'png')
+
+.. code-block:: php
+
+    "page" => array('p4', '4')
+    "ux_timestamp" => '1467727094'
+    "microseconds" => '1234'
+    "filename" => 'test-case'
+    "format" => array('.png', 'png')
 
 - routes/test/1467727094/smile.gif?user=test
-"ux_timestamp" => '1467727094'
-"filename" => 'smile'
-"format" => array('.gif', 'gif')
-"user" => 'test'
+
+.. code-block:: php
+
+    "ux_timestamp" => '1467727094'
+    "filename" => 'smile'
+    "format" => array('.gif', 'gif')
+    "user" => 'test'
 
 When a regular expression contains a back-reference, the parameter will be an array where the first value is the full string while the other values are the content of the back-references.
 
@@ -58,7 +71,22 @@ TBC
 Defining routes
 ***************
 
-TBW
+In order to create routes, you need to access the dispatcher router as follows:
+
+.. code-block:: php
+
+    $dispatcher = new \Comodojo\Dispatcher\Dispatcher();
+    $router = $dispatcher->router();
+
+Once you gain access to the router, there are two ways to add routes. You can either use the *add* method of the routing table, or load a configuration array with a series of routes.
+
+Every route can be defined by 4 different parameters:
+
+- the route URL,
+- the route type,
+- the class of the object to load,
+- a list of parameters.
+
 
 Bypass Router
 *************
