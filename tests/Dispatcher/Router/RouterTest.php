@@ -15,15 +15,17 @@ use \Comodojo\Dispatcher\Router\Route;
 class RouterTest extends \PHPUnit_Framework_TestCase {
 
     protected static $router;
+    protected static $extra;
 
     public static function setupBeforeClass() {
 
         $configuration = new Configuration( DefaultConfiguration::get() );
         $logger = new Logger('test');
         $cache = new CacheManager();
-        $extra = new Extra($configuration, $logger);
+        
+        self::$extra = new Extra($configuration, $logger);
 
-        self::$router = new Router($configuration, $logger, $cache, $extra);
+        self::$router = new Router($configuration, $logger, $cache, self::$extra);
 
     }
 
@@ -32,7 +34,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $request = new Request(self::$router->configuration(), self::$router->logger());
         $response = new Response(self::$router->configuration(), self::$router->logger());
         
-        $request->method()->set("get");
+        $request->method()->set("GET");
         
         $route = new Route(self::$router);
         $route->setType("ROUTE") 
@@ -80,8 +82,8 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         
         $this->assertEquals("\\w+", $route->getQueryRegex("name"));
         
-        if (preg_match("/" . self::$router->table()->regex($path) . "/", "test/pattern", $matches)) {
-        
+        if (preg_match("/" . self::$router->table()->regex($path) . "/", "/test/pattern", $matches)) {
+            
             $route->path($matches);
             
         }
@@ -91,7 +93,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $request = new Request(self::$router->configuration(), self::$router->logger());
         $response = new Response(self::$router->configuration(), self::$router->logger());
         
-        $service = $route->getInstance($request, $response, self::$router->extra());
+        $service = $route->getInstance($request, $response, self::$extra);
         
         $this->assertInstanceOf('\Comodojo\Dispatcher\Tests\Service\ConcreteService', $service);
         
