@@ -40,9 +40,9 @@ class Model extends DispatcherClassModel {
     use TimestampTrait;
 
     private $bypass_routing = false;
-    
+
     private $bypass_service = false;
-    
+
     private $route;
 
     private $cache;
@@ -81,13 +81,13 @@ class Model extends DispatcherClassModel {
     public function bypassRouting(Route $route) {
 
         $this->bypass_routing = true;
-        
+
         $this->route = $route;
 
         return $this;
 
     }
-    
+
     public function bypassService() {
 
         $this->bypass_service = true;
@@ -119,11 +119,11 @@ class Model extends DispatcherClassModel {
         $this->request = $request;
 
         if (!$this->bypass_routing) {
-            
+
             if (!$this->parse()) throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
 
         }
-        
+
         return $this->route;
 
     }
@@ -131,17 +131,17 @@ class Model extends DispatcherClassModel {
     public function compose(Response $response) {
 
         $this->response = $response;
-        
+
         if (is_null($this->route)) {
-            
+
             throw new DispatcherException("Route has not been loaded!");
-            
+
         }
-        
+
         if ( $this->bypass_service ) {
-            
+
             return;
-            
+
         }
 
         $service = $this->route->getInstance(
@@ -168,11 +168,11 @@ class Model extends DispatcherClassModel {
 
                 } catch (DispatcherException $de) {
 
-                    throw new DispatcherException(sprintf("Service '%s' exception for method '%s': %s", $this->service, $method, $de->getMessage()), 0, $de, 500);
+                    throw new DispatcherException(sprintf("Service '%s' exception for method '%s': %s", $service, $method, $de->getMessage()), 0, $de, 500);
 
                 } catch (Exception $e) {
 
-                    throw new DispatcherException(sprintf("Service '%s' execution failed for method '%s': %s", $this->service, $method, $e->getMessage()), 0, $e, 500);
+                    throw new DispatcherException(sprintf("Service '%s' execution failed for method '%s': %s", $service, $method, $e->getMessage()), 0, $e, 500);
 
                 }
 
@@ -188,7 +188,7 @@ class Model extends DispatcherClassModel {
 
         } else {
 
-            throw new DispatcherException(sprintf("Unable to execute service '%s'", $this->service), 0, null, 500);
+            throw new DispatcherException(sprintf("Unable to execute service '%s'", $service), 0, null, 500);
 
         }
 
@@ -197,9 +197,9 @@ class Model extends DispatcherClassModel {
     private function parse() {
 
         $path = $this->request->route();
-        
+
         foreach ($this->table->routes() as $regex => $value) {
-            
+
             // The current uri is checked against all the global regular expressions associated with the routes
             if (preg_match("/" . $regex . "/", $path, $matches)) {
 

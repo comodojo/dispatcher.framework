@@ -19,7 +19,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
             "providers" => array(
                 "test" => array(
                     "type" => "StreamHandler",
-                    "target" => "log/test.log",
+                    "stream" => "log/test.log",
                     "level" => "debug"
                 )
             )

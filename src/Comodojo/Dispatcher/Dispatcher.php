@@ -87,7 +87,7 @@ class Dispatcher {
 
         // init models
         $this->extra = new Extra($this->logger());
-        
+
         $this->request = new Request($this->configuration(), $this->logger());
 
         $this->router = new Router($this->configuration(), $this->logger(), $this->cache(), $this->extra());
@@ -178,9 +178,9 @@ class Dispatcher {
         $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
 
         if ( $this->readCache() ) {
-            
+
             return $this->shutdown();
-            
+
         }
 
         $this->logger()->debug("Starting router.");
@@ -228,9 +228,9 @@ class Dispatcher {
             $this->processDispatcherException($de);
 
         }
-        
+
         $this->processConfigurationParameters($route);
-        
+
         $this->dumpCache($route);
 
         return $this->shutdown();
@@ -238,58 +238,58 @@ class Dispatcher {
     }
 
     private function readCache() {
-        
+
         $name = (string) $this->request()->uri();
-        
-        $cache = $this->cache()->setNamespace('dispatcher-service')->get($name);
-        
+
+        $cache = $this->cache()->setNamespace('dispatcherservice')->get($name);
+
         if ( is_null($cache) ) return false;
-        
+
         $this->response = $cache;
-        
+
         return true;
-        
+
     }
-    
+
     private function dumpCache($route) {
-        
+
         $cache = strtoupper($route->getParameter('cache'));
         $ttl = $route->getParameter('ttl');
         $name = (string) $this->request()->uri();
-        
+
         if ( $cache == 'CLIENT' || $cache == 'BOTH' ) {
-            
+
             if ( $ttl > 0 ) {
-                
+
                 $this->response()->headers()->set("Cache-Control","max-age=".$ttl.", must-revalidate");
                 $this->response()->headers()->set("Expires",gmdate("D, d M Y H:i:s", (int)$this->request()->getTimestamp() + $ttl)." GMT");
-                
+
             } else {
-                
+
                 $this->response()->headers()->set("Cache-Control","no-cache, must-revalidate");
                 $this->response()->headers()->set("Expires","Mon, 26 Jul 1997 05:00:00 GMT");
-                
+
             }
-            
+
         }
-        
+
         if ( $cache == 'SERVER' || $cache == 'BOTH' ) {
-            
-            $this->cache()->setNamespace('dispatcher-service')->set($name, $this->response(), $ttl);
-            
+
+            $this->cache()->setNamespace('dispatcherservice')->set($name, $this->response(), $ttl);
+
         }
-       
+
     }
-    
+
     private function processConfigurationParameters($route) {
-        
+
         $params = $route->getParameter('headers');
-        
+
         if ( !empty($params) && is_array($params) ) {
-            
+
             foreach($params as $name=>$value) $this->response()->headers()->set($name, $value);
         }
-        
+
     }
 
     private function emitServiceSpecializedEvents($name) {

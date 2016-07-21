@@ -108,7 +108,7 @@ class Processor extends DispatcherClassModel {
 
     }
 
-    public static function parse(Configuration $configuration, Logger $logger, Response $response) {
+    public static function parse(Configuration $configuration, LoggerInterface $logger, Response $response) {
 
         $processor = new Processor($configuration, $logger, $response);
 

@@ -52,7 +52,7 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase {
 
         $methods = $service->getImplementedMethods();
 
-        $this->assertEquals(array("GET"), $methods);
+        $this->assertEquals(array("GET","TRACE"), $methods);
 
         $method = $service->getMethod("GET");
 
