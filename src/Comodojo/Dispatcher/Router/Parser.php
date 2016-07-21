@@ -1,7 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \Monolog\Logger;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Components\Configuration;

@@ -9,7 +9,7 @@ use \Comodojo\Dispatcher\Request\Method;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \League\Uri\Schemes\Http as HttpUri;
-use \Monolog\Logger;
+use \Psr\Log\LoggerInterface;
 
 /**
  * @package     Comodojo Dispatcher
@@ -49,7 +49,7 @@ class Model extends DispatcherClassModel {
 
     private $method;
 
-    public function __construct(Configuration $configuration, Logger $logger) {
+    public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
 

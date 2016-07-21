@@ -29,8 +29,7 @@ class DefaultConfiguration {
         'enabled' => true,
         'encoding' => 'UTF-8',
         'disabled-status' => 503,
-        'disabled-message' => 'Dispatcher offline',
-        'supported-methods' => array('GET','PUT','POST','DELETE','OPTIONS','HEAD')
+        'disabled-message' => 'Dispatcher offline'
     );
 
     public static function get() {

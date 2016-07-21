@@ -1,8 +1,10 @@
-<?php namespace Comodojo\Dispatcher\Log;
+<?php namespace Comodojo\Dispatcher\Components;
 
 use \Monolog\Handler\HandlerInterface;
 use \Monolog\Logger;
 use \Monolog\Handler\StreamHandler;
+use \Monolog\Handler\SyslogHandler;
+use \Monolog\Handler\ErrorLogHandler;
 use \Monolog\Handler\NullHandler;
 use \Comodojo\Dispatcher\Components\Configuration;
 
@@ -29,7 +31,7 @@ use \Comodojo\Dispatcher\Components\Configuration;
  */
 
 
-class DispatcherLogger {
+class LogManager {
 
     private $configuration;
 
@@ -92,18 +94,52 @@ class DispatcherLogger {
 
         switch ( strtolower($parameters['type']) ) {
 
-            case 'streamhandler':
+            case 'StreamHandler':
+                
+                $stream = $this->configuration->get('base-path').'/'.(empty($parameters['stream']) ? 'dispatcher.log' : $parameters['stream']);
 
-                $target = empty($parameters['target']) ? 'dispatcher.log' : $parameters['target'];
+                $level = self::getLevel( empty($parameters['level']) ? null : $parameters['level'] );
+                
+                $bubble = self::getBubble( empty($parameters['bubble']) ? true : $parameters['bubble'] );
+                
+                $filePermission = self::getFilePermission( empty($parameters['filePermission']) ? null : $parameters['filePermission'] );
+                
+                $useLocking = self::getLocking( empty($parameters['useLocking']) ? false : $parameters['useLocking'] );
 
-                $file = $this->configuration->get('base-path').'/'.$target;
-
-                $level = self::getLevel( empty($parameters['level']) ? 'info' : $parameters['level'] );
-
-                $handler = new StreamHandler($file, $level);
+                $handler = new StreamHandler($stream, $level, $bubble, $filePermission, $useLocking);
 
                 break;
-
+                
+            case 'SyslogHandler':
+                
+                if ( empty($parameters['ident']) ) return null;
+                
+                $facility = empty($parameters['facility']) ? LOG_USER : $parameters['facility'];
+            
+                $level = self::getLevel( empty($parameters['level']) ? null : $parameters['level'] );
+            
+                $bubble = self::getBubble( empty($parameters['bubble']) ? true : $parameters['bubble'] );
+            
+                $logopts = empty($parameters['logopts']) ? LOG_PID : $parameters['logopts'];
+            
+                $handler = new SyslogHandler($parameters['ident'], $facility, $level, $bubble, $logopts);
+                
+                break;
+                
+            case 'ErrorLogHandler':
+                
+                $messageType = empty($parameters['messageType']) ? ErrorLogHandler::OPERATING_SYSTEM : $parameters['messageType'];
+                
+                $level = self::getLevel( empty($parameters['level']) ? null : $parameters['level'] );
+                
+                $bubble = self::getBubble( empty($parameters['bubble']) ? true : $parameters['bubble'] );
+                
+                $expandNewlines = self::getExpandNewlines( empty($parameters['expandNewlines']) ? false : $parameters['expandNewlines'] );
+                
+                $handler = new ErrorLogHandler($messageType, $level, $bubble, $expandNewlines);
+                
+                break;
+                
             default:
                 $handler = null;
                 break;
@@ -161,6 +197,49 @@ class DispatcherLogger {
 
         return $logger_level;
 
+    }
+
+    protected static function getBubble($bubble) {
+        
+        return filter_var($bubble, FILTER_VALIDATE_BOOLEAN, array(
+            'options' => array(
+                'default' => true
+            )
+        ));
+        
+    }
+    
+    protected static function getFilePermission($filepermission = null) {
+        
+        if ( is_null($filepermission) ) return null;
+        
+        return filter_var($bubble, FILTER_VALIDATE_INT, array(
+            'options' => array(
+                'default' => 0644
+            ),
+            'flags' => FILTER_FLAG_ALLOW_OCTAL
+        ));
+        
+    }
+
+    protected static function getLocking($uselocking) {
+        
+        return filter_var($uselocking, FILTER_VALIDATE_BOOLEAN, array(
+            'options' => array(
+                'default' => false
+            )
+        ));
+        
+    }
+    
+    protected static function getExpandNewlines($expandNewlines) {
+        
+        return filter_var($expandNewlines, FILTER_VALIDATE_BOOLEAN, array(
+            'options' => array(
+                'default' => false
+            )
+        ));
+        
     }
 
 }

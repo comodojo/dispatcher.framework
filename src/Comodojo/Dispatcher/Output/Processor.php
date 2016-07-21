@@ -4,7 +4,7 @@ use \Comodojo\Dispatcher\Output\HttpStatus\StatusGeneric;
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Components\Configuration;
-use \Monolog\Logger;
+use \Psr\Log\LoggerInterface;
 
 /**
  * @package     Comodojo Dispatcher
@@ -72,7 +72,7 @@ class Processor extends DispatcherClassModel {
 
     private $response;
 
-    public function __construct(Configuration $configuration, Logger $logger, Response $response) {
+    public function __construct(Configuration $configuration,LoggerInterface $logger, Response $response) {
 
         parent::__construct($configuration, $logger);
 

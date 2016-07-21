@@ -4,7 +4,6 @@ use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Router\Parser;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Router\Model as Router;
-use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheManager;
 use \Comodojo\Exception\DispatcherException;
@@ -151,16 +150,18 @@ class Table extends DispatcherClassModel {
         }
         
         $this->logger->debug("Routing table loaded");
-
-        return $this->dumpCache();
+        
+        $this->dumpCache();
 
     }
     
     private function readCache() {
         
-        $routes = $this->cache->get("dispatcher_routes");
+        if ( $this->configuration()->get('routing-table-cache') !== true ) return;
         
-        if (is_null($routes)) return null;
+        $routes = $this->cache->setNamespace('dispatcher-internals')->get("dispatcher-routes");
+        
+        if (is_null($routes)) return;
         
         foreach ($routes as $name => $data) {
             
@@ -172,11 +173,13 @@ class Table extends DispatcherClassModel {
         
         $this->logger->debug("Routing table loaded from cache");
         
-        return $this;
-        
     }
     
     private function dumpCache() {
+        
+        if ( $this->configuration()->get('routing-table-cache') !== true ) return;
+        
+        $ttl = $this->configuration()->get('routing-table-ttl');
         
         $routes = array();
         
@@ -186,11 +189,9 @@ class Table extends DispatcherClassModel {
             
         }
         
-        $this->cache->set("dispatcher_routes", $routes, 24 * 60 * 60);
+        $this->cache->setNamespace('dispatcher-internals')->set("dispatcher-routes", $routes, $ttl == null ? 86400 : intval($ttl));
         
         $this->logger->debug("Routing table saved to cache");
-        
-        return $this;
         
     }
 

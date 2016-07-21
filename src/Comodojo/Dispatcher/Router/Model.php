@@ -9,7 +9,7 @@ use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheManager;
-use \Monolog\Logger;
+use \Psr\Log\LoggerInterface;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -39,7 +39,9 @@ class Model extends DispatcherClassModel {
 
     use TimestampTrait;
 
-    private $bypass = false;
+    private $bypass_routing = false;
+    
+    private $bypass_service = false;
     
     private $route;
 
@@ -53,7 +55,7 @@ class Model extends DispatcherClassModel {
 
     public function __construct(
         Configuration $configuration,
-        Logger $logger,
+        LoggerInterface $logger,
         CacheManager $cache,
         Extra $extra
     ) {
@@ -76,13 +78,27 @@ class Model extends DispatcherClassModel {
 
     }
 
-    public function bypass(Route $route) {
+    public function bypassRouting(Route $route) {
 
-        $this->bypass = true;
+        $this->bypass_routing = true;
         
         $this->route = $route;
 
         return $this;
+
+    }
+    
+    public function bypassService() {
+
+        $this->bypass_service = true;
+
+        return $this;
+
+    }
+
+    public function getRoute() {
+
+        return $this->route;
 
     }
 
@@ -102,7 +118,7 @@ class Model extends DispatcherClassModel {
 
         $this->request = $request;
 
-        if (!$this->bypass) {
+        if (!$this->bypass_routing) {
             
             if (!$this->parse()) throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
 
@@ -119,6 +135,12 @@ class Model extends DispatcherClassModel {
         if (is_null($this->route)) {
             
             throw new DispatcherException("Route has not been loaded!");
+            
+        }
+        
+        if ( $this->bypass_service ) {
+            
+            return;
             
         }
 

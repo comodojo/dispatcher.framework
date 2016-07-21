@@ -6,7 +6,7 @@ use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
-use \Monolog\Logger;
+use \Psr\Log\LoggerInterface;
 use \Exception;
 
 /**
@@ -43,7 +43,7 @@ abstract class AbstractService extends DispatcherClassModel {
 
     public function __construct(
         Configuration $configuration,
-        Logger $logger,
+        LoggerInterface $logger,
         Request $request,
         Router $router,
         Response $response,
@@ -94,8 +94,9 @@ abstract class AbstractService extends DispatcherClassModel {
      */
     public function getImplementedMethods() {
 
-        $supported_methods = $this->configuration()->get('supported-methods');
-
+        $supported_methods = $this->configuration()->get('supported-http-methods');
+        
+        if ( is_null($supported_methods) ) $supported_methods = array('GET','PUT','POST','DELETE','OPTIONS','HEAD','TRACE','CONNECT');
 
         if ( method_exists($this, 'any') ) {
 
