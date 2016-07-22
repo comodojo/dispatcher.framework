@@ -66,8 +66,6 @@ The request urls shown in the previous chapter will call the service associated 
 
 When a regular expression contains a back-reference, the parameter will be an array where the first value is the full string while the other values are the content of the back-references.
 
-TBC
-
 Defining routes
 ***************
 
@@ -78,7 +76,7 @@ In order to create routes, you need to access the dispatcher router as follows:
     $dispatcher = new \Comodojo\Dispatcher\Dispatcher();
     $router = $dispatcher->router();
 
-Once you gain access to the router, there are two ways to add routes. You can either use the *add* method of the routing table, or load a configuration array with a series of routes.
+Once you gain access to the router, there are two ways to add routes. You can either use the *add()* method of the routing table, or load a configuration array with a series of routes.
 
 Every route can be defined by 4 different parameters:
 
@@ -87,8 +85,122 @@ Every route can be defined by 4 different parameters:
 - the class of the object to load,
 - a list of parameters.
 
+If you want to add a single route, you can do it as follows:
 
-Bypass Router
-*************
+.. code-block:: php
 
-TBW
+    $router->table()->add(
+        'routes/test/{"page": "p(\\d+)"}', // Route definition
+        'ROUTE',                           // Route type
+        '\\My\\Awesome\\Service',          // Service class
+        array(                             // Parameters
+            "cache" => "SERVER",
+            "ttl"   => 3600
+        )
+    );
+    
+When you add a single route, this is volatile, it won't be stored in cache and the router won't remember it at the next startup.
+
+If you want to add different routes at once, you can do it as follows:
+
+.. code-block:: php
+
+    $router->table()->load(
+        array(
+            "route" => 'routes/timestamp/{"ux_timestamp*": "\\d{10}", "microseconds": "\\d{4}"}',
+            "type"  => 'ROUTE',
+            "class" => '\\My\\Awesome\\TimestampService',
+            "parameters" => array()
+        ),
+        array(
+            "route" => 'routes/file/{"filename*": "\\S+", "format*": "\\.(jpg|gif|jpeg|png)',
+            "type"  => 'ROUTE',
+            "class" => '\\My\\Awesome\\FileService',
+            "parameters" => array()
+        )
+    );
+
+The routes added with this method will be stored in cache and will be reloaded at the next startup.
+
+Routing a request
+*****************
+
+Whenever a url request is received by the *Dispatcher*, a *Request* object is created with all the informations inside (like *GET* or *POST* parameters, http headers and so on).
+
+This object can be used to find the correct route to the requested service.
+
+.. code-block:: php
+
+    $router->route($requestObject);  // \Comodojo\Dispatcher\Request\Model $requestObject
+    
+Once the request is elaborated, you can access the route as follows:
+
+.. code-block:: php
+
+    $route = $router->getRoute();
+    
+    echo $route->getServiceName();
+    
+If there isn't any route that match with the request, a DispatcherException is rised and the *getRoute()* method will return *null*.
+
+Composing a response
+********************
+
+Once the request is routed to an actual service, it is possible to compose a Response object. The router itself will execute the service and provide the resulting output to the Response objcet.
+
+.. code-block:: php
+
+    $response = new \Comodojo\Dispatcher\Response\Model(
+        $router->configuration(), 
+        $router->logger()
+    );
+    
+    $router->compose($response);
+    
+    echo $response->content()->get();
+
+Bypassing Router
+****************
+
+If you want to bypass the router (for example, to redirect a non authorized request to the login service) you can build a plugin in order to cacth a pre-routing event.
+
+.. code-block:: php
+
+    function pluginListener($args) {
+    
+        $event = $args[0];
+        
+        $router = $event->dispatcher()->router();
+        
+        $route = new \Comodojo\Dispatcher\Router\Route();
+        
+        $route->setClass("\\My\\Awesome\\LoginService")
+            ->setType("ROUTE");
+            
+        $router->bypassRouting($route);
+    
+    }
+    
+    $dispatcher->events()->subscribe('dispatcher.request.#', 'pluginListener');
+
+
+Bypassing Service
+*****************
+
+You can also completely avoid the routing process and return a predefined response (for example, if you cached a result and you want to use the saved data instead of the live one).
+
+.. code-block:: php
+
+    function pluginListener($args) {
+    
+        $event = $args[0];
+        
+        $dispatcher = $event->dispatcher();
+        
+        $dispatcher->response()->set("My awesome response!");
+        
+        $dispatcher->router()->bypassService();
+    
+    }
+    
+    $dispatcher->events()->subscribe('dispatcher.request.#', 'pluginListener');
