@@ -4,7 +4,6 @@ use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Router\Parser;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Router\Model as Router;
-use \Monolog\Logger;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Cache\CacheManager;
 use \Comodojo\Exception\DispatcherException;
@@ -35,11 +34,11 @@ use \Exception;
 class Table extends DispatcherClassModel {
 
     private $routes = array();
-    
+
     private $parser;
-    
+
     private $cache;
-    
+
     private $router;
 
     public function __construct(
@@ -48,13 +47,13 @@ class Table extends DispatcherClassModel {
     ) {
 
         parent::__construct($router->configuration(), $router->logger());
-        
+
         $this->router = $router;
 
         $this->parser = new Parser($router);
-        
+
         $this->cache = $cache;
-        
+
         $this->readCache();
 
     }
@@ -64,19 +63,19 @@ class Table extends DispatcherClassModel {
         $routeData = $this->get($route);
 
         if (!is_null($routeData)) {
-            
+
             $routeData->setType($type)
                 ->setClassName($class)
                 ->setParameters($parameters);
 
         } else {
-            
+
             $folders = explode("/", $route);
-            
+
             $this->register($folders, $type, $class, $parameters);
 
         }
-        
+
         return $this;
 
     }
@@ -105,13 +104,13 @@ class Table extends DispatcherClassModel {
         $regex = $this->regex($route);
 
         if (isset($this->routes[$regex])) {
-            
+
             unset($this->routes[$regex]);
-            
+
             return true;
-            
+
         }
-        
+
         return false;
 
     }
@@ -119,15 +118,15 @@ class Table extends DispatcherClassModel {
     public function routes($routes = null) {
 
         if (is_null($routes)) {
-            
+
             return $this->routes;
-            
+
         } else {
-            
+
             $this->routes = $routes;
-            
+
             return $this;
-            
+
         }
 
     }
@@ -149,49 +148,51 @@ class Table extends DispatcherClassModel {
             }
 
         }
-        
+
         $this->logger->debug("Routing table loaded");
 
-        return $this->dumpCache();
+        $this->dumpCache();
 
     }
-    
+
     private function readCache() {
-        
-        $routes = $this->cache->get("dispatcher_routes");
-        
-        if (is_null($routes)) return null;
-        
+
+        if ( $this->configuration()->get('routing-table-cache') !== true ) return;
+
+        $routes = $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
+
+        if (is_null($routes)) return;
+
         foreach ($routes as $name => $data) {
-            
+
             $route = new Route($this->router);
-                
+
             $this->routes[$name] = $route->setData($data);
-            
+
         }
-        
+
         $this->logger->debug("Routing table loaded from cache");
-        
-        return $this;
-        
+
     }
-    
+
     private function dumpCache() {
-        
+
+        if ( $this->configuration()->get('routing-table-cache') !== true ) return;
+
+        $ttl = $this->configuration()->get('routing-table-ttl');
+
         $routes = array();
-        
+
         foreach($this->routes as $name => $route) {
-            
+
             $routes[$name] = $route->getData();
-            
+
         }
-        
-        $this->cache->set("dispatcher_routes", $routes, 24 * 60 * 60);
-        
+
+        $this->cache->setNamespace('dispatcherinternals')->set("dispatcher-routes", $routes, $ttl == null ? 86400 : intval($ttl));
+
         $this->logger->debug("Routing table saved to cache");
-        
-        return $this;
-        
+
     }
 
     // This method add a route to the supported list

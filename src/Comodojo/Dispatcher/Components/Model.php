@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Components;
 
-use \Monolog\Logger;
+use \Psr\Log\LoggerInterface;
 use \Comodojo\Dispatcher\Components\Configuration;
 
 /**
@@ -32,7 +32,7 @@ abstract class Model {
 
     protected $logger;
 
-    public function __construct(Configuration $configuration, Logger $logger) {
+    public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         $this->configuration = $configuration;
 

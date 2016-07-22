@@ -7,7 +7,7 @@ use \Comodojo\Dispatcher\Response\Status;
 use \Comodojo\Dispatcher\Response\Content;
 use \Comodojo\Dispatcher\Response\Location;
 use \Comodojo\Cookies\CookieManager;
-use \Monolog\Logger;
+use \Psr\Log\LoggerInterface;
 
 /**
  * @package     Comodojo Dispatcher
@@ -47,7 +47,7 @@ class Model extends DispatcherClassModel {
 
     private $charset;
 
-    public function __construct(Configuration $configuration, Logger $logger) {
+    public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
 

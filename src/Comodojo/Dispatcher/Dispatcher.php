@@ -1,11 +1,12 @@
 <?php namespace Comodojo\Dispatcher;
 
-use \Monolog\Logger;
+use \Psr\Log\LoggerInterface;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Components\DefaultConfiguration;
 use \Comodojo\Dispatcher\Components\EventsManager;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Components\CacheManager as DispatcherCache;
+use \Comodojo\Dispatcher\Components\LogManager;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
@@ -13,9 +14,7 @@ use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Output\Processor;
 use \Comodojo\Dispatcher\Events\DispatcherEvent;
 use \Comodojo\Dispatcher\Events\ServiceEvent;
-use \Comodojo\Dispatcher\Log\DispatcherLogger;
 use \Comodojo\Cache\CacheManager;
-use \League\Event\Emitter;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -65,7 +64,7 @@ class Dispatcher {
         $configuration = array(),
         EventsManager $events = null,
         CacheManager $cache = null,
-        Logger $logger = null
+        LoggerInterface $logger = null
     ) {
 
         // starting output buffer
@@ -80,7 +79,7 @@ class Dispatcher {
         $this->configuration()->merge($configuration);
 
         // init core components
-        $this->logger = is_null($logger) ? DispatcherLogger::create($this->configuration()) : $logger;
+        $this->logger = is_null($logger) ? LogManager::create($this->configuration()) : $logger;
 
         $this->events = is_null($events) ? new EventsManager($this->logger()) : $events;
 
@@ -88,7 +87,7 @@ class Dispatcher {
 
         // init models
         $this->extra = new Extra($this->logger());
-        
+
         $this->request = new Request($this->configuration(), $this->logger());
 
         $this->router = new Router($this->configuration(), $this->logger(), $this->cache(), $this->extra());
@@ -178,6 +177,12 @@ class Dispatcher {
 
         $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
 
+        if ( $this->readCache() ) {
+
+            return $this->shutdown();
+
+        }
+
         $this->logger()->debug("Starting router.");
 
         try {
@@ -224,7 +229,66 @@ class Dispatcher {
 
         }
 
+        $this->processConfigurationParameters($route);
+
+        $this->dumpCache($route);
+
         return $this->shutdown();
+
+    }
+
+    private function readCache() {
+
+        $name = (string) $this->request()->uri();
+
+        $cache = $this->cache()->setNamespace('dispatcherservice')->get($name);
+
+        if ( is_null($cache) ) return false;
+
+        $this->response = $cache;
+
+        return true;
+
+    }
+
+    private function dumpCache($route) {
+
+        $cache = strtoupper($route->getParameter('cache'));
+        $ttl = $route->getParameter('ttl');
+        $name = (string) $this->request()->uri();
+
+        if ( $cache == 'CLIENT' || $cache == 'BOTH' ) {
+
+            if ( $ttl > 0 ) {
+
+                $this->response()->headers()->set("Cache-Control","max-age=".$ttl.", must-revalidate");
+                $this->response()->headers()->set("Expires",gmdate("D, d M Y H:i:s", (int)$this->request()->getTimestamp() + $ttl)." GMT");
+
+            } else {
+
+                $this->response()->headers()->set("Cache-Control","no-cache, must-revalidate");
+                $this->response()->headers()->set("Expires","Mon, 26 Jul 1997 05:00:00 GMT");
+
+            }
+
+        }
+
+        if ( $cache == 'SERVER' || $cache == 'BOTH' ) {
+
+            $this->cache()->setNamespace('dispatcherservice')->set($name, $this->response(), $ttl);
+
+        }
+
+    }
+
+    private function processConfigurationParameters($route) {
+
+        $params = $route->getParameter('headers');
+
+        if ( !empty($params) && is_array($params) ) {
+
+            foreach($params as $name=>$value) $this->response()->headers()->set($name, $value);
+        }
 
     }
 

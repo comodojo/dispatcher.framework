@@ -1,7 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \Monolog\Logger;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Components\Configuration;
@@ -31,7 +30,7 @@ use \Exception;
  */
 
 class Parser extends DispatcherClassModel {
-    
+
     private $router;
 
     public function __construct(
@@ -39,21 +38,21 @@ class Parser extends DispatcherClassModel {
     ) {
 
         parent::__construct($router->configuration(), $router->logger());
-        
+
         $this->router = $router;
 
     }
-    
-    // This method read the route (folder by folder recursively) and build 
+
+    // This method read the route (folder by folder recursively) and build
     // the global regular expression against which all the request URI will be compared
     public function read($folders = array(), Route $value = null, $regex = '') {
-        
+
         if (is_null($value)) {
-            
+
             $value = new Route($this->router);
-            
+
         }
-        
+
         // if the first 'folder' is empty is removed
         while (!empty($folders) && empty($folders[0])) {
 
@@ -71,7 +70,7 @@ class Parser extends DispatcherClassModel {
 
             // The first element of the array 'folders' is taken in order to be analyzed
             $folder  = array_shift($folders);
-            
+
             // All the parameters of the route must be json strings
             $decoded = json_decode($folder, true);
 
@@ -86,7 +85,7 @@ class Parser extends DispatcherClassModel {
                  *     /calendar/{'ux_timestamp*': '\d{10}', 'microseconds': '\d{4}'}/
                  *
                  * The '*' at the end of the paramerter name implies that the parameter is required
-                 * This example can be read as a calendar service that accepts both 
+                 * This example can be read as a calendar service that accepts both
                  * timestamps in unix or javascript format.
                  *
                  * This is the reason of the following 'foreach'
@@ -96,13 +95,13 @@ class Parser extends DispatcherClassModel {
                     $this->logger->debug("PARAMETER KEY: " . $key);
 
                     $this->logger->debug("PARAMETER STRING: " . $string);
-                    
+
                     /* The key and the regex of every paramater is passed to the 'param'
-                     * method which will build an appropriate regular expression and will understand 
+                     * method which will build an appropriate regular expression and will understand
                      * if the parameter is required and will build the Route query object
                      */
                     $param_regex .= $this->param($key, $string, $value);
-                    
+
                     if ($value->isQueryRequired($key)) $param_required = true;
 
                     $this->logger->debug("PARAMETER REGEX: " . $param_regex);
