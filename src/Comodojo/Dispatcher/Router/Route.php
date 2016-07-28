@@ -190,6 +190,11 @@ class Route extends DispatcherClassModel {
 
         if (class_exists($class)) {
 
+            // All the route parameters are also added to the query parameters
+            foreach ($this->getParameters() as $parameter => $value) {
+                $request->query()->set($parameter, $value);
+            }
+
             return new $class(
                 $this->configuration,
                 $this->logger,
