@@ -1,11 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Request;
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \Comodojo\Dispatcher\Request\Headers;
-use \Comodojo\Dispatcher\Request\Post;
-use \Comodojo\Dispatcher\Request\Query;
-use \Comodojo\Dispatcher\Request\UserAgent;
-use \Comodojo\Dispatcher\Request\Method;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \League\Uri\Schemes\Http as HttpUri;
@@ -36,27 +31,13 @@ use \Psr\Log\LoggerInterface;
 class Model extends DispatcherClassModel {
 
     use TimestampTrait;
-
-    private $headers;
-
-    private $uri;
-
-    private $useragent;
-
-    private $post;
-
-    private $query;
-
-    private $method;
-
-    private $version;
-
+    
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
 
         $this->setTimestamp($_SERVER['REQUEST_TIME_FLOAT']);
-
+        
         $this->headers = new Headers();
 
         $this->uri = HttpUri::createFromServer($_SERVER);
@@ -70,53 +51,14 @@ class Model extends DispatcherClassModel {
         $this->method = new Method();
 
         $this->version = new Version();
-
-    }
-
-    public function headers() {
-
-        return $this->headers;
-
-    }
-
-    public function uri() {
-
-        return $this->uri;
-
-    }
-
-    public function post() {
-
-        return $this->post;
-
-    }
-
-    public function query() {
-
-        return $this->query;
-
-    }
-
-    public function useragent() {
-
-        return $this->useragent;
-
-    }
-
-    public function method() {
-
-        return $this->method;
-    }
-
-    public function version() {
-
-        return $this->version;
+        
+        $this->file = File::fromUploadedFiles();
 
     }
 
     public function route() {
 
-        return str_replace($this->configuration()->get("base-uri"), "", $this->uri->getPath());
+        return str_replace($this->configuration->get("base-uri"), "", $this->uri->getPath());
     }
 
 }

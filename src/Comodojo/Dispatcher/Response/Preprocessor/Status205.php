@@ -29,7 +29,7 @@ class Status205 extends AbstractPreprocessor {
     public function consolidate() {
 
         foreach (array('Allow', 'Content-Encoding', 'Content-Language', 'Content-Length', 'Content-MD5', 'Content-Type', 'Last-Modified') as $header) {
-            $this->response()->headers()->delete($header);
+            $this->response->headers->delete($header);
         }
 
     }

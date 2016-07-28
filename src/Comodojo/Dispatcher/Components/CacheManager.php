@@ -29,11 +29,11 @@ use \Psr\Log\LoggerInterface;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class CacheManager extends DispatcherClassModel{
+class CacheManager extends DispatcherClassModel {
 
     public function init() {
 
-        $cache = $this->configuration()->get('cache');
+        $cache = $this->configuration->get('cache');
 
         if ( empty($cache) ) {
 

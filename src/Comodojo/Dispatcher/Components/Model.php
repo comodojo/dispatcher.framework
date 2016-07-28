@@ -2,6 +2,8 @@
 
 use \Psr\Log\LoggerInterface;
 use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Dispatcher\Components\DataAccess as DataAccessTrait;
+use \Serializable;
 
 /**
  * @package     Comodojo Dispatcher
@@ -27,10 +29,12 @@ use \Comodojo\Dispatcher\Components\Configuration;
 
 
 abstract class Model {
+    
+    use DataAccessTrait;
 
-    protected $configuration;
+    public $configuration;
 
-    protected $logger;
+    public $logger;
 
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
@@ -39,17 +43,5 @@ abstract class Model {
         $this->logger = $logger;
 
     }
-
-    public function configuration() {
-
-        return $this->configuration;
-
-    }
-
-    public function logger() {
-
-        return $this->logger;
-
-    }
-
+    
 }

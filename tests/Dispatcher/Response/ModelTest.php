@@ -25,11 +25,11 @@ class ExtraTest extends \PHPUnit_Framework_TestCase {
 
     public function testComponents() {
 
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Headers', self::$response->headers());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Status', self::$response->status());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Content', self::$response->content());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Location', self::$response->location());
-        $this->assertInstanceOf('\Comodojo\Cookies\CookieManager', self::$response->cookies());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Headers', self::$response->headers);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Status', self::$response->status);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Content', self::$response->content);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Location', self::$response->location);
+        $this->assertInstanceOf('\Comodojo\Cookies\CookieManager', self::$response->cookies);
 
     }
 
@@ -37,7 +37,7 @@ class ExtraTest extends \PHPUnit_Framework_TestCase {
 
         $uri = "www.google.com";
 
-        $location = self::$response->location();
+        $location = self::$response->location;
 
         $location->set($uri);
 
@@ -47,7 +47,7 @@ class ExtraTest extends \PHPUnit_Framework_TestCase {
 
     public function testStatus() {
 
-        $status = self::$response->status();
+        $status = self::$response->status;
 
         $this->assertEquals(200,$status->get());
 
@@ -63,7 +63,7 @@ class ExtraTest extends \PHPUnit_Framework_TestCase {
 
     public function testContent() {
 
-        $content = self::$response->content();
+        $content = self::$response->content;
         $out = md5(mt_rand());
 
         $this->assertNull($content->get());

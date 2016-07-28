@@ -1,8 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
+<?php namespace Comodojo\Dispatcher\Components;
 
 /**
- * Status: Continue
- *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
@@ -24,14 +22,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status100 extends AbstractPreprocessor {
 
-    public function consolidate() {
-
-        $this->response->content>set(null);
-        $this->response->headers>delete('Content-Type');
-        $this->response->headers>delete('Content-Length');
-
+trait ToString {
+    
+    public function __toString() {
+        
+        return $this->get();
+        
     }
 
 }

@@ -29,17 +29,11 @@ use \League\Event\ListenerInterface;
 
 class EventsManager extends Emitter {
 
-    protected $logger;
+    public $logger;
 
     public function __construct(LoggerInterface $logger) {
 
         $this->logger = $logger;
-
-    }
-
-    public function logger() {
-
-        return $this->logger;
 
     }
 

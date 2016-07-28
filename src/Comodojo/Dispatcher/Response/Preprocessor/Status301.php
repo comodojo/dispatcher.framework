@@ -30,15 +30,15 @@ class Status301 extends Status200 {
 
     public function consolidate() {
 
-        $location = $this->response()->location()->get();
+        $location = $this->response->location->get();
 
         if ( empty($location) ) throw new Exception("Invalid location, cannot redirect");
 
-        $this->response()->headers()->set("Location: ".$location);
+        $this->response->headers->set("Location: ".$location);
 
-        if ( empty($this->response->content()->get()) ) {
+        if ( empty($this->response->content->get()) ) {
 
-            $this->response->content()->set(sprintf('<!DOCTYPE html>
+            $this->response->content->set(sprintf('<!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8" />

@@ -45,35 +45,35 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
         $dispatcher = self::$dispatcher;
 
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Components\Configuration', self::$dispatcher->configuration());
-        $this->assertInstanceOf('\League\Event\Emitter', self::$dispatcher->events());
-        $this->assertInstanceOf('\Comodojo\Cache\CacheManager', self::$dispatcher->cache());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', self::$dispatcher->request());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Model', self::$dispatcher->router());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Model', self::$dispatcher->response());
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Extra\Model', self::$dispatcher->extra());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Components\Configuration', self::$dispatcher->configuration);
+        $this->assertInstanceOf('\League\Event\Emitter', self::$dispatcher->events);
+        $this->assertInstanceOf('\Comodojo\Cache\CacheManager', self::$dispatcher->cache);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', self::$dispatcher->request);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Model', self::$dispatcher->router);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Model', self::$dispatcher->response);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Extra\Model', self::$dispatcher->extra);
 
-        $this->assertCount(1, self::$dispatcher->cache()->getProviders());
+        $this->assertCount(1, self::$dispatcher->cache->getProviders());
 
         $r = 'Unable to find a valid route for the specified uri';
 
-        $dispatcher->events()->subscribe('dispatcher', '\Comodojo\Dispatcher\Tests\Helpers\MockDispatcherListener');
-        $dispatcher->events()->subscribe('dispatcher.request', '\Comodojo\Dispatcher\Tests\Helpers\MockServiceListener');
+        $dispatcher->events->subscribe('dispatcher', '\Comodojo\Dispatcher\Tests\Helpers\MockDispatcherListener');
+        $dispatcher->events->subscribe('dispatcher.request', '\Comodojo\Dispatcher\Tests\Helpers\MockServiceListener');
 
         $result = $dispatcher->dispatch();
 
-        $uri = $dispatcher->request()->uri()->getPath();
+        $uri = $dispatcher->request->uri->getPath();
 
-        $headers = $dispatcher->response()->headers()->get();
+        $headers = $dispatcher->response->headers->get();
 
-        $status = $dispatcher->response()->status()->get();
+        $status = $dispatcher->response->status->get();
 
         $this->assertEquals($r, $result);
 
         $this->assertEquals(404, $status);
 
-        $this->assertTrue($dispatcher->extra()->get('test-dispatcher-event'));
-        $this->assertTrue($dispatcher->extra()->get('test-service-event'));
+        $this->assertTrue($dispatcher->extra->get('test-dispatcher-event'));
+        $this->assertTrue($dispatcher->extra->get('test-service-event'));
 
     }
 

@@ -42,7 +42,7 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = self::$service;
 
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', $service->request());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', $service->request);
 
     }
 
@@ -56,7 +56,7 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase {
 
         $method = $service->getMethod("GET");
 
-        $status = $service->response()->status()->get();
+        $status = $service->response->status->get();
 
         $this->assertEquals(200, $status);
 

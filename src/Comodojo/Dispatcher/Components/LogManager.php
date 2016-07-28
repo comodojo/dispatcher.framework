@@ -33,7 +33,7 @@ use \Comodojo\Dispatcher\Components\Configuration;
 
 class LogManager {
 
-    private $configuration;
+    public $configuration;
 
     public function __construct(Configuration $configuration) {
 

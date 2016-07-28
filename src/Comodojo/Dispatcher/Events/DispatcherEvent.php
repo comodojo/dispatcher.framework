@@ -1,5 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Events;
 
+use \Comodojo\Dispatcher\Components\DataAccess as DataAccessTrait;
 use \Comodojo\Dispatcher\Dispatcher;
 
 /**
@@ -26,7 +27,7 @@ use \Comodojo\Dispatcher\Dispatcher;
 
 class DispatcherEvent extends AbstractEvent {
 
-    private $dispatcher;
+    use DataAccessTrait;
 
     public function __construct(
         Dispatcher $dispatcher
@@ -35,12 +36,6 @@ class DispatcherEvent extends AbstractEvent {
         parent::__construct('dispatcher');
 
         $this->dispatcher = $dispatcher;
-
-    }
-
-    final public function dispatcher() {
-
-        return $this->dispatcher;
 
     }
 

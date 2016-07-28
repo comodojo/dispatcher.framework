@@ -30,7 +30,7 @@ class Status202 extends Status200 {
 
     public function consolidate() {
 
-        $this->response()->headers()->set('Status: 202 Accepted');
+        $this->response->headers->set('Status: 202 Accepted');
 
         parent::consolidate();
 

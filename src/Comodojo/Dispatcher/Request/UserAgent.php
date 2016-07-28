@@ -1,5 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Request;
 
+use \Comodojo\Dispatcher\Components\ToString as ToStringTrait;
+
 /**
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -23,6 +25,8 @@
  */
 
 class UserAgent {
+
+    use ToStringTrait;
 
     private $user_agent;
 

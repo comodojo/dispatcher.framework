@@ -1,5 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Response;
 
+use \Comodojo\Dispatcher\Components\ToString as ToStringTrait;
 use \Exception;
 
 /**
@@ -25,6 +26,8 @@ use \Exception;
  */
 
 class Location {
+
+    use ToStringTrait;
 
     private $location;
 

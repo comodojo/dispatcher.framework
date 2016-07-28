@@ -33,14 +33,6 @@ use \Exception;
 
 abstract class AbstractService extends DispatcherClassModel {
 
-    protected $request;
-
-    protected $router;
-
-    protected $response;
-
-    protected $extra;
-
     public function __construct(
         Configuration $configuration,
         LoggerInterface $logger,
@@ -62,30 +54,6 @@ abstract class AbstractService extends DispatcherClassModel {
 
     }
 
-    final public function request() {
-
-        return $this->request;
-
-    }
-
-    final public function router() {
-
-        return $this->router;
-
-    }
-
-    final public function response() {
-
-        return $this->response;
-
-    }
-
-    final public function extra() {
-
-        return $this->extra;
-
-    }
-
     /**
      * Get service-implemented HTTP methods
      *
@@ -94,7 +62,7 @@ abstract class AbstractService extends DispatcherClassModel {
      */
     public function getImplementedMethods() {
 
-        $supported_methods = $this->configuration()->get('supported-http-methods');
+        $supported_methods = $this->configuration->get('supported-http-methods');
 
         if ( is_null($supported_methods) ) $supported_methods = array('GET','PUT','POST','DELETE','OPTIONS','HEAD','TRACE','CONNECT','PURGE');
 
