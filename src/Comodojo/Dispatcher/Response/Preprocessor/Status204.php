@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: Not implemented
+ * Status: No Content
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,25 +24,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status501 extends AbstractHttpStatus {
-
-    public function consolidate() {
-
-        // An Allow Header should be prvided from DispatcherException
-        $allowed = $this->response()->headers()->get('Allow');
-
-        if ( is_null($allowed) ) {
-
-            header('Method not implemented', true, 501);
-
-        } else {
-
-            header("Allow: $allowed", true, 501);
-
-            $this->response()->headers()->remove('Allow');
-
-        }
-
-    }
+class Status204 extends Status100 {
 
 }

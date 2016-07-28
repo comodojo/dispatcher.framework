@@ -38,9 +38,9 @@ class Content {
 
     }
 
-    public function set($content) {
+    public function set($content=null) {
 
-        if ( !is_scalar($content) ) {
+        if ( !is_scalar($content) && $content != null ) {
 
             throw new Exception("Invalid HTTP content");
 

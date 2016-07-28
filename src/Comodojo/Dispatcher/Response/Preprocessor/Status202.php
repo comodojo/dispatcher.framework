@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: Origin not allowed
+ * Status: Created
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,11 +24,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status403 extends AbstractHttpStatus {
+class Status202 extends Status200 {
+
+    //PLEASE NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description in body... just in case
 
     public function consolidate() {
 
-        header('Origin not allowed', true, 403); //Not originated from allowed source
+        $this->response()->headers()->set('Status: 202 Accepted');
+
+        parent::consolidate();
 
     }
 

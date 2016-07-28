@@ -60,6 +60,8 @@ class Dispatcher {
 
     private $events;
 
+    private $route;
+
     public function __construct(
         $configuration = array(),
         EventsManager $events = null,
@@ -189,6 +191,8 @@ class Dispatcher {
 
             $route = $this->router()->route($this->request());
 
+            $this->route = $route;
+
         } catch (DispatcherException $de) {
 
             $this->logger()->debug("Route error (".$de->getStatus()."), shutting down dispatcher.");
@@ -256,24 +260,17 @@ class Dispatcher {
         $cache = strtoupper($route->getParameter('cache'));
         $ttl = $route->getParameter('ttl');
         $name = (string) $this->request()->uri();
+        $method = $this->request()->method()->get();
+        $status = $this->response()->status()->get();
 
-        if ( $cache == 'CLIENT' || $cache == 'BOTH' ) {
-
-            if ( $ttl > 0 ) {
-
-                $this->response()->headers()->set("Cache-Control","max-age=".$ttl.", must-revalidate");
-                $this->response()->headers()->set("Expires",gmdate("D, d M Y H:i:s", (int)$this->request()->getTimestamp() + $ttl)." GMT");
-
-            } else {
-
-                $this->response()->headers()->set("Cache-Control","no-cache, must-revalidate");
-                $this->response()->headers()->set("Expires","Mon, 26 Jul 1997 05:00:00 GMT");
-
-            }
-
-        }
-
-        if ( $cache == 'SERVER' || $cache == 'BOTH' ) {
+        // @NOTE: Server cache will not consider cacheable POST or PUT requests
+        //        because of dispatcher internal structure: if post request is cached
+        //        subsequent requests will never reach the service.
+        if (
+            ( $cache == 'SERVER' || $cache == 'BOTH' ) &&
+            in_array($request->method()->get(), array('GET', 'HEAD')) &&
+            in_array($this->status()->get(), array(200, 203, 300, 301, 302, 404, 410))
+        ){
 
             $this->cache()->setNamespace('dispatcherservice')->set($name, $this->response(), $ttl);
 
@@ -313,8 +310,7 @@ class Dispatcher {
 
         $message = $de->getMessage();
 
-        //$headers = $de->getHeaders();
-        $headers = array();
+        $headers = $de->getHeaders();
 
         $this->response()->status()->set($status);
 
@@ -326,6 +322,8 @@ class Dispatcher {
 
     private function shutdown() {
 
+        $this->response()->consolidate($this->request, $this->route);
+
         $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.response') );
 
         $this->events()->emit( $this->emitServiceSpecializedEvents('dispatcher.response.'.$this->response()->status()->get()) );
@@ -334,11 +332,12 @@ class Dispatcher {
 
         $this->logger()->debug("Composing return value.");
 
-        $return = Processor::parse($this->configuration(), $this->logger(), $this->response());
+        $return = Processor::parse($this->configuration(), $this->logger(), $this->request(), $this->response());
 
         $this->logger()->debug("Dispatcher run-cycle ends.");
 
-        ob_end_clean();
+        if ( function_exists('fastcgi_finish_request') ) fastcgi_finish_request();
+        else ob_end_clean();
 
         return $return;
 

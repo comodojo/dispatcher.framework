@@ -2,9 +2,11 @@
 
 use \Comodojo\Dispatcher\Output\HttpStatus\StatusGeneric;
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Psr\Log\LoggerInterface;
+use \Exception;
 
 /**
  * @package     Comodojo Dispatcher
@@ -28,79 +30,113 @@ use \Psr\Log\LoggerInterface;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Missing status codes
+//
+// @WARNING: some method's preprocessor missing
+//
 //         _______
 //        j_______j
 //       /_______/_\
 //       |Missing| |
 //       |  ___  | |
-//       | !100! | |
+//       | !418! | |
 //       | !___! | |
 //       |_______|,'
 //
-//      // Informational 1xx
-//      100 => "Continue",
-//      101 => "Switching Protocols",
-//      // Successful 2xx
-//      203 => "Non-Authoritative Information",
-//      205 => "Reset Content",
-//      206 => "Partial Content",
-//      // Redirection 3xx
-//      300 => "Multiple Choices",
-//      305 => "Use Proxy",
-//      // Client Error 4xx
-//      401 => "Unauthorized",
-//      402 => "Payment Required",
-//      406 => "Not Acceptable",
-//      407 => "Proxy Authentication Required",
-//      408 => "Request Timeout",
-//      409 => "Conflict",
-//      410 => "Gone",
-//      411 => "Length Required",
-//      412 => "Precondition Failed",
-//      413 => "Request Entity Too Large",
-//      414 => "Request-URI Too Long",
-//      415 => "Unsupported Media Type",
-//      416 => "Requested Range Not Satisfiable",
-//      417 => "Expectation Failed",
-//      // Server Error 5xx
-//      502 => "Bad Gateway",
-//      504 => "Gateway Timeout",
-//      505 => "HTTP Version Not Supported"
 
 class Processor extends DispatcherClassModel {
 
+    private $codes = array(
+        // Informational 1xx
+        100 => 'Continue',
+        101 => 'Switching Protocols',
+        102 => 'Processing',
+        // Successful 2xx
+        200 => 'OK',
+        201 => 'Created',
+        202 => 'Accepted',
+        203 => 'Non-Authoritative Information',
+        204 => 'No Content',
+        205 => 'Reset Content',
+        206 => 'Partial Content',
+        207 => 'Multi-Status', // missing
+        208 => 'Already Reported', // missing
+        226 => 'IM Used', // missing
+        // Redirection 3xx
+        300 => 'Multiple Choices',
+        301 => 'Moved Permanently',
+        302 => 'Found',
+        303 => 'See Other',
+        304 => 'Not Modified',
+        305 => 'Use Proxy',
+        307 => 'Temporary Redirect',
+        308 => 'Permanent Redirect',
+        // Client Error 4xx
+        400 => 'Bad Request',
+        401 => 'Unauthorized', // missing
+        402 => 'Payment Required', // missing
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        405 => 'Method Not Allowed',
+        406 => 'Not Acceptable', // missing
+        407 => 'Proxy Authentication Required', // missing
+        408 => 'Request Timeout', // missing
+        409 => 'Conflict', // missing
+        410 => 'Gone',
+        411 => 'Length Required', // missing
+        412 => 'Precondition Failed', // missing
+        413 => 'Payload Too Large', // missing
+        414 => 'URI Too Long', // missing
+        415 => 'Unsupported Media Type', // missing
+        416 => 'Range Not Satisfiable', // missing
+        417 => 'Expectation Failed', // missing
+        421 => 'Misdirected Request', // missing
+        422 => 'Unprocessable Entity', // missing
+        423 => 'Locked', // missing
+        424 => 'Failed Dependency', // missing
+        426 => 'Upgrade Required', // missing
+        428 => 'Precondition Required', // missing
+        429 => 'Too Many Requests', // missing
+        431 => 'Request Header Fields Too Large', // missing
+        451 => 'Unavailable For Legal Reasons', // missing
+        // Server Error 5xx
+        500 => 'Internal Server Error',
+        501 => 'Not Implemented',
+        502 => 'Bad Gateway',
+        503 => 'Service Unavailable',
+        504 => 'Gateway Timeout',
+        505 => 'HTTP Version Not Supported',
+        506 => 'Variant Also Negotiates (Experimental)', // missing
+        507 => 'Insufficient Storage', // missing
+        508 => 'Loop Detected', // missing
+        510 => 'Not Extended', // missing
+        511 => 'Network Authentication Required' // missing
+    );
+
+    private $request;
+
     private $response;
 
-    public function __construct(Configuration $configuration,LoggerInterface $logger, Response $response) {
+    public function __construct(Configuration $configuration, LoggerInterface $logger, Request $request, Response $response) {
 
         parent::__construct($configuration, $logger);
 
         $this->response = $response;
 
+        $this->request = $request;
+
     }
 
-    public function compose() {
+    public function send() {
 
         $status = $this->response->status()->get();
 
-        $output_class_name = "\\Comodojo\\Dispatcher\\Output\\HttpStatus\\Status".$status;
+        if ( !array_key_exists($status, $this->codes) ) throw new Exception("Invalid HTTP status code in response");
 
-        if ( class_exists($output_class_name) ) {
-
-            $output = new $output_class_name($this->response);
-
-        } else {
-
-            $output = new StatusGeneric($this->response);
-
-        }
-
-        $output->consolidate();
-
-        $this->processContentType();
+        $message = $this->codes[$status];
 
         $this->response->headers()->send();
+
+        header(sprintf('HTTP/%s %s %s', $this->request->version()->get(), $status, $message), true, $status);
 
         $this->response->cookies()->save();
 
@@ -108,26 +144,11 @@ class Processor extends DispatcherClassModel {
 
     }
 
-    public static function parse(Configuration $configuration, LoggerInterface $logger, Response $response) {
+    public static function parse(Configuration $configuration, LoggerInterface $logger, Request $request, Response $response) {
 
-        $processor = new Processor($configuration, $logger, $response);
+        $processor = new Processor($configuration, $logger, $request, $response);
 
-        return $processor->compose();
-
-    }
-
-    protected function processContentType() {
-
-        $content = $this->response->content();
-
-        $type = $this->response->content()->type();
-        $charset = $this->response->content()->charset();
-
-        if ( is_null($charset) ) {
-            $this->response->headers()->set("Content-type",strtolower($type));
-        } else {
-            $this->response->headers()->set("Content-type",strtolower($type)."; charset=".$charset);
-        }
+        return $processor->send();
 
     }
 

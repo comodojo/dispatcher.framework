@@ -1,8 +1,8 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
-
-use \Comodojo\Dispatcher\Response\Model as Response;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
+ * Status: Not Modified
+ *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
@@ -24,22 +24,18 @@ use \Comodojo\Dispatcher\Response\Model as Response;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AbstractHttpStatus implements HttpStatusInterface {
+class Status304 extends Status100 {
 
-    protected $response;
+    public function consolidate() {
 
-    public function __construct(Response $response) {
+        foreach (array('Allow', 'Content-Encoding', 'Content-Language', 'Content-Length', 'Content-MD5', 'Content-Type', 'Last-Modified') as $header) {
+            $this->response()->headers()->delete($header);
+        }
 
-        $this->response = $response;
-
-    }
-
-    final public function response() {
-
-        return $this->response;
+        parent::consolidate();
 
     }
 
-    abstract public function consolidate();
+
 
 }

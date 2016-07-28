@@ -1,7 +1,9 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
+
+use \Exception;
 
 /**
- * Status: OK
+ * Status: Method Not Allowed
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,11 +26,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status200 extends AbstractHttpStatus {
+class Status405 extends Status400 {
 
     public function consolidate() {
 
-        header('Content-Length: '.$this->response()->content()->length());
+        // An Allow Header should be provided from DispatcherException
+        $allow = $this->response()->headers()->get('Allow');
+
+        if ( is_null($allow) ) throw new Exception("Missing Allow header");
+
+        parent::consolidate();
 
     }
 

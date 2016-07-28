@@ -1,7 +1,9 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
+
+use \Exception;
 
 /**
- * Status: Internal Server Error
+ * Status: Moved Permanently
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,13 +26,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status500 extends AbstractHttpStatus {
+class Status301 extends Status200 {
 
     public function consolidate() {
 
-        header('500 Internal Server Error', true, 500);
-        header('Content-Length: '.$this->response()->content()->length());
+        $location = $this->response()->location()->get();
 
+        if ( empty($location) ) throw new Exception("Invalid location, cannot redirect");
+
+        $this->response()->headers()->set("Location: ".$location);
+
+        if ( empty($this->response->content()->get()) ) {
+
+            $this->response->content()->set(sprintf('<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="refresh" content="1;url=%1$s" />
+        <title>Redirecting to %1$s</title>
+    </head>
+    <body>
+        Redirecting to <a href="%1$s">%1$s</a>.
+    </body>
+</html>', htmlspecialchars($location, ENT_QUOTES, 'UTF-8')));
+
+        }
+
+        parent::consolidate();
 
     }
 

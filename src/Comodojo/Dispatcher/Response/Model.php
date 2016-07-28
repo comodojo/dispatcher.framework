@@ -6,6 +6,8 @@ use \Comodojo\Dispatcher\Response\Headers;
 use \Comodojo\Dispatcher\Response\Status;
 use \Comodojo\Dispatcher\Response\Content;
 use \Comodojo\Dispatcher\Response\Location;
+use \Comodojo\Dispatcher\Request\Model as Request;
+use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Cookies\CookieManager;
 use \Psr\Log\LoggerInterface;
 
@@ -90,6 +92,73 @@ class Model extends DispatcherClassModel {
     public function location() {
 
         return $this->location;
+
+    }
+
+    public function consolidate(Request $request, Route $route = null) {
+
+        $status = $this->status()->get();
+
+        $output_class_name = "\\Comodojo\\Dispatcher\\Response\\Preprocessor\\Status".$status;
+
+        // @TODO: this condition will be removed when all preprocessors ready
+        if ( class_exists($output_class_name) ) {
+            $output = new $output_class_name($this);
+        } else {
+            $output = new \Comodojo\Dispatcher\Response\Preprocessor\Status200($this);
+        }
+
+        $output->consolidate();
+
+        if ( $route != null ) {
+            $this->setClientCache($request, $route);
+        }
+
+        // extra checks
+
+        if ( $request->method()->get() == 'HEAD' && !in_array($status, array(100,101,102,204,304)) ) {
+            $length = $this->content()->length();
+            $this->content()->set(null);
+            if ($length) $this->headers()->set('Content-Length', $length);
+        }
+
+        if ($this->headers()->get('Transfer-Encoding') != null) {
+            $this->headers()->delete('Content-Length');
+        }
+
+        if ( $request->version()->get() == '1.0' && false !== strpos($this->headers->get('Cache-Control'), 'no-cache')) {
+            $this->headers()->set('pragma', 'no-cache');
+            $this->headers()->set('expires', -1);
+        }
+
+    }
+
+    private function setClientCache(Request $request, Route $route) {
+
+        $cache = strtoupper($route->getParameter('cache'));
+        $ttl = $route->getParameter('ttl');
+
+        if (
+            ($cache == 'CLIENT' || $cache == 'BOTH') &&
+            in_array($request->method()->get(), array('GET', 'HEAD', 'POST', 'PUT')) &&
+            in_array($this->status()->get(), array(200, 203, 300, 301, 302, 404, 410))
+            // @TODO: here we should also check for Cache-Control no-store or private;
+            //        the cache layer will be improoved in future versions.
+        ) {
+
+            if ( $ttl > 0 ) {
+
+                $this->headers()->set("Cache-Control","max-age=".$ttl.", must-revalidate");
+                $this->headers()->set("Expires",gmdate("D, d M Y H:i:s", (int)$this->getTimestamp() + $ttl)." GMT");
+
+            } else {
+
+                $this->headers()->set("Cache-Control","no-cache, must-revalidate");
+                $this->headers()->set("Expires","Mon, 26 Jul 1997 05:00:00 GMT");
+
+            }
+
+        }
 
     }
 

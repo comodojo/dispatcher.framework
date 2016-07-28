@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: Created
+ * Status: OK
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,11 +24,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status201 extends AbstractHttpStatus {
+class Status200 extends AbstractPreprocessor {
 
     public function consolidate() {
 
-        header("Location: ".$this->response()->location()->get(),true,$this->response()->status()->get());
+        $this->response()->headers()->set('Content-Length: '.$this->response()->content()->length());
+
+        $type = $this->response()->content()->type();
+        $charset = $this->response()->content()->charset();
+
+        if ( is_null($charset) ) {
+            $this->response()->headers()->set("Content-type", strtolower($type));
+        } else {
+            $this->response()->headers()->set("Content-type", strtolower($type)."; charset=".$charset);
+        }
 
     }
 

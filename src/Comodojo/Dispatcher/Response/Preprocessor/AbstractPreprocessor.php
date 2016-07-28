@@ -1,8 +1,8 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
+
+use \Comodojo\Dispatcher\Response\Model as Response;
 
 /**
- * Status: Temporary Redirect
- *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
@@ -24,6 +24,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status307 extends Status201 {
+abstract class AbstractPreprocessor {
+
+    protected $response;
+
+    public function __construct(Response $response) {
+
+        $this->response = $response;
+
+    }
+
+    final public function response() {
+
+        return $this->response;
+
+    }
+
+    abstract public function consolidate();
 
 }

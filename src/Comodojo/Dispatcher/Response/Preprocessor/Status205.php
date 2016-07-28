@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: OK - No Content
+ * Status: Reset Content
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,15 +24,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status204 extends AbstractHttpStatus {
+class Status205 extends AbstractPreprocessor {
 
     public function consolidate() {
 
-        header($_SERVER["SERVER_PROTOCOL"].' 204 No Content');
-        header('Status: 204 No Content');
-        header('Content-Length: 0',true);
-
-        $this->response()->content()->set(null);
+        foreach (array('Allow', 'Content-Encoding', 'Content-Language', 'Content-Length', 'Content-MD5', 'Content-Type', 'Last-Modified') as $header) {
+            $this->response()->headers()->delete($header);
+        }
 
     }
 
