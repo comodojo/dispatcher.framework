@@ -3,7 +3,6 @@
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \Comodojo\Dispatcher\Router\Table;
 use \Comodojo\Dispatcher\Router\Route;
-use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
@@ -37,22 +36,6 @@ use \Exception;
 
 class Model extends DispatcherClassModel {
 
-    use TimestampTrait;
-
-    private $bypass_routing = false;
-
-    private $bypass_service = false;
-
-    private $route;
-
-    private $cache;
-
-    private $request;
-
-    private $response;
-
-    private $table;
-
     public function __construct(
         Configuration $configuration,
         LoggerInterface $logger,
@@ -62,19 +45,21 @@ class Model extends DispatcherClassModel {
 
         parent::__construct($configuration, $logger);
 
+        $this->route = null;
+
+        $this->request = null;
+
+        $this->response = null;
+
         $this->table = new Table($cache, $this);
 
         $this->cache = $cache;
 
         $this->extra = $extra;
 
-        $this->setTimestamp();
+        $this->bypass_routing = false;
 
-    }
-
-    public function table() {
-
-        return $this->table;
+        $this->bypass_service = false;
 
     }
 
@@ -127,6 +112,31 @@ class Model extends DispatcherClassModel {
         return $this->route;
 
     }
+    
+    public function getServiceInstance() {
+        
+        $class = $this->route->getClassName();
+
+        if (class_exists($class)) {
+
+            // All the route parameters are also added to the query parameters
+            foreach ($this->route->getParameters() as $parameter => $value) {
+                $this->request->query()->set($parameter, $value);
+            }
+
+            return new $class(
+                $this->configuration,
+                $this->logger,
+                $this->request,
+                $this,
+                $this->response,
+                $this->extra
+            );
+
+        }
+        else return null;
+        
+    }
 
     public function compose(Response $response) {
 
@@ -144,11 +154,7 @@ class Model extends DispatcherClassModel {
 
         }
 
-        $service = $this->route->getInstance(
-            $this->request,
-            $this->response,
-            $this->extra
-        );
+        $service = $this->getServiceInstance();
 
         if (!is_null($service)) {
 
@@ -198,7 +204,7 @@ class Model extends DispatcherClassModel {
 
         $path = $this->request->route();
 
-        foreach ($this->table->routes() as $regex => $value) {
+        foreach ($this->table->routes as $regex => $value) {
 
             // The current uri is checked against all the global regular expressions associated with the routes
             if (preg_match("/" . $regex . "/", $path, $matches)) {

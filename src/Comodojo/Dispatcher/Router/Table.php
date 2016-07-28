@@ -33,20 +33,14 @@ use \Exception;
 
 class Table extends DispatcherClassModel {
 
-    private $routes = array();
-
-    private $parser;
-
-    private $cache;
-
-    private $router;
-
     public function __construct(
         CacheManager $cache,
         Router $router
     ) {
 
-        parent::__construct($router->configuration(), $router->logger());
+        parent::__construct($router->configuration, $router->logger);
+        
+        $this->routes = array();
 
         $this->router = $router;
 
@@ -115,22 +109,6 @@ class Table extends DispatcherClassModel {
 
     }
 
-    public function routes($routes = null) {
-
-        if (is_null($routes)) {
-
-            return $this->routes;
-
-        } else {
-
-            $this->routes = $routes;
-
-            return $this;
-
-        }
-
-    }
-
     public function defaultRoute() {
 
         return $this->get('/');
@@ -159,17 +137,9 @@ class Table extends DispatcherClassModel {
 
         if ( $this->configuration()->get('routing-table-cache') !== true ) return;
 
-        $routes = $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
+        $this->routes = $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
 
         if (is_null($routes)) return;
-
-        foreach ($routes as $name => $data) {
-
-            $route = new Route($this->router);
-
-            $this->routes[$name] = $route->setData($data);
-
-        }
 
         $this->logger->debug("Routing table loaded from cache");
 
@@ -181,15 +151,7 @@ class Table extends DispatcherClassModel {
 
         $ttl = $this->configuration()->get('routing-table-ttl');
 
-        $routes = array();
-
-        foreach($this->routes as $name => $route) {
-
-            $routes[$name] = $route->getData();
-
-        }
-
-        $this->cache->setNamespace('dispatcherinternals')->set("dispatcher-routes", $routes, $ttl == null ? 86400 : intval($ttl));
+        $this->cache->setNamespace('dispatcherinternals')->set("dispatcher-routes", $this->routes, $ttl == null ? 86400 : intval($ttl));
 
         $this->logger->debug("Routing table saved to cache");
 

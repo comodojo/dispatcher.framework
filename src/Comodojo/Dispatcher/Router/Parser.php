@@ -1,9 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
-use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Router\Route;
-use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -29,19 +26,7 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Parser extends DispatcherClassModel {
-
-    private $router;
-
-    public function __construct(
-        Router $router
-    ) {
-
-        parent::__construct($router->configuration(), $router->logger());
-
-        $this->router = $router;
-
-    }
+class Parser {
 
     // This method read the route (folder by folder recursively) and build
     // the global regular expression against which all the request URI will be compared
@@ -49,7 +34,7 @@ class Parser extends DispatcherClassModel {
 
         if (is_null($value)) {
 
-            $value = new Route($this->router);
+            $value = new Route();
 
         }
 

@@ -15,7 +15,6 @@ use \Comodojo\Dispatcher\Router\Route;
 class RouterTest extends \PHPUnit_Framework_TestCase {
 
     protected static $router;
-    protected static $extra;
 
     public static function setupBeforeClass() {
 
@@ -26,20 +25,20 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $cache = new CacheManager();
 
-        self::$extra = new Extra($configuration, $logger);
+        $extra = new Extra($configuration, $logger);
 
-        self::$router = new Router($configuration, $logger, $cache, self::$extra);
+        self::$router = new Router($configuration, $logger, $cache, $extra);
 
     }
 
     public function testRouter() {
 
-        $request = new Request(self::$router->configuration(), self::$router->logger());
-        $response = new Response(self::$router->configuration(), self::$router->logger());
+        $request = new Request(self::$router->configuration, self::$router->logger);
+        $response = new Response(self::$router->configuration, self::$router->logger);
 
         $request->method()->set("GET");
 
-        $route = new Route(self::$router);
+        $route = new Route();
         $route->setType("ROUTE")
             ->setClassName("\\Comodojo\\Dispatcher\\Tests\\Service\\ConcreteService");
 
@@ -51,7 +50,15 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals("ROUTE", $route->getType());
 
-        $this->assertEquals("\\Comodojo\\Dispatcher\\Tests\\Service\\ConcreteService", $route->getClassName());
+        $this->assertEquals('\Comodojo\Dispatcher\Tests\Service\ConcreteService', $route->getClassName());
+
+        $service = $router->getServiceInstance();
+
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Tests\Service\ConcreteService', $service);
+
+        $this->assertEquals('this is a test', $service->get());
+
+        $this->assertEquals('method not allowed', $service->trace());
 
         self::$router->compose($response);
 
@@ -63,15 +70,15 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $path = 'test/{"name*": "\\\\w+"}';
 
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Table', self::$router->table());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Table', self::$router->table);
 
-        self::$router->table()->add(
+        self::$router->table->add(
             $path,
             "ROUTE",
             "\\Comodojo\\Dispatcher\\Tests\\Service\\ConcreteService"
         );
 
-        $route = self::$router->table()->get($path);
+        $route = self::$router->table->get($path);
 
         $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Route', $route);
 
@@ -85,7 +92,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals("\\w+", $route->getQueryRegex("name"));
 
-        if (preg_match("/" . self::$router->table()->regex($path) . "/", "/test/pattern", $matches)) {
+        if (preg_match("/" . self::$router->table->regex($path) . "/", "/test/pattern", $matches)) {
 
             $route->path($matches);
 
@@ -93,20 +100,9 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals("pattern", $route->getParameter("name"));
 
-        $request = new Request(self::$router->configuration(), self::$router->logger());
-        $response = new Response(self::$router->configuration(), self::$router->logger());
+        $this->assertTrue(self::$router->table->remove($path));
 
-        $service = $route->getInstance($request, $response, self::$extra);
-
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Tests\Service\ConcreteService', $service);
-
-        $this->assertEquals('this is a test', $service->get());
-
-        $this->assertEquals('method not allowed', $service->trace());
-
-        $this->assertTrue(self::$router->table()->remove($path));
-
-        $this->assertNull(self::$router->table()->get($path));
+        $this->assertNull(self::$router->table->get($path));
 
     }
 
