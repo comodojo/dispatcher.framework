@@ -162,7 +162,7 @@ Once the request is routed to an actual service, it is possible to compose a Res
 Bypassing Router
 ****************
 
-If you want to bypass the router (for example, to redirect a non authorized request to the login service) you can build a plugin in order to cacth a pre-routing event.
+If you want to bypass the router (for example, to redirect an unauthorized request to the login service) you can build a plugin in order to cacth a pre-routing event.
 
 .. code-block:: php
 

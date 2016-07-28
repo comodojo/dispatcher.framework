@@ -52,7 +52,7 @@ class DefaultConfiguration {
 
         $uri = self::uriGetAbsolute();
 
-        return ( $http . $_SERVER['HTTP_HOST'] . $uri . "/" );
+        return ( $http . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost') . $uri . "/" );
 
     }
 
