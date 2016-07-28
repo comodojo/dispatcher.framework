@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: See Other
+ * Status: Not Found
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,6 +24,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status303 extends Status201 {
+class Status404 extends Status400 {
 
 }

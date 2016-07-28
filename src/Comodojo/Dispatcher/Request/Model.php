@@ -49,6 +49,8 @@ class Model extends DispatcherClassModel {
 
     private $method;
 
+    private $version;
+
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
@@ -66,6 +68,8 @@ class Model extends DispatcherClassModel {
         $this->useragent = new UserAgent();
 
         $this->method = new Method();
+
+        $this->version = new Version();
 
     }
 
@@ -102,6 +106,12 @@ class Model extends DispatcherClassModel {
     public function method() {
 
         return $this->method;
+    }
+
+    public function version() {
+
+        return $this->version;
+
     }
 
     public function route() {

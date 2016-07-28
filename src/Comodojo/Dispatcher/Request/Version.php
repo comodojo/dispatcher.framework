@@ -1,8 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Request;
 
 /**
- * Status: Found
- *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
@@ -24,6 +22,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status302 extends Status201 {
+class Version {
+
+    private $version;
+
+    public function __construct() {
+
+        $this->version = $_SERVER['SERVER_PROTOCOL'];
+
+    }
+
+    public function get() {
+
+        return $this->version;
+
+    }
+
+    public function set($version) {
+
+        $this->version = $version;
+
+        return $this;
+
+    }
 
 }

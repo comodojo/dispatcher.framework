@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: Service Unavailable
+ * Status: Created
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,12 +24,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status503 extends AbstractHttpStatus {
+class Status201 extends Status200 {
 
     public function consolidate() {
 
-        header($_SERVER["SERVER_PROTOCOL"].' 503 Service Temporarily Unavailable');
-        header('Status: 503 Service Temporarily Unavailable');
+        $location = $this->response()->location()->get();
+
+        if ( $location != null ) $this->response()->headers()->set("Location: ".$location);
+
+        parent::consolidate();
 
     }
 

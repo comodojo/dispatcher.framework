@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: Generic status
+ * Status: Bad Gateway
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,13 +24,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class StatusGeneric extends AbstractHttpStatus {
-
-    public function consolidate() {
-
-        header($_SERVER["SERVER_PROTOCOL"].' '.$this->response()->status()->get(), true, $this->response()->status()->get());
-        header('Content-Length: '.$this->response()->content()->length());
-
-    }
+class Status502 extends Status200 {
 
 }

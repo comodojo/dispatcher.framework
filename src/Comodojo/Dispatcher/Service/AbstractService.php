@@ -95,8 +95,8 @@ abstract class AbstractService extends DispatcherClassModel {
     public function getImplementedMethods() {
 
         $supported_methods = $this->configuration()->get('supported-http-methods');
-        
-        if ( is_null($supported_methods) ) $supported_methods = array('GET','PUT','POST','DELETE','OPTIONS','HEAD','TRACE','CONNECT');
+
+        if ( is_null($supported_methods) ) $supported_methods = array('GET','PUT','POST','DELETE','OPTIONS','HEAD','TRACE','CONNECT','PURGE');
 
         if ( method_exists($this, 'any') ) {
 

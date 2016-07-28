@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: Accepted
+ * Status: Continue
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,14 +24,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status202 extends AbstractHttpStatus {
+class Status100 extends AbstractPreprocessor {
 
     public function consolidate() {
 
-        //PLEASE NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description in body... just in case
-        header($_SERVER["SERVER_PROTOCOL"].' 202 Accepted');
-        header('Status: 202 Accepted');
-        header('Content-Length: '.$this->response()->content()->length());
+        $this->response()->content()->set(null);
+        $this->response()->headers()->delete('Content-Type');
+        $this->response()->headers()->delete('Content-Length');
 
     }
 

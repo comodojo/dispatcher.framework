@@ -1,8 +1,8 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
-
-use \Comodojo\Dispatcher\Response\Model as Response;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
+ * Status: See Other
+ *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
@@ -24,10 +24,6 @@ use \Comodojo\Dispatcher\Response\Model as Response;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-interface HttpStatusInterface {
-
-    public function __construct(Response $response);
-
-    public function consolidate();
+class Status303 extends Status301 {
 
 }

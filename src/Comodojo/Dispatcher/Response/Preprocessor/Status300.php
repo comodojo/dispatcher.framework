@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: Not Found
+ * Status: Multiple Choices
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,14 +24,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status404 extends AbstractHttpStatus {
-
-    public function consolidate() {
-
-        header($_SERVER["SERVER_PROTOCOL"].' 404 Not Found');
-        header('Status: 404 Not Found');
-        header('Content-Length: '.$this->response()->content()->length());
-
-    }
+class Status300 extends Status201 {
 
 }

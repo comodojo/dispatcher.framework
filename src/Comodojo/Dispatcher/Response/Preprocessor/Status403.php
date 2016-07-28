@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: Not Modified
+ * Status: Forbidden
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,30 +24,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status304 extends AbstractHttpStatus {
-
-    public function consolidate() {
-
-        $last_modified = $this->response()->headers()->get('Last-Modified');
-
-        if ( is_null($last_modified) ) {
-
-            header($_SERVER["SERVER_PROTOCOL"].' 304 Not Modified');
-
-        } else if ( is_int($last_modified) ) {
-
-            header('Last-Modified: '.gmdate('D, d M Y H:i:s', $last_modified).' GMT', true, 304);
-
-        } else {
-
-            header('Last-Modified: '.$last_modified, true, 304);
-
-        }
-
-        header('Content-Length: '.$this->response()->content()->length());
-
-        $this->response()->headers()->remove('Last-Modified');
-
-    }
+class Status403 extends Status400 {
 
 }

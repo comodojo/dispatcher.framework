@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Output\HttpStatus;
+<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 /**
- * Status: Bad Request
+ * Status: Switching Protocols
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -24,13 +24,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status400 extends AbstractHttpStatus {
-
-    public function consolidate() {
-
-        header($_SERVER["SERVER_PROTOCOL"].' 400 Bad Request', true, 400);
-        header('Content-Length: '.$this->response()->content()->length());
-
-    }
+class Status101 extends Status100 {
 
 }
