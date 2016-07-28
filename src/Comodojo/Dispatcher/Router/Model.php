@@ -168,11 +168,11 @@ class Model extends DispatcherClassModel {
 
                 } catch (DispatcherException $de) {
 
-                    throw new DispatcherException(sprintf("Service '%s' exception for method '%s': %s", $service, $method, $de->getMessage()), 0, $de, 500);
+                    throw new DispatcherException(sprintf("Service '%s' exception for method '%s': %s", $this->route->getClassName(), $method, $de->getMessage()), 0, $de, 500);
 
                 } catch (Exception $e) {
 
-                    throw new DispatcherException(sprintf("Service '%s' execution failed for method '%s': %s", $service, $method, $e->getMessage()), 0, $e, 500);
+                    throw new DispatcherException(sprintf("Service '%s' execution failed for method '%s': %s", $this->route->getClassName(), $method, $e->getMessage()), 0, $e, 500);
 
                 }
 
@@ -188,7 +188,7 @@ class Model extends DispatcherClassModel {
 
         } else {
 
-            throw new DispatcherException(sprintf("Unable to execute service '%s'", $service), 0, null, 500);
+            throw new DispatcherException(sprintf("Unable to execute service '%s'", $this->route->getClassName()), 0, null, 500);
 
         }
 
