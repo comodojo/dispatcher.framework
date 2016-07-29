@@ -35,6 +35,17 @@ class LogManager {
 
     public $configuration;
 
+    private static $levels = array(
+        'INFO' => Logger::INFO,
+        'NOTICE' => Logger::NOTICE,
+        'WARNING' => Logger::WARNING,
+        'ERROR' => Logger::ERROR,
+        'CRITICAL' => Logger::CRITICAL,
+        'ALERT' => Logger::ALERT,
+        'EMERGENCY' => Logger::EMERGENCY,
+        'DEBUG' => Logger::DEBUG
+    );
+
     public function __construct(Configuration $configuration) {
 
         $this->configuration = $configuration;
@@ -45,21 +56,19 @@ class LogManager {
 
         $log = $this->configuration->get('log');
 
+        $name = empty($log['name']) ? 'dispatcher' : $log['name'];
+
+        $logger = new Logger($name);
+
         if (
             empty($log) ||
             ( isset($log['enabled']) && $log['enabled'] === false ) ||
             empty($log['providers'])
         ) {
 
-            $logger = new Logger('dispatcher');
-
             $logger->pushHandler( new NullHandler( self::getLevel() ) );
 
         } else {
-
-            $name = empty($log['name']) ? 'dispatcher' : $log['name'];
-
-            $logger = new Logger($name);
 
             foreach ($log['providers'] as $provider => $parameters) {
 
@@ -95,57 +104,70 @@ class LogManager {
         switch ( $parameters['type'] ) {
 
             case 'StreamHandler':
-
-                $stream = $this->configuration->get('base-path').'/'.(empty($parameters['stream']) ? 'dispatcher.log' : $parameters['stream']);
-
-                $level = self::getLevel( empty($parameters['level']) ? null : $parameters['level'] );
-
-                $bubble = self::getBubble( empty($parameters['bubble']) ? true : $parameters['bubble'] );
-
-                $filePermission = self::getFilePermission( empty($parameters['filePermission']) ? null : $parameters['filePermission'] );
-
-                $useLocking = self::getLocking( empty($parameters['useLocking']) ? false : $parameters['useLocking'] );
-
-                $handler = new StreamHandler($stream, $level, $bubble, $filePermission, $useLocking);
-
+                $handler = $this->getStreamHandler($provider, $parameters);
                 break;
 
             case 'SyslogHandler':
-
-                if ( empty($parameters['ident']) ) return null;
-
-                $facility = empty($parameters['facility']) ? LOG_USER : $parameters['facility'];
-
-                $level = self::getLevel( empty($parameters['level']) ? null : $parameters['level'] );
-
-                $bubble = self::getBubble( empty($parameters['bubble']) ? true : $parameters['bubble'] );
-
-                $logopts = empty($parameters['logopts']) ? LOG_PID : $parameters['logopts'];
-
-                $handler = new SyslogHandler($parameters['ident'], $facility, $level, $bubble, $logopts);
-
+                $handler = $this->getSyslogHandler($provider, $parameters);
                 break;
 
             case 'ErrorLogHandler':
-
-                $messageType = empty($parameters['messageType']) ? ErrorLogHandler::OPERATING_SYSTEM : $parameters['messageType'];
-
-                $level = self::getLevel( empty($parameters['level']) ? null : $parameters['level'] );
-
-                $bubble = self::getBubble( empty($parameters['bubble']) ? true : $parameters['bubble'] );
-
-                $expandNewlines = self::getExpandNewlines( empty($parameters['expandNewlines']) ? false : $parameters['expandNewlines'] );
-
-                $handler = new ErrorLogHandler($messageType, $level, $bubble, $expandNewlines);
-
+                $handler = $this->getErrorLogHandler($provider, $parameters);
                 break;
 
             default:
                 $handler = null;
                 break;
+
         }
 
         return $handler;
+
+    }
+
+    protected function getStreamHandler($name, $parameters) {
+
+        $stream = $this->configuration->get('base-path').'/'.(empty($parameters['stream']) ? 'dispatcher.log' : $parameters['stream']);
+
+        $level = self::getLevel( empty($parameters['level']) ? null : $parameters['level'] );
+
+        $bubble = self::getBubble( empty($parameters['bubble']) ? true : $parameters['bubble'] );
+
+        $filePermission = self::getFilePermission( empty($parameters['filePermission']) ? null : $parameters['filePermission'] );
+
+        $useLocking = self::getLocking( empty($parameters['useLocking']) ? false : $parameters['useLocking'] );
+
+        return new StreamHandler($stream, $level, $bubble, $filePermission, $useLocking);
+
+    }
+
+    protected function getSyslogHandler($name, $parameters) {
+
+        if ( empty($parameters['ident']) ) return null;
+
+        $facility = empty($parameters['facility']) ? LOG_USER : $parameters['facility'];
+
+        $level = self::getLevel( empty($parameters['level']) ? null : $parameters['level'] );
+
+        $bubble = self::getBubble( empty($parameters['bubble']) ? true : $parameters['bubble'] );
+
+        $logopts = empty($parameters['logopts']) ? LOG_PID : $parameters['logopts'];
+
+        return new SyslogHandler($parameters['ident'], $facility, $level, $bubble, $logopts);
+
+    }
+
+    protected function getErrorLogHandler($name, $parameters) {
+
+        $messageType = empty($parameters['messageType']) ? ErrorLogHandler::OPERATING_SYSTEM : $parameters['messageType'];
+
+        $level = self::getLevel( empty($parameters['level']) ? null : $parameters['level'] );
+
+        $bubble = self::getBubble( empty($parameters['bubble']) ? true : $parameters['bubble'] );
+
+        $expandNewlines = self::getExpandNewlines( empty($parameters['expandNewlines']) ? false : $parameters['expandNewlines'] );
+
+        return new ErrorLogHandler($messageType, $level, $bubble, $expandNewlines);
 
     }
 
@@ -158,44 +180,11 @@ class LogManager {
      */
     protected static function getLevel($level = null) {
 
-        switch ( strtoupper($level) ) {
+        $level = strtoupper($level);
 
-            case 'INFO':
-                $logger_level = Logger::INFO;
-                break;
+        if ( array_key_exists($level, self::$levels) ) return self::$levels[$level];
 
-            case 'NOTICE':
-                $logger_level = Logger::NOTICE;
-                break;
-
-            case 'WARNING':
-                $logger_level = Logger::WARNING;
-                break;
-
-            case 'ERROR':
-                $logger_level = Logger::ERROR;
-                break;
-
-            case 'CRITICAL':
-                $logger_level = Logger::CRITICAL;
-                break;
-
-            case 'ALERT':
-                $logger_level = Logger::ALERT;
-                break;
-
-            case 'EMERGENCY':
-                $logger_level = Logger::EMERGENCY;
-                break;
-
-            case 'DEBUG':
-            default:
-                $logger_level = Logger::DEBUG;
-                break;
-
-        }
-
-        return $logger_level;
+        return self::$levels['DEBUG'];
 
     }
 
