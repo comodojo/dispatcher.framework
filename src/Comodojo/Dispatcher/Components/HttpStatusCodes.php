@@ -93,49 +93,49 @@ class HttpStatusCodes {
         510 => 'Not Extended', // missing
         511 => 'Network Authentication Required' // missing
     );
-    
+
     public function exists($code) {
-        
+
         return array_key_exists($code, $this->codes);
-        
+
     }
-    
+
     public function getMessage($code) {
-        
-        if ( $this->exists($code) ) return $this->code[$code];
-        
+
+        if ( $this->exists($code) ) return $this->codes[$code];
+
         throw new Exception("Invalid HTTP status code $code");
-        
+
     }
-    
+
     public function isInformational($code) {
-        
+
         return $code >= 100 && $code < 200;
-        
+
     }
-    
+
     public function isSuccessful($code) {
-        
+
         return $code >= 200 && $code < 300;
-        
+
     }
-    
+
     public function isRedirection($code) {
-        
+
         return $code >= 300 && $code < 400;
-        
+
     }
-    
+
     public function isClientError($code) {
-        
+
         return $code >= 400 && $code < 500;
-        
+
     }
-    
+
     public function isServerError($code) {
-        
+
         return $code >= 500 && $code < 600;
-        
+
     }
 
 }

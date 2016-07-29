@@ -39,12 +39,12 @@ class Table extends DispatcherClassModel {
     ) {
 
         parent::__construct($router->configuration, $router->logger);
-        
+
         $this->routes = array();
 
         $this->router = $router;
 
-        $this->parser = new Parser($router);
+        $this->parser = new Parser($this->logger);
 
         $this->cache = $cache;
 
@@ -97,9 +97,13 @@ class Table extends DispatcherClassModel {
 
         $regex = $this->regex($route);
 
-        if (isset($this->routes[$regex])) {
+        $routes = $this->routes;
 
-            unset($this->routes[$regex]);
+        if (isset($routes[$regex])) {
+
+            unset($routes[$regex]);
+
+            $this->routes = $routes;
 
             return true;
 
@@ -135,7 +139,7 @@ class Table extends DispatcherClassModel {
 
     private function readCache() {
 
-        if ( $this->configuration()->get('routing-table-cache') !== true ) return;
+        if ( $this->configuration->get('routing-table-cache') !== true ) return;
 
         $this->routes = $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
 
@@ -147,9 +151,9 @@ class Table extends DispatcherClassModel {
 
     private function dumpCache() {
 
-        if ( $this->configuration()->get('routing-table-cache') !== true ) return;
+        if ( $this->configuration->get('routing-table-cache') !== true ) return;
 
-        $ttl = $this->configuration()->get('routing-table-ttl');
+        $ttl = $this->configuration->get('routing-table-ttl');
 
         $this->cache->setNamespace('dispatcherinternals')->set("dispatcher-routes", $this->routes, $ttl == null ? 86400 : intval($ttl));
 
@@ -177,7 +181,9 @@ class Table extends DispatcherClassModel {
 
         //$this->logger->debug("PARAMETERS: " . var_export($value, true));
 
-        $this->routes[$regex] = $route;
+        $this->routes = array_merge($this->routes, array(
+            $regex => $route
+        ));
 
     }
 

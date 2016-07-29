@@ -89,7 +89,7 @@ class Model extends DispatcherClassModel {
 
     public function route(Request $request) {
 
-        $method = $request->method()->get();
+        $method = $request->method->get();
 
         $methods = $this->configuration->get('allowed-http-methods');
 
@@ -112,16 +112,16 @@ class Model extends DispatcherClassModel {
         return $this->route;
 
     }
-    
+
     public function getServiceInstance() {
-        
+
         $class = $this->route->getClassName();
 
         if (class_exists($class)) {
 
             // All the route parameters are also added to the query parameters
             foreach ($this->route->getParameters() as $parameter => $value) {
-                $this->request->query()->set($parameter, $value);
+                $this->request->query->set($parameter, $value);
             }
 
             return new $class(
@@ -135,7 +135,7 @@ class Model extends DispatcherClassModel {
 
         }
         else return null;
-        
+
     }
 
     public function compose(Response $response) {
@@ -160,7 +160,7 @@ class Model extends DispatcherClassModel {
 
             $result = "";
 
-            $method = $this->request->method()->get();
+            $method = $this->request->method->get();
 
             $methods = $service->getImplementedMethods();
 
@@ -190,7 +190,7 @@ class Model extends DispatcherClassModel {
 
             }
 
-            $this->response->content()->set($result);
+            $this->response->content->set($result);
 
         } else {
 

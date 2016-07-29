@@ -1,6 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
 use \Comodojo\Dispatcher\Router\Route;
+use \Psr\Log\LoggerInterface;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -27,6 +28,14 @@ use \Exception;
  */
 
 class Parser {
+
+    public $logger;
+
+    public function __construct(LoggerInterface $logger) {
+
+        $this->logger = $logger;
+
+    }
 
     // This method read the route (folder by folder recursively) and build
     // the global regular expression against which all the request URI will be compared
@@ -61,7 +70,7 @@ class Parser {
 
             if (!is_null($decoded) && is_array($decoded)) {
 
-                $param_regex    = '';
+                $param_regex = '';
 
                 $param_required = false;
 

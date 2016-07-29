@@ -10,7 +10,7 @@ use \Comodojo\Dispatcher\Response\Content;
 use \Comodojo\Dispatcher\Response\Location;
 use \Comodojo\Cookies\CookieManager;
 
-class ExtraTest extends \PHPUnit_Framework_TestCase {
+class ModelTest extends \PHPUnit_Framework_TestCase {
 
     private static $response;
 
@@ -57,7 +57,7 @@ class ExtraTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals('Bad Request', $status->description());
 
-        $this->assertEquals('Request Entity Too Large', $status->description(413));
+        $this->assertEquals('Payload Too Large', $status->description(413));
 
     }
 

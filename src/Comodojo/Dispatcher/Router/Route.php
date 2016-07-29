@@ -29,9 +29,9 @@ use \Exception;
  */
 
 class Route implements Serializable {
-    
+
     use DataAccessTrait;
-    
+
     use DataSerializationTrait;
 
     public function __construct() {
@@ -84,7 +84,7 @@ class Route implements Serializable {
 
     public function addService($service) {
 
-        array_push($this->service, $service);
+        $this->service = array_merge($this->service, array($service));
 
         return $this;
 
@@ -92,7 +92,9 @@ class Route implements Serializable {
 
     public function getParameter($key) {
 
-        return (isset($this->parameters[$key]))?$this->parameters[$key]:null;
+        $parameters = $this->parameters;
+
+        return (isset($parameters[$key]))?$parameters[$key]:null;
 
     }
 
@@ -104,7 +106,7 @@ class Route implements Serializable {
 
     public function setParameter($key, $value) {
 
-        $this->parameters[$key] = $value;
+        $this->parameters = array_merge($this->parameters, array($key => $value));
 
         return $this;
 
@@ -120,10 +122,12 @@ class Route implements Serializable {
 
     public function setQuery($key, $regex, $required = false) {
 
-        $this->query[$key] = array(
-            "regex" => $regex,
-            "required" => $required
-        );
+        $this->query = array_merge($this->query, array(
+            $key => array(
+                "regex" => $regex,
+                "required" => $required
+            )
+        ));
 
         return $this;
 
@@ -131,13 +135,17 @@ class Route implements Serializable {
 
     public function isQueryRequired($key) {
 
-        return isset($this->query[$key])?$this->query[$key]["required"]:false;
+        $query = $this->query;
+
+        return isset($query[$key])?$query[$key]["required"]:false;
 
     }
 
     public function getQueryRegex($key) {
 
-        return isset($this->query[$key])?$this->query[$key]["regex"]:null;
+        $query = $this->query;
+
+        return isset($query[$key])?$query[$key]["regex"]:null;
 
     }
 
