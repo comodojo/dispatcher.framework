@@ -52,7 +52,9 @@ class Model extends DispatcherClassModel {
 
         $this->version = new Version();
         
-        $this->file = File::fromUploadedFiles();
+        $repo = (!empty($configuration->get('repository')))?$configuration->get('base-path') . "/" . $configuration->get('repository'):'';
+        
+        $this->file = File::fromUploadedFiles($repo);
 
     }
 

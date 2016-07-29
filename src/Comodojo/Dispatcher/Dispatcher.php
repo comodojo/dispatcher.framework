@@ -159,7 +159,7 @@ class Dispatcher {
 
         try {
 
-            $this->router->compose($this->response());
+            $this->router->compose($this->response);
 
         } catch (DispatcherException $de) {
 
@@ -194,9 +194,13 @@ class Dispatcher {
     private function dumpCache($route) {
 
         $cache = strtoupper($route->getParameter('cache'));
+        
         $ttl = $route->getParameter('ttl');
+        
         $name = (string) $this->request->uri;
+        
         $method = $this->request->method->get();
+        
         $status = $this->response->status->get();
 
         // @NOTE: Server cache will not consider cacheable POST or PUT requests
@@ -204,8 +208,8 @@ class Dispatcher {
         //        subsequent requests will never reach the service.
         if (
             ( $cache == 'SERVER' || $cache == 'BOTH' ) &&
-            in_array($request->method->get(), array('GET', 'HEAD')) &&
-            in_array($this->status->get(), array(200, 203, 300, 301, 302, 404, 410))
+            in_array($method, array('GET', 'HEAD')) &&
+            in_array($status, array(200, 203, 300, 301, 302, 404, 410))
         ){
 
             $this->cache->setNamespace('dispatcherservice')->set($name, $this->response->export(), $ttl);

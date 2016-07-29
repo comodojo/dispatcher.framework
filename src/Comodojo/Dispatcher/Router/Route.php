@@ -44,6 +44,8 @@ class Route implements Serializable {
 
         $this->parameters = array();
 
+        $this->request = array();
+
         $this->query = array();
 
     }
@@ -120,6 +122,36 @@ class Route implements Serializable {
 
     }
 
+    public function getRequestParameter($key) {
+
+        $parameters = $this->request;
+
+        return (isset($parameters[$key]))?$parameters[$key]:null;
+
+    }
+
+    public function getRequestParameters() {
+
+        return $this->request;
+
+    }
+
+    public function setRequestParameter($key, $value) {
+
+        $this->request = array_merge($this->request, array($key => $value));
+
+        return $this;
+
+    }
+
+    public function setRequestParameters($parameters) {
+
+        $this->request = $parameters;
+
+        return $this;
+
+    }
+
     public function setQuery($key, $regex, $required = false) {
 
         $this->query = array_merge($this->query, array(
@@ -191,7 +223,7 @@ class Route implements Serializable {
                     if (count($matches) == 1) $matches = $matches[0]; // This is the case where no backreferences are present or available.
 
                     // The extracted value (with any backreference available) is added to the query parameters.
-                    $this->setParameter($key, $matches);
+                    $this->setRequestParameter($key, $matches);
 
                 }
 

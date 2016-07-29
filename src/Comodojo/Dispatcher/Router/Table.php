@@ -143,7 +143,13 @@ class Table extends DispatcherClassModel {
 
         $this->routes = $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
 
-        if (is_null($routes)) return;
+        if (is_null($this->routes)) {
+            
+            $this->routes = array();
+            
+            return;
+            
+        }
 
         $this->logger->debug("Routing table loaded from cache");
 

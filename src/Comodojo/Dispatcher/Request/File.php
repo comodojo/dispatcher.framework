@@ -101,8 +101,6 @@ class File {
     public function getFileData() {
 
         $file = $this->getTemporaryName();
-        if (empty($file))
-            $file = $this->getLocalName();
 
         if (file_exists($file))
             return file_get_contents($file);
@@ -116,8 +114,7 @@ class File {
         return (
             !empty($this->path) &&
             !empty($this->slug) &&
-            file_exists($this->getLocalName()) &&
-            file_exists($this->getLocalName() . ".data")
+            file_exists($this->getLocalName())
         );
 
     }
@@ -128,13 +125,11 @@ class File {
 
             $this->loadFromUploadedFile($slugOrControl);
 
-        } else {
-
-            $this->loadFromLocalRepository($slugOrControl);
+            return $this;
 
         }
 
-        return $this;
+        throw new DispatcherException("The requested file has not been uploaded");
 
     }
 
@@ -150,7 +145,7 @@ class File {
 
             if (move_uploaded_file($this->getTemporaryName(), $this->getLocalName())) {
 
-                return $this->saveFileInfo();
+                return $this->fileIsSaved();
 
             }
 
@@ -181,66 +176,6 @@ class File {
         }
 
         throw new DispatcherException("File not uploaded");
-
-    }
-
-    private function loadFromLocalRepository($slug) {
-
-        $this->slug = $slug;
-
-        if ($this->fileIsSaved()) {
-
-            $this->loadFileInfo();
-
-            return $this;
-
-        }
-
-        throw new DispatcherException("File not found");
-
-    }
-
-    private function loadFileInfo() {
-
-        $info = $this->getLocalName() . ".data";
-
-        if (file_exists($info)) {
-
-            $data = unserialize(file_get_contents($info));
-
-            $this->fname = $data[0];
-            $this->ctype = $data[1];
-            $this->size  = intval($data[2]);
-            $this->upld  = intval($data[3]);
-
-            return $this;
-
-        }
-
-        throw new DispatcherException("Unable to load file info");
-
-    }
-
-    private function saveFileInfo() {
-
-        $info = $this->getLocalName() . ".data";
-
-        if (!empty($this->path) && file_exists($this->path)) {
-
-            file_put_contents($info, serialize(
-                array(
-                    $this->fname,
-                    $this->ctype,
-                    $this->size,
-                    $this->upld
-                )
-            ));
-
-            return $this;
-
-        }
-
-        throw new DispatcherException("Unable to save file info");
 
     }
 
