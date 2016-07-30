@@ -1,6 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Response;
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Response\Headers;
 use \Comodojo\Dispatcher\Response\Status;
@@ -34,10 +35,8 @@ use \Psr\Log\LoggerInterface;
  */
 
 class Model extends DispatcherClassModel {
-
-    private $content_type = "text/plain";
-
-    private $charset;
+    
+    use TimestampTrait;
 
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
