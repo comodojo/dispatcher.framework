@@ -98,7 +98,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         }
 
-        $this->assertEquals("pattern", $route->getParameter("name"));
+        $this->assertEquals("pattern", $route->getRequestParameter("name"));
 
         $this->assertTrue(self::$router->table->remove($path));
 
