@@ -15,7 +15,7 @@ use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Output\Processor;
 use \Comodojo\Dispatcher\Events\DispatcherEvent;
 use \Comodojo\Dispatcher\Events\ServiceEvent;
-use \Comodojo\Cache\CacheManager;
+use \Comodojo\Cache\Cache;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -46,10 +46,22 @@ class Dispatcher {
     use DataAccessTrait;
     use TimestampTrait;
 
+    /**
+     * The main dispatcher constructor.
+     *
+     * @property Configuration $configuration
+     * @property LoggerInterface $logger
+     * @property EventsManager $events
+     * @property Cache $cache
+     * @property Extra $extra
+     * @property Request $request
+     * @property Router $router
+     * @property Response $response
+     */
     public function __construct(
         $configuration = array(),
         EventsManager $events = null,
-        CacheManager $cache = null,
+        Cache $cache = null,
         LoggerInterface $logger = null
     ) {
 
@@ -194,13 +206,13 @@ class Dispatcher {
     private function dumpCache($route) {
 
         $cache = strtoupper($route->getParameter('cache'));
-        
+
         $ttl = $route->getParameter('ttl');
-        
+
         $name = (string) $this->request->uri;
-        
+
         $method = $this->request->method->get();
-        
+
         $status = $this->response->status->get();
 
         // @NOTE: Server cache will not consider cacheable POST or PUT requests

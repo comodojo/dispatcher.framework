@@ -5,7 +5,7 @@ use \Comodojo\Dispatcher\Router\Parser;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Components\Configuration;
-use \Comodojo\Cache\CacheManager;
+use \Comodojo\Cache\Cache;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -34,7 +34,7 @@ use \Exception;
 class Table extends DispatcherClassModel {
 
     public function __construct(
-        CacheManager $cache,
+        Cache $cache,
         Router $router
     ) {
 
@@ -144,11 +144,11 @@ class Table extends DispatcherClassModel {
         $this->routes = $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
 
         if (is_null($this->routes)) {
-            
+
             $this->routes = array();
-            
+
             return;
-            
+
         }
 
         $this->logger->debug("Routing table loaded from cache");

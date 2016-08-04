@@ -2,9 +2,12 @@
 
 use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
 use \comodojo\Dispatcher\Components\Configuration;
-use \Comodojo\Cache\CacheInterface\CacheInterface;
-use \Comodojo\Cache\CacheManager as ComodojoCacheManager;
-use \Comodojo\Cache\FileCache;
+use \Comodojo\Cache\Providers\ProviderInterface;
+use \Comodojo\Cache\Providers\Filesystem;
+use \Comodojo\Cache\Providers\Memcached;
+use \Comodojo\Cache\Providers\Apc;
+use \Comodojo\Cache\Providers\PhpRedis;
+use \Comodojo\Cache\Cache;
 use \Psr\Log\LoggerInterface;
 
 /**
@@ -31,31 +34,30 @@ use \Psr\Log\LoggerInterface;
 
 class CacheManager extends DispatcherClassModel {
 
+    protected static $algorithms = array(
+        'PICK_LAST' => Cache::PICK_LAST,
+        'PICK_RANDOM' => Cache::PICK_RANDOM,
+        'PICK_BYWEIGHT' => Cache::PICK_BYWEIGHT,
+        'PICK_ALL' => Cache::PICK_ALL,
+        'PICK_TRAVERSE' => Cache::PICK_TRAVERSE,
+        'PICK_FIRST' => Cache::PICK_FIRST
+    );
+
     public function init() {
 
         $cache = $this->configuration->get('cache');
 
-        if ( empty($cache) ) {
+        $algorithm = self::getAlgorithm( empty($cache['algorithm']) ? null : $cache['algorithm']);
 
-            $manager = new ComodojoCacheManager(self::getAlgorithm(), $this->logger);
+        $manager = new Cache($algorithm, $this->logger);
 
-        } else {
+        if ( !empty($cache) && !empty($cache['providers']) && is_array($cache['providers']) ) {
 
-            $enabled = ( empty($cache['enabled']) || $cache['enabled'] === true ) ? true : false;
+            foreach ($cache['providers'] as $provider => $parameters) {
 
-            $algorithm = self::getAlgorithm( empty($cache['algorithm']) ? null : $cache['algorithm']);
+                list($handler, $weight) = $this->getHandler($provider, $parameters);
 
-            $manager = new ComodojoCacheManager($algorithm, $this->logger);
-
-            if ( $enabled && !empty($cache['providers']) ) {
-
-                foreach ($cache['providers'] as $provider => $parameters) {
-
-                    $handler = $this->getHandler($provider, $parameters);
-
-                    if ( $handler instanceof CacheInterface ) $manager->addProvider($handler);
-
-                }
+                if ( $handler instanceof ProviderInterface ) $manager->addProvider($handler, $weight);
 
             }
 
@@ -68,7 +70,7 @@ class CacheManager extends DispatcherClassModel {
     /**
      * Create the Cache Manager
      *
-     * @return \Comodojo\Cache\CacheManager
+     * @return \Comodojo\Cache\Cache
      */
     public static function create(Configuration $configuration, LoggerInterface $logger) {
 
@@ -80,37 +82,33 @@ class CacheManager extends DispatcherClassModel {
 
     protected function getHandler($provider, $parameters) {
 
-        switch ( strtolower($parameters['type']) ) {
+        if ( empty($parameters['type']) ) return array(null, null);
 
-            case 'filecache':
+        $weight = empty($parameters['weight']) ? 0 : $parameters['weight'];
 
-                $base = $this->configuration->get('base-path');
+        switch ( $parameters['type'] ) {
 
-                if ( empty($parameters['folder']) ||  empty($base) ) {
-                    $this->logger->warning("Wrong cache provider, disabling $provider", $parameters);
-                    break;
-                }
+            case 'Filesystem':
 
-                $target = $base.'/'.$parameters['folder'];
-
-                $handler = new FileCache($target);
+                $handler = $this->getFilesystemProvider($provider, $parameters);
 
                 break;
 
-            case 'memcached':
+            case 'Apc':
 
-                if ( empty($parameters['host']) ) {
-                    $this->logger->warning("Wrong cache provider, disabling $provider", $parameters);
-                    break;
-                }
+                $handler = $this->getApcProvider($provider, $parameters);
 
-                $port = empty($parameters['port']) ? 11211 : intval($parameters['port']);
+                break;
 
-                $weight = empty($parameters['weight']) ? 0 : intval($parameters['weight']);
+            case 'Memcached':
 
-                $persistentid = empty($parameters['persistent-id']) ? null : boolval($parameters['persistentid']);
+                $handler = $this->getMemcachedProvider($provider, $parameters);
 
-                $handler = new MemcachedCache($host, $port, $weight, $persistentid);
+                break;
+
+            case 'PhpRedis':
+
+                $handler = $this->getPhpRedisProvider($provider, $parameters);
 
                 break;
 
@@ -119,7 +117,49 @@ class CacheManager extends DispatcherClassModel {
                 break;
         }
 
-        return $handler;
+        return array($handler, $weight);
+
+    }
+
+    protected function getFilesystemProvider($provider, $parameters) {
+
+        $base = $this->configuration->get('base-path');
+
+        if ( empty($parameters['folder']) ||  empty($base) ) {
+            $this->logger->warning("Wrong cache provider, disabling $provider", $parameters);
+            return null;
+        }
+
+        $target = $base.'/'.$parameters['folder'];
+
+        $handler = new Filesystem($target);
+
+    }
+
+    protected function getApcProvider($provider, $parameters) {
+
+        return new Apc();
+
+    }
+
+    protected function getMemcachedProvider($provider, $parameters) {
+
+        $server = empty($parameters['server']) ? '127.0.0.1' : $parameters['server'];
+        $port = empty($parameters['port']) ? '1121' : $parameters['port'];
+        $weight = empty($parameters['weight']) ? 0 : $parameters['weight'];
+        $persistent_id = empty($parameters['persistent_id']) ? null : $parameters['persistent_id'];
+
+        return new Memcached($server, $port, $weight, $persistent_id);
+
+    }
+
+    protected function getPhpRedisProvider($provider, $parameters) {
+
+        $server = empty($parameters['server']) ? '127.0.0.1' : $parameters['server'];
+        $port = empty($parameters['port']) ? '1121' : $parameters['port'];
+        $timeout = empty($parameters['timeout']) ? 0 : $parameters['timeout'];
+
+        return new PhpRedis($server, $port, $timeout);
 
     }
 
@@ -132,32 +172,11 @@ class CacheManager extends DispatcherClassModel {
      */
     protected static function getAlgorithm($algorithm = null) {
 
-        switch ( strtoupper($algorithm) ) {
+        $algorithm = strtoupper($algorithm);
 
-            case 'PICK_LAST':
-                $selected = ComodojoCacheManager::PICK_LAST;
-                break;
+        if ( array_key_exists($algorithm, self::$algorithms) ) return self::$algorithms[$algorithm];
 
-            case 'PICK_RANDOM':
-                $selected = ComodojoCacheManager::PICK_RANDOM;
-                break;
-
-            case 'PICK_BYWEIGHT':
-                $selected = ComodojoCacheManager::PICK_BYWEIGHT;
-                break;
-
-            case 'PICK_ALL':
-                $selected = ComodojoCacheManager::PICK_ALL;
-                break;
-
-            case 'PICK_FIRST':
-            default:
-                $selected = ComodojoCacheManager::PICK_FIRST;
-                break;
-
-        }
-
-        return $selected;
+        return self::$algorithms['PICK_FIRST'];
 
     }
 

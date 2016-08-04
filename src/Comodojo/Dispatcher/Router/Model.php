@@ -7,7 +7,7 @@ use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Components\Configuration;
-use \Comodojo\Cache\CacheManager;
+use \Comodojo\Cache\Cache;
 use \Psr\Log\LoggerInterface;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
@@ -39,7 +39,7 @@ class Model extends DispatcherClassModel {
     public function __construct(
         Configuration $configuration,
         LoggerInterface $logger,
-        CacheManager $cache,
+        Cache $cache,
         Extra $extra
     ) {
 

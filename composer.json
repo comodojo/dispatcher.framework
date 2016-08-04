@@ -36,13 +36,14 @@
             "Comodojo\\Dispatcher\\": "src/Comodojo/Dispatcher"
         }
     },
+    "minimum-stability": "dev",
     "require": {
         "php": ">=5.6.0",
         "symfony/yaml": "^3.0",
         "monolog/monolog": "^1.0",
         "comodojo/exceptions": "^1.0",
         "comodojo/cookies": "^1.1",
-        "comodojo/cache": "^1.0",
+        "comodojo/cache": "^2.0",
         "league/uri": "^4.0",
         "league/event": "^2.1"
     },
