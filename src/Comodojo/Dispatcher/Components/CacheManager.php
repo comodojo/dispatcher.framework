@@ -132,7 +132,7 @@ class CacheManager extends DispatcherClassModel {
 
         $target = $base.'/'.$parameters['folder'];
 
-        $handler = new Filesystem($target);
+        return new Filesystem($target);
 
     }
 
