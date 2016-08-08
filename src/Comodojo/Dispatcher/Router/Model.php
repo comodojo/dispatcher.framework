@@ -174,7 +174,7 @@ class Model extends DispatcherClassModel {
 
                 } catch (DispatcherException $de) {
 
-                    throw new DispatcherException(sprintf("Service '%s' exception for method '%s': %s", $this->route->getClassName(), $method, $de->getMessage()), 0, $de, 500);
+                    throw $de;
 
                 } catch (Exception $e) {
 
