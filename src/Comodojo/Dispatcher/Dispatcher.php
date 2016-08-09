@@ -8,6 +8,7 @@ use \Comodojo\Dispatcher\Components\EventsManager;
 use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
 use \Comodojo\Dispatcher\Components\CacheManager as DispatcherCache;
 use \Comodojo\Dispatcher\Components\LogManager;
+use \Comodojo\Dispatcher\Components\ServerCache;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
@@ -127,7 +128,7 @@ class Dispatcher {
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
 
-        if ( $this->readCache() ) {
+        if ( ServerCache::read($this->request, $this->response, $this->cache) ) {
 
             return $this->shutdown();
 
@@ -137,9 +138,7 @@ class Dispatcher {
 
         try {
 
-            $route = $this->router->route($this->request);
-
-            $this->route = $route;
+            $this->route = $this->router->route($this->request);
 
         } catch (DispatcherException $de) {
 
@@ -150,9 +149,9 @@ class Dispatcher {
             return $this->shutdown();
 
         }
-
+        
         $route_type = $route->getType();
-
+        
         $route_service = $route->getServiceName();
 
         $this->logger->debug("Route acquired, type $route_type directed to $route_service.");
@@ -181,52 +180,11 @@ class Dispatcher {
 
         }
 
-        $this->processConfigurationParameters($route);
+        $this->processConfigurationParameters($this->route);
 
-        $this->dumpCache($route);
+        ServerCache::dump($this->request, $this->response, $this->route, $this->cache);
 
         return $this->shutdown();
-
-    }
-
-    private function readCache() {
-
-        $name = (string) $this->request->uri;
-
-        $cache = $this->cache->setNamespace('dispatcherservice')->get($name);
-
-        if ( is_null($cache) ) return false;
-
-        $this->response->import($cache);
-
-        return true;
-
-    }
-
-    private function dumpCache($route) {
-
-        $cache = strtoupper($route->getParameter('cache'));
-
-        $ttl = $route->getParameter('ttl');
-
-        $name = (string) $this->request->uri;
-
-        $method = $this->request->method->get();
-
-        $status = $this->response->status->get();
-
-        // @NOTE: Server cache will not consider cacheable POST or PUT requests
-        //        because of dispatcher internal structure: if post request is cached
-        //        subsequent requests will never reach the service.
-        if (
-            ( $cache == 'SERVER' || $cache == 'BOTH' ) &&
-            in_array($method, array('GET', 'HEAD')) &&
-            in_array($status, array(200, 203, 300, 301, 302, 404, 410))
-        ){
-
-            $this->cache->setNamespace('dispatcherservice')->set($name, $this->response->export(), $ttl);
-
-        }
 
     }
 
