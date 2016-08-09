@@ -29,23 +29,23 @@ use \Comodojo\Cache\Cache;
 
 
 class ServerCache {
-    
+
     // @NOTE: Server cache will not consider cacheable POST or PUT requests
     //        because of dispatcher internal structure: if post request is cached
     //        subsequent requests will never reach the service.
     private static $cachable_methods = array('GET', 'HEAD');
-    
+
     private static $cachable_statuses = array(200, 203, 300, 301, 302, 404, 410);
-    
+
     public static function read(
         Request $request,
         Response $response,
         Cache $cache
     ) {
 
-        $name = (string) $request->method . (string) $this->request->uri;
+        $name = (string) $request->method . (string) $request->uri;
 
-        $cache_object = $this->cache->setNamespace('dispatcherservice')->get($name);
+        $cache_object = $cache->setNamespace('dispatcherservice')->get($name);
 
         if ( is_null($cache_object) ) return false;
 
@@ -83,5 +83,5 @@ class ServerCache {
         }
 
     }
-    
+
 }

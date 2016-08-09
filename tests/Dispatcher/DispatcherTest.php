@@ -40,7 +40,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
     /**
     * @runInSeparateProcess
-     */
+    */
     public function testAll() {
 
         $dispatcher = self::$dispatcher;
