@@ -35,6 +35,8 @@ class LogManager {
 
     public $configuration;
 
+    public $name;
+
     private static $levels = array(
         'INFO' => Logger::INFO,
         'NOTICE' => Logger::NOTICE,
@@ -46,9 +48,10 @@ class LogManager {
         'DEBUG' => Logger::DEBUG
     );
 
-    public function __construct(Configuration $configuration) {
+    public function __construct(Configuration $configuration, $name = 'dispatcher') {
 
         $this->configuration = $configuration;
+        $this->name = $name;
 
     }
 
@@ -56,7 +59,7 @@ class LogManager {
 
         $log = $this->configuration->get('log');
 
-        $name = empty($log['name']) ? 'dispatcher' : $log['name'];
+        $name = empty($log['name']) ? $this->name : $log['name'];
 
         $logger = new Logger($name);
 
