@@ -94,9 +94,9 @@ class LogManager {
      *
      * @return Logger
      */
-    public static function create(Configuration $configuration) {
+    public static function create(Configuration $configuration, $name = 'dispatcher') {
 
-        $log = new LogManager($configuration);
+        $log = new LogManager($configuration, $name);
 
         return $log->init();
 
