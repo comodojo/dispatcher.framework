@@ -52,7 +52,7 @@ class Processor extends DispatcherClassModel {
         $this->response = $response;
 
         $this->request = $request;
-        
+
         $this->codes = new HttpStatusCodes();
 
     }

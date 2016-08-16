@@ -26,7 +26,7 @@ use \Exception;
  */
 
 class Content {
-    
+
     use ToStringTrait;
 
     private $content;

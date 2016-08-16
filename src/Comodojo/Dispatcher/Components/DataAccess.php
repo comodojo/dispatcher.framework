@@ -24,41 +24,33 @@
 
 
 trait DataAccess {
-    
+
     protected $data = array();
 
     public function __get($name) {
-        
+
         if ( array_key_exists($name, $this->data) ) {
-            
+
             return $this->data[$name];
-            
+
         }
-        
+
         return null;
-        
-        // $className = get_class($this);
-        
-        // throw new Exception("Invalid property $name for $className");
-        
+
     }
-    
+
     public function __set($name, $value) {
-        
-        // $className = get_class($this);
-        
-        // if ( array_key_exists($name, $this->data) === false ) throw new Exception("Invalid property $name for $className");
-        
+
         $this->data[$name] = $value;
-        
+
     }
-    
+
     public function __isset($name) {
-        
+
         return array_key_exists($name, $this->data);
-        
+
     }
-    
+
     public function merge($data) {
 
         foreach ($data as $key => $value) {
@@ -68,19 +60,19 @@ trait DataAccess {
         return $this;
 
     }
-    
+
     public function export() {
-        
+
         return $this->data;
-        
+
     }
-    
+
     public function import($data) {
-        
+
         $this->data = $data;
-        
+
         return $this;
-        
+
     }
 
 }

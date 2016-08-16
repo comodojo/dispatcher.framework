@@ -149,9 +149,9 @@ class Dispatcher {
             return $this->shutdown();
 
         }
-        
+
         $route_type = $route->getType();
-        
+
         $route_service = $route->getServiceName();
 
         $this->logger->debug("Route acquired, type $route_type directed to $route_service.");

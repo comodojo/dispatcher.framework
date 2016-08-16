@@ -41,14 +41,6 @@ trait Timestamp {
 
         return $this;
 
-        // $this->timestamp = filter_var($time, FILTER_VALIDATE_FLOAT, array(
-        //     'options' => array(
-        //         'decimal' => '.',
-        //         'default' => false
-        //     ),
-        //     'flags' =>  FILTER_FLAG_ALLOW_THOUSAND
-        // ));
-
     }
 
 }

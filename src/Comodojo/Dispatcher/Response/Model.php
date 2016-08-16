@@ -35,7 +35,7 @@ use \Psr\Log\LoggerInterface;
  */
 
 class Model extends DispatcherClassModel {
-    
+
     use TimestampTrait;
 
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
@@ -53,7 +53,7 @@ class Model extends DispatcherClassModel {
         $this->location = new Location();
 
     }
-    
+
     public function consolidate(Request $request, Route $route = null) {
 
         $status = $this->status->get();

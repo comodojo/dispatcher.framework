@@ -22,7 +22,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 trait Parameters {
 
     protected $parameters = array();
@@ -32,25 +31,25 @@ trait Parameters {
         if ( is_null($parameter) ) return $this->parameters;
 
         else if ( array_key_exists($parameter, $this->parameters) ) {
-            
+
             $value = $this->parameters[$parameter];
-            
+
             if (is_array($value) && !is_null($index)) {
-                
+
                 if (isset($value[$index])) {
-                
+
                     return $value[$index];
-                    
+
                 } else {
-                    
+
                     return null;
-                    
+
                 }
-                
+
             } else {
 
                 return $value;
-                
+
             }
 
         }

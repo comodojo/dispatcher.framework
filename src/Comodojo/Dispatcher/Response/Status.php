@@ -27,17 +27,17 @@ use \Exception;
  */
 
 class Status {
-    
+
     use ToStringTrait;
 
     private $status_code = 200;
-    
+
     private $codes;
-    
+
     public function __construct() {
-        
+
         $this->codes = new HttpStatusCodes;
-        
+
     }
 
     public function get() {
@@ -63,7 +63,7 @@ class Status {
     public function description($code=null) {
 
         if ( is_null($code) ) return $this->codes->getMessage($this->status_code);
-        
+
         return $this->codes->getMessage($code);
 
     }

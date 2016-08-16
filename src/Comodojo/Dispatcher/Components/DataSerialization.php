@@ -24,7 +24,7 @@
 
 
 trait DataSerialization {
-    
+
     /**
      * Return the serialized data
      *
