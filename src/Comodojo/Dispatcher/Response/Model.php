@@ -1,14 +1,14 @@
 <?php namespace Comodojo\Dispatcher\Response;
 
-use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
-use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Dispatcher\Components\AbstractModel;
 use \Comodojo\Dispatcher\Response\Headers;
 use \Comodojo\Dispatcher\Response\Status;
 use \Comodojo\Dispatcher\Response\Content;
 use \Comodojo\Dispatcher\Response\Location;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Route;
+use \Comodojo\Foundation\Timing\TimingTrait;
+use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Cookies\CookieManager;
 use \Psr\Log\LoggerInterface;
 
@@ -34,23 +34,21 @@ use \Psr\Log\LoggerInterface;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Model extends DispatcherClassModel {
+class Model extends AbstractModel {
 
-    use TimestampTrait;
+    use TimingTrait;
+
+    protected $mode = self::PROTECTDATA;
 
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
 
-        $this->headers = new Headers();
-
-        $this->cookies = new CookieManager();
-
-        $this->status = new Status();
-
-        $this->content = new Content();
-
-        $this->location = new Location();
+        $this->setRaw('headers', new Headers());
+        $this->setRaw('cookies', new CookieManager());
+        $this->setRaw('status', new Status());
+        $this->setRaw('content', new Content());
+        $this->setRaw('location', new Location());
 
     }
 

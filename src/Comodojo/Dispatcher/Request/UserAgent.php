@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Request;
 
-use \Comodojo\Dispatcher\Components\ToString as ToStringTrait;
+use \Comodojo\Dispatcher\Components\ToStringTrait;
 
 /**
  * @package     Comodojo Dispatcher

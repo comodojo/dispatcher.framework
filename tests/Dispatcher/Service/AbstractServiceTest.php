@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Tests\Service;
 
-use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;

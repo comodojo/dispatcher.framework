@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Request;
 
-use \Comodojo\Dispatcher\Components\Parameters as ParametersTrait;
+use \Comodojo\Foundation\Base\ParametersTrait;
 
 /**
  * @package     Comodojo Dispatcher

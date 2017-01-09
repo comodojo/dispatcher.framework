@@ -41,7 +41,7 @@
         "php": ">=5.6.0",
         "comodojo/foundation": "dev-master",
         "symfony/yaml": "^3.0",
-        "comodojo/cookies": "^1.1",
+        "comodojo/cookies": "^2.0",
         "comodojo/cache": "^2.0",
         "league/uri": "^4.0"
     },

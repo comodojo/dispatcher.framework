@@ -7,7 +7,7 @@ class MockDispatcherListener extends AbstractListener {
 
     public function handle(EventInterface $event) {
 
-        $event->dispatcher->extra->set('test-dispatcher-event',true);
+        $event->getDispatcher()->extra->set('test-dispatcher-event',true);
 
     }
 

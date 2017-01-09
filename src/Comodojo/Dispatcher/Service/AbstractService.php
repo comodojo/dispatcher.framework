@@ -1,7 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Service;
 
-use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Dispatcher\Components\AbstractModel;
+use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
@@ -31,7 +31,9 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AbstractService extends DispatcherClassModel {
+abstract class AbstractService extends AbstractModel {
+
+    protected $mode = self::READONLY;
 
     public function __construct(
         Configuration $configuration,
@@ -44,13 +46,10 @@ abstract class AbstractService extends DispatcherClassModel {
 
         parent::__construct($configuration, $logger);
 
-        $this->request = $request;
-
-        $this->router = $router;
-
-        $this->response = $response;
-
-        $this->extra = $extra;
+        $this->setRaw('request', $request);
+        $this->setRaw('router', $router);
+        $this->setRaw('response', $response);
+        $this->setRaw('extra', $extra);
 
     }
 
@@ -58,7 +57,6 @@ abstract class AbstractService extends DispatcherClassModel {
      * Get service-implemented HTTP methods
      *
      * @return  array   Service implemented methods, in uppercase
-     * @throw Exception
      */
     public function getImplementedMethods() {
 

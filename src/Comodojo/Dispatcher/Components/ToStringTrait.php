@@ -22,24 +22,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+trait ToStringTrait {
 
-trait Timestamp {
+    public function __toString() {
 
-    protected $timestamp;
-
-    final public function getTimestamp() {
-
-        return $this->timestamp;
-
-    }
-
-    final public function setTimestamp($time = null) {
-
-        if ( is_float($time) ) $this->timestamp = $time;
-
-        else $this->timestamp = microtime(true);
-
-        return $this;
+        return $this->get();
 
     }
 

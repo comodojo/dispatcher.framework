@@ -7,7 +7,7 @@ class MockServiceListener extends AbstractListener {
 
     public function handle(EventInterface $event) {
 
-        $event->extra->set('test-service-event',true);
+        $event->getExtra()->set('test-service-event',true);
 
     }
 

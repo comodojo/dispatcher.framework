@@ -1,12 +1,12 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
-use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Components\AbstractModel;
 use \Comodojo\Dispatcher\Router\Table;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
-use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Cache\Cache;
 use \Psr\Log\LoggerInterface;
 use \Comodojo\Exception\DispatcherException;
@@ -34,7 +34,9 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Model extends DispatcherClassModel {
+class Model extends AbstractModel {
+
+    protected $mode = self::PROTECTDATA;
 
     public function __construct(
         Configuration $configuration,
@@ -45,21 +47,14 @@ class Model extends DispatcherClassModel {
 
         parent::__construct($configuration, $logger);
 
-        $this->route = null;
-
-        $this->request = null;
-
-        $this->response = null;
-
-        $this->table = new Table($cache, $this);
-
-        $this->cache = $cache;
-
-        $this->extra = $extra;
-
-        $this->bypass_routing = false;
-
-        $this->bypass_service = false;
+        $this->setRaw('route', null);
+        $this->setRaw('request', null);
+        $this->setRaw('response', null);
+        $this->setRaw('table', new Table($cache, $this));
+        $this->setRaw('cache', $cache);
+        $this->setRaw('extra', $extra);
+        $this->setRaw('bypass_routing', false);
+        $this->setRaw('bypass_service', false);
 
     }
 

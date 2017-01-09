@@ -2,7 +2,7 @@
 
 use \Monolog\Logger;
 use \Monolog\Handler\NullHandler;
-use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Dispatcher\Components\DefaultConfiguration;
 use \Comodojo\Cache\CacheManager;
 use \Comodojo\Dispatcher\Request\Model as Request;

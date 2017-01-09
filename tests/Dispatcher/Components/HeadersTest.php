@@ -1,10 +1,10 @@
 <?php namespace Comodojo\Dispatcher\Tests\Components;
 
-use \Comodojo\Dispatcher\Components\Headers;
+use \Comodojo\Dispatcher\Components\HeadersTrait;
 
 class HeadersTest extends \PHPUnit_Framework_TestCase {
 
-    use Headers;
+    use HeadersTrait;
 
     protected $header = 'X-Test';
 

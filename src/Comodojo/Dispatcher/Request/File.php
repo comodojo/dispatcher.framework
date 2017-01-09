@@ -1,7 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Request;
 
 use \Exception;
-use \Comodojo\Exception\DispatcherException;
 
 /**
  * @package     Comodojo Dispatcher
@@ -27,44 +26,27 @@ use \Comodojo\Exception\DispatcherException;
 
 class File {
 
-    private $path  = '';
+    private $slug;
 
-    private $slug  = '';
+    private $fname;
 
-    private $fname = '';
+    private $tname;
 
-    private $tname = '';
+    private $upld;
 
-    private $upld  = '';
+    private $ctype;
 
-    private $ctype = 'text/plain';
+    private $size = 0;
 
-    private $size  = 0;
+    public function __construct($fileControl) {
 
-    public function __construct($fileControl = null, $repository = '') {
-
-        $this->path = $repository;
-
-        if (!is_null($fileControl)) {
-
-            $this->load($fileControl);
-
-        }
+        $this->load($fileControl);
 
     }
 
     public function getTemporaryName() {
 
         return $this->tname;
-
-    }
-
-    public function getLocalName() {
-
-        if (!empty($this->path))
-            return $this->path . "/" . $this->slug;
-        else
-            return '';
 
     }
 
@@ -102,20 +84,9 @@ class File {
 
         $file = $this->getTemporaryName();
 
-        if (file_exists($file))
-            return file_get_contents($file);
+        if (file_exists($file)) return file_get_contents($file);
 
-        throw new DispatcherException("File does not exists");
-
-    }
-
-    public function fileIsSaved() {
-
-        return (
-            !empty($this->path) &&
-            !empty($this->slug) &&
-            file_exists($this->getLocalName())
-        );
+        throw new Exception("File does not exists");
 
     }
 
@@ -129,75 +100,61 @@ class File {
 
         }
 
-        throw new DispatcherException("The requested file has not been uploaded");
+        throw new Exception("The requested file has not been uploaded");
 
     }
 
-    public function save($repository = '') {
-
-        if (!empty($repository)) {
-
-            $this->path = $repository;
-
-        }
+    public function save($path, $as_slug = false) {
 
         if (!empty($this->path) && file_exists($this->path)) {
 
-            if (move_uploaded_file($this->getTemporaryName(), $this->getLocalName())) {
+            $local_name = "$this->path/" . ($as_slug ? $this->getSlug() : $this->getFileName());
 
-                return $this->fileIsSaved();
+            if ( file_exists($local_name) ) {
+
+                $files = glob("$local_name*");
+
+                $count = count($files);
+
+                $local_name .= "-$count";
 
             }
 
-            throw new DispatcherException("Unable to save file");
+            if ( move_uploaded_file($this->getTemporaryName(), $local_name) ) {
+
+                // return file_exists($local_name);
+                return true;
+
+            }
+
+            throw new Exception("Unable to save file");
 
         }
 
-        throw new DispatcherException("Repository path is not available");
+        throw new Exception("Repository path not available");
 
     }
 
     private function loadFromUploadedFile($fileControl) {
 
-        if (isset($_FILES[$fileControl])) {
+        $file = $_FILES[$fileControl];
 
-            $file = $_FILES[$fileControl];
+        $this->tname = $file['tmp_name'];
+        $this->fname = $file['name'];
+        $this->ctype = $file['type'];
+        $this->size = intval($file['size']);
+        $this->upld = filectime($file['tmp_name']);
+        $this->slug = self::createSlug($this->fname);
 
-            $this->tname = $file['tmp_name'];
-            $this->fname = $file['name'];
-            $this->ctype = $file['type'];
-            $this->size  = intval($file['size']);
-            $this->upld  = filectime($file['tmp_name']);
-
-            $this->createSlug();
-
-            return $this;
-
-        }
-
-        throw new DispatcherException("File not uploaded");
+        return $this;
 
     }
 
-    private function createSlug() {
+    private static function createSlug($filename) {
 
-        preg_match_all("/[a-z0-9]+/", iconv("UTF-8", "ASCII//TRANSLIT", strtolower(preg_replace('/\..*?$/', '', $this->fname))), $matches);
+        preg_match_all("/[a-z0-9]+/", iconv("UTF-8", "ASCII//TRANSLIT", strtolower(preg_replace('/\..*?$/', '', $filename))), $matches);
 
-        $this->slug  = implode('-', $matches[0]);
-
-        if (!empty($this->path)) {
-
-            $files = glob($this->path . "/" . $slug . "*");
-
-            $count = count ($files);
-
-            if ($count > 0) {
-
-                $this->slug .= "-" . $count;
-
-            }
-
-        }
+        return implode('-', $matches[0]);
 
     }
 

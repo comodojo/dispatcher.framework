@@ -1,5 +1,9 @@
 <?php namespace Comodojo\Dispatcher\Components;
 
+use \Comodojo\Foundation\DataAccess\Model as FoundationModel;
+use \Comodojo\Foundation\Base\Configuration;
+use \Psr\Log\LoggerInterface;
+
 /**
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
@@ -22,32 +26,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+abstract class AbstractModel extends FoundationModel {
 
-trait DataSerialization {
+    public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
-    /**
-     * Return the serialized data
-     *
-     * @return string $serialized
-     */
-    public function serialize() {
-
-        return serialize($this->data);
-
-    }
-
-    /**
-     * Return the unserialized object
-     *
-     * @param string $data Serialized data
-     *
-     * @return Routes $this
-     */
-    public function unserialize($data) {
-
-        $this->data = unserialize($data);
-
-        return true;
+        $this->setRaw('configuration', $configuration);
+        $this->setRaw('logger', $logger);
 
     }
 

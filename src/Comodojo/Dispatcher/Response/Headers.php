@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Response;
 
-use \Comodojo\Dispatcher\Components\Headers as HeadersTrait;
+use \Comodojo\Dispatcher\Components\HeadersTrait;
 
 /**
  * @package     Comodojo Dispatcher

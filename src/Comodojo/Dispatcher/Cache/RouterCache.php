@@ -1,4 +1,4 @@
-<?php namespace Comodojo\Dispatcher\Components;
+<?php namespace Comodojo\Dispatcher\Cache;
 
 /**
  * @package     Comodojo Dispatcher
@@ -23,55 +23,19 @@
  */
 
 
-trait DataAccess {
+class RouterCache extends AbstractCache {
 
-    protected $data = array();
+    public static function read() {
 
-    public function __get($name) {
-
-        if ( array_key_exists($name, $this->data) ) {
-
-            return $this->data[$name];
-
-        }
-
-        return null;
+        return $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
 
     }
 
-    public function __set($name, $value) {
+    public static function dump($data, $ttl = null) {
 
-        $this->data[$name] = $value;
-
-    }
-
-    public function __isset($name) {
-
-        return array_key_exists($name, $this->data);
-
-    }
-
-    public function merge($data) {
-
-        foreach ($data as $key => $value) {
-            $this->$key = $value;
-        }
-
-        return $this;
-
-    }
-
-    public function export() {
-
-        return $this->data;
-
-    }
-
-    public function import($data) {
-
-        $this->data = $data;
-
-        return $this;
+        return $this->cache
+            ->setNamespace('dispatcherinternals')
+            ->set("dispatcher-routes", $data, $ttl === null ? self::DEFAULTTTL : intval($ttl));
 
     }
 

@@ -1,4 +1,4 @@
-<?php namespace Comodojo\Dispatcher\Components;
+<?php namespace Comodojo\Dispatcher\Cache;
 
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Route;
@@ -28,7 +28,7 @@ use \Comodojo\Cache\Cache;
  */
 
 
-class ServerCache {
+class ServerCache extends AbstractCache {
 
     // @NOTE: Server cache will not consider cacheable POST or PUT requests
     //        because of dispatcher internal structure: if post request is cached
@@ -37,19 +37,18 @@ class ServerCache {
 
     private static $cachable_statuses = array(200, 203, 300, 301, 302, 404, 410);
 
-    public static function read(
+    public function read(
         Request $request,
-        Response $response,
-        Cache $cache
+        Response $response
     ) {
 
         $name = (string) $request->method . (string) $request->uri;
 
-        $cache_object = $cache->setNamespace('dispatcherservice')->get($name);
+        $cache_object = $this->cache->setNamespace('dispatcherservice')->get($name);
 
         if ( is_null($cache_object) ) return false;
 
-        $response->import($cache);
+        $response->import($cache_object);
 
         return true;
 
@@ -58,8 +57,7 @@ class ServerCache {
     public static function dump(
         Request $request,
         Response $response,
-        Route $route,
-        Cache $cache
+        Route $route
     ) {
 
         $cache = strtoupper($route->getParameter('cache'));
@@ -78,7 +76,9 @@ class ServerCache {
             in_array($status, self::$cachable_statuses)
         ){
 
-            $cache->setNamespace('dispatcherservice')->set($name, $response->export(), $ttl);
+            $this->cache
+                ->setNamespace('dispatcherservice')
+                ->set($name, $response->export(), $ttl === null ? self::DEFAULTTTL : intval($ttl));
 
         }
 

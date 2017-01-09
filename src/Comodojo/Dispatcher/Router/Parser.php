@@ -132,7 +132,7 @@ class Parser {
         // If the field name ends with a '*', the parameter is considered as required
         if (preg_match('/^(.+)\*$/', $key, $bits)) {
 
-            $key            = $bits[1];
+            $key = $bits[1];
             $field_required = true;
 
         }

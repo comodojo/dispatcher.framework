@@ -1,10 +1,11 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
-use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Components\AbstractModel;
+use \Comodojo\Dispatcher\Cache\RouterCache;
 use \Comodojo\Dispatcher\Router\Parser;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Router\Model as Router;
-use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Cache\Cache;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
@@ -31,7 +32,9 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Table extends DispatcherClassModel {
+class Table extends AbstractModel {
+
+    protected $mode = self::PROTECTDATA;
 
     public function __construct(
         Cache $cache,
@@ -40,13 +43,10 @@ class Table extends DispatcherClassModel {
 
         parent::__construct($router->configuration, $router->logger);
 
-        $this->routes = array();
-
-        $this->router = $router;
-
-        $this->parser = new Parser($this->logger);
-
-        $this->cache = $cache;
+        $this->setRaw('routes', []);
+        $this->setRaw('router', $router);
+        $this->setRaw('parser', new Parser($this->logger));
+        $this->setRaw('cache', new RouterCache($cache));
 
         $this->readCache();
 
@@ -141,15 +141,17 @@ class Table extends DispatcherClassModel {
 
         if ( $this->configuration->get('routing-table-cache') !== true ) return;
 
-        $this->routes = $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
+        $data = $this->cache->read();
 
-        if (is_null($this->routes)) {
+        if ( is_null($data) ) {
 
-            $this->routes = array();
+            $this->routes = [];
 
             return;
 
         }
+
+        $this->routes = $data;
 
         $this->logger->debug("Routing table loaded from cache");
 
@@ -161,9 +163,11 @@ class Table extends DispatcherClassModel {
 
         $ttl = $this->configuration->get('routing-table-ttl');
 
-        $this->cache->setNamespace('dispatcherinternals')->set("dispatcher-routes", $this->routes, $ttl == null ? 86400 : intval($ttl));
-
-        $this->logger->debug("Routing table saved to cache");
+        if ( $this->cache->dump($this->routes, $ttl) ) {
+            $this->logger->debug("Routing table saved to cache");
+        } else {
+            $this->logger->warning("Cannot save routing table to cache");
+        }
 
     }
 

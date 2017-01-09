@@ -4,8 +4,8 @@ use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
-use \Comodojo\Dispatcher\Components\DataAccess as DataAccessTrait;
-use \Monolog\Logger;
+use \Comodojo\Foundation\Events\AbstractEvent;
+use \Psr\Log\LoggerInterface;
 
 /**
  * @package     Comodojo Dispatcher
@@ -29,14 +29,21 @@ use \Monolog\Logger;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 class ServiceEvent extends AbstractEvent {
 
-    use DataAccessTrait;
+    protected $logger;
+
+    protected $request;
+
+    protected $router;
+
+    protected $response;
+
+    protected $extra;
 
     public function __construct(
         $name,
-        Logger $logger,
+        LoggerInterface $logger,
         Request $request,
         Router $router,
         Response $response,
@@ -55,6 +62,31 @@ class ServiceEvent extends AbstractEvent {
 
         $this->extra = $extra;
 
+    }
+
+    public function getLogger() {
+
+        return $this->logger;
+    }
+
+    public function getRequest() {
+
+        return $this->request;
+    }
+
+    public function getRouter() {
+
+        return $this->router;
+    }
+
+    public function getResponse() {
+
+        return $this->response;
+    }
+
+    public function getExtra() {
+
+        return $this->extra;
     }
 
 }

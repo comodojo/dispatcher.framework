@@ -1,7 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Components;
 
-use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Dispatcher\Components\AbstractModel;
+use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Cache\Providers\ProviderInterface;
 use \Comodojo\Cache\Providers\Filesystem;
 use \Comodojo\Cache\Providers\Memcached;
@@ -32,7 +32,8 @@ use \Psr\Log\LoggerInterface;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class CacheManager extends DispatcherClassModel {
+// TODO: This class should be moved in fondation when cache package (2.0) ready
+class CacheManager extends AbstractModel {
 
     protected static $algorithms = array(
         'PICK_LAST' => Cache::PICK_LAST,

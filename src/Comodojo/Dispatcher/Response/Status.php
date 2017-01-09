@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Response;
 
-use \Comodojo\Dispatcher\Components\ToString as ToStringTrait;
+use \Comodojo\Dispatcher\Components\ToStringTrait;
 use \Comodojo\Dispatcher\Components\HttpStatusCodes;
 use \Exception;
 

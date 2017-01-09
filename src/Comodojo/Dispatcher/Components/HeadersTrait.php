@@ -22,10 +22,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+trait HeadersTrait {
 
-trait Headers {
-
-    protected $headers = array();
+    protected $headers = [];
 
     public function get($header = null) {
 
@@ -41,14 +40,14 @@ trait Headers {
 
         if ( is_null($header) ) {
 
-            return array_map( function($header, $value) {
-                return (string)($header.':'.$value);
-            },
-            $this->headers);
+            return array_map( [$this, 'headerToString'],
+                array_keys($this->headers),
+                array_values($this->headers)
+            );
 
         } else if ( array_key_exists($header, $this->headers) ) {
 
-            return (string)($header.':'.$this->headers[$header]);
+            return self::headerToString($header, $this->headers[$header]);
 
         } else return null;
 
@@ -101,6 +100,12 @@ trait Headers {
         }
 
         return $this;
+
+    }
+
+    private static function headerToString($header, $value) {
+
+        return (string)($header.':'.$value);
 
     }
 

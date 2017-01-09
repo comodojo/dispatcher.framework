@@ -1,7 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
-use \Comodojo\Dispatcher\Components\DataAccess as DataAccessTrait;
-use \Comodojo\Dispatcher\Components\DataSerialization as DataSerializationTrait;
+use \Comodojo\Foundation\DataAccess\Model as FoundationModel;
+use \Comodojo\Foundation\DataAccess\SerializationTrait;
 use \Comodojo\Exception\DispatcherException;
 use \Serializable;
 use \Exception;
@@ -28,25 +28,20 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Route implements Serializable {
+class Route extends FoundationModel implements Serializable {
 
-    use DataAccessTrait;
+    use SerializationTrait;
 
-    use DataSerializationTrait;
+    protected $mode = self::PROTECTDATA;
 
     public function __construct() {
 
-        $this->classname = "";
-
-        $this->type = "";
-
-        $this->service = array();
-
-        $this->parameters = array();
-
-        $this->request = array();
-
-        $this->query = array();
+        $this->setRaw('classname', "");
+        $this->setRaw('type', "");
+        $this->setRaw('service', []);
+        $this->setRaw('parameters', []);
+        $this->setRaw('request', []);
+        $this->setRaw('query', []);
 
     }
 

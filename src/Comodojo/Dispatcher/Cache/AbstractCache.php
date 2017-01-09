@@ -1,4 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Components;
+<?php namespace Comodojo\Dispatcher\Cache;
+
+use \Comodojo\Cache\Cache;
 
 /**
  * @package     Comodojo Dispatcher
@@ -23,13 +25,21 @@
  */
 
 
-trait ToString {
+abstract class AbstractCache {
 
-    abstract public function get();
+    const DEFAULTTTL = 86400;
+    
+    protected $cache;
 
-    public function __toString() {
+    public function __construct(Cache $cache) {
 
-        return $this->get();
+        $this->cache = $cache;
+
+    }
+
+    public function getCache() {
+
+        return $this->cache;
 
     }
 

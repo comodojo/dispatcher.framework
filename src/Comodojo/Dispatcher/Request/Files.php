@@ -1,8 +1,4 @@
-<?php namespace Comodojo\Dispatcher\Components;
-
-use \Comodojo\Dispatcher\Components\Configuration;
-use \Comodojo\Dispatcher\Components\DataAccess as DataAccessTrait;
-use \Psr\Log\LoggerInterface;
+<?php namespace Comodojo\Dispatcher\Request;
 
 /**
  * @package     Comodojo Dispatcher
@@ -26,16 +22,31 @@ use \Psr\Log\LoggerInterface;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+class Files {
 
-abstract class Model {
+    protected $files = [];
 
-    use DataAccessTrait;
+    public function __construct() {
 
-    public function __construct(Configuration $configuration, LoggerInterface $logger) {
+        foreach ($_FILES as $idx => $data) {
 
-        $this->configuration = $configuration;
+            $this->files[] = new File($idx);
 
-        $this->logger = $logger;
+        }
+
+    }
+
+    public function getFiles() {
+
+        return $this->files;
+
+    }
+
+    public static function load() {
+
+        $files = new Files();
+
+        return $files->getFiles();
 
     }
 

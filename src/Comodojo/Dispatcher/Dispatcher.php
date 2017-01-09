@@ -1,14 +1,12 @@
 <?php namespace Comodojo\Dispatcher;
 
-use \Psr\Log\LoggerInterface;
-use \Comodojo\Dispatcher\Components\DataAccess as DataAccessTrait;
-use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Dispatcher\Components\AbstractModel;
 use \Comodojo\Dispatcher\Components\DefaultConfiguration;
-use \Comodojo\Dispatcher\Components\EventsManager;
-use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
+
+// To Foundation //
 use \Comodojo\Dispatcher\Components\CacheManager as DispatcherCache;
-use \Comodojo\Dispatcher\Components\LogManager;
-use \Comodojo\Dispatcher\Components\ServerCache;
+
+use \Comodojo\Dispatcher\Cache\ServerCache;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
@@ -16,7 +14,12 @@ use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Output\Processor;
 use \Comodojo\Dispatcher\Events\DispatcherEvent;
 use \Comodojo\Dispatcher\Events\ServiceEvent;
+use \Comodojo\Foundation\Base\Configuration;
+use \Comodojo\Foundation\Timing\TimingTrait;
+use \Comodojo\Foundation\Events\Manager as EventsManager;
+use \Comodojo\Foundation\Logging\Manager as LogManager;
 use \Comodojo\Cache\Cache;
+use \Psr\Log\LoggerInterface;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -42,10 +45,11 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Dispatcher {
+class Dispatcher extends AbstractModel {
 
-    use DataAccessTrait;
-    use TimestampTrait;
+    use TimingTrait;
+
+    protected $mode = self::READONLY;
 
     /**
      * The main dispatcher constructor.
@@ -60,7 +64,7 @@ class Dispatcher {
      * @property Response $response
      */
     public function __construct(
-        $configuration = array(),
+        array $configuration = [],
         EventsManager $events = null,
         Cache $cache = null,
         LoggerInterface $logger = null
@@ -70,31 +74,27 @@ class Dispatcher {
         ob_start();
 
         // fix current timestamp
-        $this->setTimestamp();
-
-        // parsing configuration
-        $this->configuration = new Configuration( DefaultConfiguration::get() );
-
-        $this->configuration->merge($configuration);
+        $this->setTiming();
 
         // init core components
-        $this->logger = is_null($logger) ? LogManager::create($this->configuration) : $logger;
+        // create new configuration object and merge configuration
+        $configuration_object = new Configuration( DefaultConfiguration::get() );
+        $configuration_object->merge($configuration);
+        $logger = is_null($logger) ? LogManager::createFromConfiguration($configuration_object)->getLogger() : $logger;
 
-        $this->events = is_null($events) ? new EventsManager($this->logger) : $events;
+        parent::__construct($configuration_object, $logger);
 
-        $this->cache = is_null($cache) ? DispatcherCache::create($this->configuration, $this->logger) : $cache;
+        $this->setRaw('events', is_null($events) ? EventsManager::create($this->logger) : $events);
+        $this->setRaw('cache', is_null($cache) ? DispatcherCache::create($this->configuration, $this->logger) : $cache);
 
         // init models
-        $this->extra = new Extra($this->logger);
-
-        $this->request = new Request($this->configuration, $this->logger);
-
-        $this->router = new Router($this->configuration, $this->logger, $this->cache, $this->extra);
-
-        $this->response = new Response($this->configuration, $this->logger);
+        $this->setRaw('extra', new Extra($this->logger));
+        $this->setRaw('request', new Request($this->configuration, $this->logger));
+        $this->setRaw('router', new Router($this->configuration, $this->logger, $this->cache, $this->extra));
+        $this->setRaw('response', new Response($this->configuration, $this->logger));
 
         // we're ready!
-        $this->logger->debug("Dispatcher ready, current date ".date('c', $this->getTimestamp()));
+        $this->logger->debug("Dispatcher ready");
 
     }
 
@@ -122,13 +122,15 @@ class Dispatcher {
 
         }
 
+        $cache = new ServerCache($this->cache);
+
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request') );
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.'.$this->request->method->get()) );
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
 
-        if ( ServerCache::read($this->request, $this->response, $this->cache) ) {
+        if ( $cache->read($this->request, $this->response) ) {
 
             return $this->shutdown();
 
@@ -182,7 +184,7 @@ class Dispatcher {
 
         $this->processConfigurationParameters($this->route);
 
-        ServerCache::dump($this->request, $this->response, $this->route, $this->cache);
+        $cache->dump($this->request, $this->response, $this->route);
 
         return $this->shutdown();
 

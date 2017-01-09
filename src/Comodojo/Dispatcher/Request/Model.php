@@ -1,8 +1,8 @@
 <?php namespace Comodojo\Dispatcher\Request;
 
-use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
-use \Comodojo\Dispatcher\Components\Timestamp as TimestampTrait;
-use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Dispatcher\Components\AbstractModel;
+use \Comodojo\Foundation\Timing\TimingTrait;
+use \Comodojo\Foundation\Base\Configuration;
 use \League\Uri\Schemes\Http as HttpUri;
 use \Psr\Log\LoggerInterface;
 
@@ -28,39 +28,33 @@ use \Psr\Log\LoggerInterface;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Model extends DispatcherClassModel {
+class Model extends AbstractModel {
 
-    use TimestampTrait;
-    
+    use TimingTrait;
+
+    protected $mode = self::READONLY;
+
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
 
-        $this->setTimestamp($_SERVER['REQUEST_TIME_FLOAT']);
-        
-        $this->headers = new Headers();
+        $this->setTiming($_SERVER['REQUEST_TIME_FLOAT']);
 
-        $this->uri = HttpUri::createFromServer($_SERVER);
-
-        $this->post = new Post();
-
-        $this->query = new Query();
-
-        $this->useragent = new UserAgent();
-
-        $this->method = new Method();
-
-        $this->version = new Version();
-        
-        $repo = (!empty($configuration->get('repository')))?$configuration->get('base-path') . "/" . $configuration->get('repository'):'';
-        
-        $this->file = File::fromUploadedFiles($repo);
+        $this->setRaw('headers', new Headers());
+        $this->setRaw('uri', HttpUri::createFromServer($_SERVER));
+        $this->setRaw('post', new Post());
+        $this->setRaw('query', new Query());
+        $this->setRaw('useragent', new UserAgent());
+        $this->setRaw('method', new Method());
+        $this->setRaw('version', new Version());
+        $this->setRaw('files', Files::load());
 
     }
 
     public function route() {
 
         return str_replace($this->configuration->get("base-uri"), "", $this->uri->getPath());
+
     }
 
 }

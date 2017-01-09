@@ -31,7 +31,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
     public static function setUpBeforeClass() {
 
         $config = array_merge(self::$config, array(
-            "base-path" => realpath(dirname(__FILE__)."/../")
+            "base-path" => realpath(dirname(__FILE__)."/../root/")
         ));
 
         self::$dispatcher = new Dispatcher($config);
@@ -45,7 +45,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
         $dispatcher = self::$dispatcher;
 
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Components\Configuration', self::$dispatcher->configuration);
+        $this->assertInstanceOf('\Comodojo\Foundation\Base\Configuration', self::$dispatcher->configuration);
         $this->assertInstanceOf('\League\Event\Emitter', self::$dispatcher->events);
         $this->assertInstanceOf('\Comodojo\Cache\Cache', self::$dispatcher->cache);
         $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', self::$dispatcher->request);

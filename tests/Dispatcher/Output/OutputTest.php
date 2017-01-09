@@ -1,7 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Tests\Output;
 
 use \Monolog\Logger;
-use \Comodojo\Dispatcher\Components\Configuration;
+use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Dispatcher\Components\DefaultConfiguration;
 use \Comodojo\Dispatcher\Request\Model as RequestModel;
 use \Comodojo\Dispatcher\Response\Model as ResponseModel;

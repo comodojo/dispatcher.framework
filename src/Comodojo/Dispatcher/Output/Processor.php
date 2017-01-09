@@ -1,10 +1,10 @@
 <?php namespace Comodojo\Dispatcher\Output;
 
-use \Comodojo\Dispatcher\Components\Model as DispatcherClassModel;
+use \Comodojo\Dispatcher\Components\AbstractModel;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
-use \Comodojo\Dispatcher\Components\Configuration;
 use \Comodojo\Dispatcher\Components\HttpStatusCodes;
+use \Comodojo\Foundation\Base\Configuration;
 use \Psr\Log\LoggerInterface;
 use \Exception;
 
@@ -43,17 +43,24 @@ use \Exception;
 //       |_______|,'
 //
 
-class Processor extends DispatcherClassModel {
+class Processor extends AbstractModel {
 
-    public function __construct(Configuration $configuration, LoggerInterface $logger, Request $request, Response $response) {
+    protected $mode = self::READONLY;
+
+    public function __construct(
+        Configuration $configuration,
+        LoggerInterface $logger,
+        Request $request,
+        Response $response
+    ) {
 
         parent::__construct($configuration, $logger);
 
-        $this->response = $response;
+        $this->setRaw('response', $response);
 
-        $this->request = $request;
+        $this->setRaw('request', $request);
 
-        $this->codes = new HttpStatusCodes();
+        $this->setRaw('codes', new HttpStatusCodes());
 
     }
 
@@ -75,7 +82,12 @@ class Processor extends DispatcherClassModel {
 
     }
 
-    public static function parse(Configuration $configuration, LoggerInterface $logger, Request $request, Response $response) {
+    public static function parse(
+        Configuration $configuration,
+        LoggerInterface $logger,
+        Request $request,
+        Response $response
+    ) {
 
         $processor = new Processor($configuration, $logger, $request, $response);
 
