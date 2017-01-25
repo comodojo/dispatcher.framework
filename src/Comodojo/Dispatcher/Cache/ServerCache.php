@@ -3,7 +3,6 @@
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Response\Model as Response;
-use \Comodojo\Cache\Cache;
 
 /**
  * @package     Comodojo Dispatcher
@@ -42,7 +41,7 @@ class ServerCache extends AbstractCache {
         Response $response
     ) {
 
-        $name = (string) $request->method . (string) $request->uri;
+        $name = md5( (string) $request->method . (string) $request->uri );
 
         $cache_object = $this->cache->setNamespace('dispatcherservice')->get($name);
 
@@ -64,7 +63,7 @@ class ServerCache extends AbstractCache {
 
         $ttl = $route->getParameter('ttl');
 
-        $name = (string) $request->method . (string) $request->uri;
+        $name = md5( (string) $request->method . (string) $request->uri );
 
         $method = $request->method->get();
 

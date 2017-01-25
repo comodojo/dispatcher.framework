@@ -7,7 +7,7 @@ use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Foundation\Base\Configuration;
-use \Comodojo\Cache\Cache;
+use \Comodojo\SimpleCache\Manager as SimpleCacheManager;
 use \Psr\Log\LoggerInterface;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
@@ -41,7 +41,7 @@ class Model extends AbstractModel {
     public function __construct(
         Configuration $configuration,
         LoggerInterface $logger,
-        Cache $cache,
+        SimpleCacheManager $cache,
         Extra $extra
     ) {
 

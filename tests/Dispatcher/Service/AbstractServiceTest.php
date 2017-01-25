@@ -5,7 +5,7 @@ use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
-use \Comodojo\Cache\CacheManager;
+use \Comodojo\SimpleCache\Manager as CacheManager;
 use \Monolog\Logger;
 
 class AbstractServiceTest extends \PHPUnit_Framework_TestCase {

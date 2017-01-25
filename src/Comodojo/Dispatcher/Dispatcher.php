@@ -2,10 +2,6 @@
 
 use \Comodojo\Dispatcher\Components\AbstractModel;
 use \Comodojo\Dispatcher\Components\DefaultConfiguration;
-
-// To Foundation //
-use \Comodojo\Dispatcher\Components\CacheManager as DispatcherCache;
-
 use \Comodojo\Dispatcher\Cache\ServerCache;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
@@ -18,7 +14,7 @@ use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Foundation\Timing\TimingTrait;
 use \Comodojo\Foundation\Events\Manager as EventsManager;
 use \Comodojo\Foundation\Logging\Manager as LogManager;
-use \Comodojo\Cache\Cache;
+use \Comodojo\SimpleCache\Manager as SimpleCacheManager;
 use \Psr\Log\LoggerInterface;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
@@ -66,7 +62,7 @@ class Dispatcher extends AbstractModel {
     public function __construct(
         array $configuration = [],
         EventsManager $events = null,
-        Cache $cache = null,
+        SimpleCacheManager $cache = null,
         LoggerInterface $logger = null
     ) {
 
@@ -85,7 +81,7 @@ class Dispatcher extends AbstractModel {
         parent::__construct($configuration_object, $logger);
 
         $this->setRaw('events', is_null($events) ? EventsManager::create($this->logger) : $events);
-        $this->setRaw('cache', is_null($cache) ? DispatcherCache::create($this->configuration, $this->logger) : $cache);
+        $this->setRaw('cache', is_null($cache) ? SimpleCacheManager::createFromConfiguration($this->configuration, $this->logger) : $cache);
 
         // init models
         $this->setRaw('extra', new Extra($this->logger));

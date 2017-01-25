@@ -6,7 +6,7 @@ use \Comodojo\Dispatcher\Router\Parser;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Foundation\Base\Configuration;
-use \Comodojo\Cache\Cache;
+use \Comodojo\SimpleCache\Manager as SimpleCacheManager;
 use \Comodojo\Exception\DispatcherException;
 use \Exception;
 
@@ -37,7 +37,7 @@ class Table extends AbstractModel {
     protected $mode = self::PROTECTDATA;
 
     public function __construct(
-        Cache $cache,
+        SimpleCacheManager $cache,
         Router $router
     ) {
 

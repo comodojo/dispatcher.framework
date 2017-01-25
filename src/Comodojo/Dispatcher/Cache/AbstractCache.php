@@ -1,6 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Cache;
 
-use \Comodojo\Cache\Cache;
+use \Comodojo\SimpleCache\Manager as Cache;
 
 /**
  * @package     Comodojo Dispatcher
@@ -28,7 +28,7 @@ use \Comodojo\Cache\Cache;
 abstract class AbstractCache {
 
     const DEFAULTTTL = 86400;
-    
+
     protected $cache;
 
     public function __construct(Cache $cache) {

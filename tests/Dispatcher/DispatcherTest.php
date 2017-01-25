@@ -6,11 +6,11 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
     protected static $config = array(
         "cache" => array(
-            "algorithm" => "PICK_ALL",
+            "pick_methods" => "PICK_ALL",
             "providers" => array(
                 "test" => array(
                     "type" => "Filesystem",
-                    "folder" => "cache"
+                    "cache_folder" => "cache"
                 )
             )
         ),
@@ -47,7 +47,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertInstanceOf('\Comodojo\Foundation\Base\Configuration', self::$dispatcher->configuration);
         $this->assertInstanceOf('\League\Event\Emitter', self::$dispatcher->events);
-        $this->assertInstanceOf('\Comodojo\Cache\Cache', self::$dispatcher->cache);
+        $this->assertInstanceOf('\Comodojo\SimpleCache\Manager', self::$dispatcher->cache);
         $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', self::$dispatcher->request);
         $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Model', self::$dispatcher->router);
         $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Model', self::$dispatcher->response);
