@@ -25,13 +25,13 @@
 
 class RouterCache extends AbstractCache {
 
-    public static function read() {
+    public function read() {
 
         return $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
 
     }
 
-    public static function dump($data, $ttl = null) {
+    public function dump($data, $ttl = null) {
 
         return $this->cache
             ->setNamespace('dispatcherinternals')
