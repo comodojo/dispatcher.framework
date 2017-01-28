@@ -45,7 +45,7 @@ class Dispatcher extends AbstractModel {
 
     use TimingTrait;
 
-    protected $mode = self::READONLY;
+    // protected $mode = self::PROTECTDATA;
 
     /**
      * The main dispatcher constructor.
@@ -148,9 +148,9 @@ class Dispatcher extends AbstractModel {
 
         }
 
-        $route_type = $route->getType();
+        $route_type = $this->route->getType();
 
-        $route_service = $route->getServiceName();
+        $route_service = $this->route->getServiceName();
 
         $this->logger->debug("Route acquired, type $route_type directed to $route_service.");
 
@@ -244,8 +244,10 @@ class Dispatcher extends AbstractModel {
 
         $this->logger->debug("Dispatcher run-cycle ends.");
 
-        if ( function_exists('fastcgi_finish_request') ) fastcgi_finish_request();
-        else ob_end_clean();
+        // This could cause WSOD with some PHP-FPM configurations
+        // if ( function_exists('fastcgi_finish_request') ) fastcgi_finish_request();
+        // else ob_end_clean();
+        ob_end_clean();
 
         return $return;
 

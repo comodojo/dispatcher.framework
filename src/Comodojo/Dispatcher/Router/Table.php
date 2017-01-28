@@ -74,6 +74,12 @@ class Table extends AbstractModel {
 
     }
 
+    public function count() {
+
+        return count($this->routes);
+
+    }
+
     public function get($route) {
 
         $regex = $this->regex($route);
@@ -126,12 +132,14 @@ class Table extends AbstractModel {
             foreach( $routes as $name => $route ) {
 
                 $this->add($route['route'], $route['type'], $route['class'], $route['parameters']);
+                // $this->add($name, $route['type'], $route['class'], $route['parameters']);
 
             }
 
         }
 
-        $this->logger->debug("Routing table loaded");
+        $count = $this->count();
+        $this->logger->debug("$count routes loaded in routing table");
 
         $this->dumpCache();
 
