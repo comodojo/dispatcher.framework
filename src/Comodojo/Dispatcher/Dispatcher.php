@@ -80,6 +80,9 @@ class Dispatcher extends AbstractModel {
 
         parent::__construct($configuration_object, $logger);
 
+        $this->logger->debug("--------------------------------------------------------");
+        $this->logger->debug("Dispatcher run-cycle starts at ".$this->getTime()->format('c'));
+
         $this->setRaw('events', is_null($events) ? EventsManager::create($this->logger) : $events);
         $this->setRaw('cache', is_null($cache) ? SimpleCacheManager::createFromConfiguration($this->configuration, $this->logger) : $cache);
 
@@ -132,7 +135,7 @@ class Dispatcher extends AbstractModel {
 
         }
 
-        $this->logger->debug("Starting router.");
+        $this->logger->debug("Starting router");
 
         try {
 
@@ -140,7 +143,7 @@ class Dispatcher extends AbstractModel {
 
         } catch (DispatcherException $de) {
 
-            $this->logger->debug("Route error (".$de->getStatus()."), shutting down dispatcher.");
+            $this->logger->debug("Route error (".$de->getStatus()."), shutting down dispatcher");
 
             $this->processDispatcherException($de);
 
@@ -152,7 +155,7 @@ class Dispatcher extends AbstractModel {
 
         $route_service = $this->route->getServiceName();
 
-        $this->logger->debug("Route acquired, type $route_type directed to $route_service.");
+        $this->logger->debug("Route acquired, type $route_type directed to $route_service");
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route') );
 
@@ -164,7 +167,7 @@ class Dispatcher extends AbstractModel {
 
         // translate route to service
 
-        $this->logger->debug("Running $route_service service.");
+        $this->logger->debug("Running $route_service service");
 
         try {
 
@@ -172,7 +175,7 @@ class Dispatcher extends AbstractModel {
 
         } catch (DispatcherException $de) {
 
-            $this->logger->debug("Service exception (".$de->getStatus()."), shutting down dispatcher.");
+            $this->logger->debug("Service exception (".$de->getStatus()."), shutting down dispatcher");
 
             $this->processDispatcherException($de);
 
@@ -199,7 +202,7 @@ class Dispatcher extends AbstractModel {
 
     private function emitServiceSpecializedEvents($name) {
 
-        $this->logger->debug("Emitting $name service-event.");
+        $this->logger->debug("Emitting $name service-event");
 
         return new ServiceEvent(
             $name,
@@ -238,11 +241,11 @@ class Dispatcher extends AbstractModel {
 
         $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.#') );
 
-        $this->logger->debug("Composing return value.");
+        $this->logger->debug("Composing return value");
 
         $return = Processor::parse($this->configuration, $this->logger, $this->request, $this->response);
 
-        $this->logger->debug("Dispatcher run-cycle ends.");
+        $this->logger->debug("Dispatcher run-cycle ends");
 
         // This could cause WSOD with some PHP-FPM configurations
         // if ( function_exists('fastcgi_finish_request') ) fastcgi_finish_request();
