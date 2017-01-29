@@ -33,7 +33,7 @@ use \Exception;
 
 abstract class AbstractService extends AbstractModel {
 
-    protected $mode = self::READONLY;
+    protected $mode = self::PROTECTDATA;
 
     public function __construct(
         Configuration $configuration,

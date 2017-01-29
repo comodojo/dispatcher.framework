@@ -53,7 +53,7 @@ class ServerCache extends AbstractCache {
 
     }
 
-    public static function dump(
+    public function dump(
         Request $request,
         Response $response,
         Route $route
