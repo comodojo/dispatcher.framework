@@ -83,14 +83,21 @@ class Dispatcher extends AbstractModel {
         $this->logger->debug("--------------------------------------------------------");
         $this->logger->debug("Dispatcher run-cycle starts at ".$this->getTime()->format('c'));
 
-        $this->setRaw('events', is_null($events) ? EventsManager::create($this->logger) : $events);
-        $this->setRaw('cache', is_null($cache) ? SimpleCacheManager::createFromConfiguration($this->configuration, $this->logger) : $cache);
+        try {
+            
+            $this->setRaw('events', is_null($events) ? EventsManager::create($this->logger) : $events);
+            $this->setRaw('cache', is_null($cache) ? SimpleCacheManager::createFromConfiguration($this->configuration, $this->logger) : $cache);
 
-        // init models
-        $this->setRaw('extra', new Extra($this->logger));
-        $this->setRaw('request', new Request($this->configuration, $this->logger));
-        $this->setRaw('router', new Router($this->configuration, $this->logger, $this->cache, $this->extra));
-        $this->setRaw('response', new Response($this->configuration, $this->logger));
+            // init models
+            $this->setRaw('extra', new Extra($this->logger));
+            $this->setRaw('request', new Request($this->configuration, $this->logger));
+            $this->setRaw('router', new Router($this->configuration, $this->logger, $this->cache, $this->extra));
+            $this->setRaw('response', new Response($this->configuration, $this->logger));
+
+        } catch (Exception $e) {
+            $this->logger->critical($e->getMessage(),$e->getTrace());
+            throw $e;
+        }
 
         // we're ready!
         $this->logger->debug("Dispatcher ready");
