@@ -67,26 +67,31 @@ class ServiceEvent extends AbstractEvent {
     public function getLogger() {
 
         return $this->logger;
+
     }
 
     public function getRequest() {
 
         return $this->request;
+
     }
 
     public function getRouter() {
 
         return $this->router;
+
     }
 
     public function getResponse() {
 
         return $this->response;
+
     }
 
     public function getExtra() {
 
         return $this->extra;
+
     }
 
 }

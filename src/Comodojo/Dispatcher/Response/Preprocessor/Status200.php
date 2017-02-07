@@ -28,7 +28,7 @@ class Status200 extends AbstractPreprocessor {
 
     public function consolidate() {
 
-        $this->response->headers->set('Content-Length: '.$this->response->content->length());
+        $this->response->headers->set('Content-Length', $this->response->content->length());
 
         $type = $this->response->content->type();
         $charset = $this->response->content->charset();
