@@ -1,4 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Components;
+<?php namespace Comodojo\Dispatcher\Traits;
+
+use \Comodojo\SimpleCache\Manager as CacheManager;
 
 /**
  * @package     Comodojo Dispatcher
@@ -22,11 +24,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait ToStringTrait {
+trait CacheTrait {
 
-    public function __toString() {
+    protected $cache;
 
-        return $this->get();
+    public function getCache() {
+
+        return $this->cache;
+
+    }
+
+    public function setCache(CacheManager $cache) {
+
+        $this->cache = $cache;
 
     }
 

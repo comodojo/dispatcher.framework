@@ -28,9 +28,9 @@ class Status100 extends AbstractPreprocessor {
 
     public function consolidate() {
 
-        $this->response->content->set(null);
-        $this->response->headers->delete('Content-Type');
-        $this->response->headers->delete('Content-Length');
+        $this->response->getContent()->set(null);
+        $this->response->getHeaders()->delete('Content-Type');
+        $this->response->getHeaders()->delete('Content-Length');
 
     }
 

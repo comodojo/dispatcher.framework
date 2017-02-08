@@ -40,9 +40,9 @@ class OutputTest extends \PHPUnit_Framework_TestCase {
      */
     public function testSuccessOutput() {
 
-        $this->response->content->set("test");
+        $this->response->getContent()->set("test");
 
-        $this->response->status->set(201);
+        $this->response->getStatus()->set(201);
 
         $output = Processor::parse($this->configuration, $this->logger, $this->request, $this->response);
 
@@ -55,9 +55,9 @@ class OutputTest extends \PHPUnit_Framework_TestCase {
      */
     public function testNoContentOutput() {
 
-        $this->response->content->set("test");
+        $this->response->getContent()->set("test");
 
-        $this->response->status->set(204);
+        $this->response->getStatus()->set(204);
 
         $this->response->consolidate($this->request);
 

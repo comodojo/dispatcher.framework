@@ -11,6 +11,7 @@ use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Router\Table;
 use \Comodojo\Dispatcher\Router\Route;
+use \Comodojo\Foundation\Events\Manager as EventsManager;
 
 class RouterTest extends \PHPUnit_Framework_TestCase {
 
@@ -25,18 +26,20 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $cache = new CacheManager();
 
+        $events = EventsManager::create($logger);
+
         $extra = new Extra($configuration, $logger);
 
-        self::$router = new Router($configuration, $logger, $cache, $extra);
+        self::$router = new Router($configuration, $logger, $cache, $events, $extra);
 
     }
 
     public function testRouter() {
 
-        $request = new Request(self::$router->configuration, self::$router->logger);
-        $response = new Response(self::$router->configuration, self::$router->logger);
+        $request = new Request(self::$router->getConfiguration(), self::$router->getLogger());
+        $response = new Response(self::$router->getConfiguration(), self::$router->getLogger());
 
-        $request->method->set("GET");
+        $request->getMethod()->set("GET");
 
         $route = new Route();
         $route->setType("ROUTE")
@@ -62,23 +65,25 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         self::$router->compose($response);
 
-        $this->assertEquals('this is a test', $response->content->get());
+        $this->assertEquals('this is a test', (string) $response->getContent());
 
     }
 
     public function testTableRoute() {
 
+        $table = self::$router->getTable();
+
         $path = 'test/{"name*": "\\\\w+"}';
 
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Table', self::$router->table);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Table', $table);
 
-        self::$router->table->add(
+        $table->add(
             $path,
             "ROUTE",
             "\\Comodojo\\Dispatcher\\Tests\\Service\\ConcreteService"
         );
 
-        $route = self::$router->table->get($path);
+        $route = $table->get($path);
 
         $this->assertInstanceOf('\Comodojo\Dispatcher\Router\Route', $route);
 
@@ -92,7 +97,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals("\\w+", $route->getQueryRegex("name"));
 
-        if (preg_match("/" . self::$router->table->regex($path) . "/", "/test/pattern", $matches)) {
+        if (preg_match("/" . $table->regex($path) . "/", "/test/pattern", $matches)) {
 
             $route->path($matches);
 
@@ -100,9 +105,9 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertEquals("pattern", $route->getRequestParameter("name"));
 
-        $this->assertTrue(self::$router->table->remove($path));
+        $this->assertTrue($table->remove($path));
 
-        $this->assertNull(self::$router->table->get($path));
+        $this->assertNull($table->get($path));
 
     }
 

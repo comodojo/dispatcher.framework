@@ -28,15 +28,15 @@ class Status200 extends AbstractPreprocessor {
 
     public function consolidate() {
 
-        $this->response->headers->set('Content-Length', $this->response->content->length());
+        $this->response->getHeaders()->set('Content-Length', $this->response->getContent()->length());
 
-        $type = $this->response->content->type();
-        $charset = $this->response->content->charset();
+        $type = $this->response->getContent()->type();
+        $charset = $this->response->getContent()->charset();
 
         if ( is_null($charset) ) {
-            $this->response->headers->set("Content-type", strtolower($type));
+            $this->response->getHeaders()->set("Content-type", strtolower($type));
         } else {
-            $this->response->headers->set("Content-type", strtolower($type)."; charset=".$charset);
+            $this->response->getHeaders()->set("Content-type", strtolower($type)."; charset=".$charset);
         }
 
     }

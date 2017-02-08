@@ -34,7 +34,10 @@ use \Exception;
 
 class Table extends AbstractModel {
 
-    protected $mode = self::PROTECTDATA;
+    protected $routes = [];
+    protected $router;
+    protected $parser;
+    protected $cache;
 
     public function __construct(
         SimpleCacheManager $cache,
@@ -43,10 +46,9 @@ class Table extends AbstractModel {
 
         parent::__construct($router->configuration, $router->logger);
 
-        $this->setRaw('routes', []);
-        $this->setRaw('router', $router);
-        $this->setRaw('parser', new Parser($this->logger));
-        $this->setRaw('cache', new RouterCache($cache));
+        $this->router = $router;
+        $this->parser = new Parser($this->logger);
+        $this->cache = new RouterCache($cache);
 
         $this->readCache();
 
@@ -80,14 +82,21 @@ class Table extends AbstractModel {
 
     }
 
+    public function getRoutes() {
+
+        return $this->routes;
+
+    }
+
     public function get($route) {
 
         $regex = $this->regex($route);
 
-        if (isset($this->routes[$regex]))
+        if (isset($this->routes[$regex])) {
             return $this->routes[$regex];
-        else
-            return null;
+        }
+
+        return null;
 
     }
 
@@ -183,25 +192,20 @@ class Table extends AbstractModel {
     private function register($folders, $type, $class, $parameters) {
 
         // The values associated with a route are as follows:
-        $route = new Route($this->router);
+        // $route = new Route($this->router);
+        $route = new Route();
         $route->setType($type) // Type of route
             ->setClassName($class) // Class to be invoked
             ->setParameters($parameters); // Parameters passed via the composer.json configuration (cache, ttl, etc...)
 
-        $this->logger->debug("ROUTE: " . implode("/", $folders));
-
-        //$this->logger->debug("PARAMETERS: " . var_export($value, true));
+        $this->logger->debug("Route table - route: " . implode("/", $folders));
 
         // This method generate a global regular expression which will be able to match all the URI supported by the route
         $regex = $this->parser->read($folders, $route);
 
-        $this->logger->debug("ROUTE: " . $regex);
+        $this->logger->debug("Route table - route regex: $regex");
 
-        //$this->logger->debug("PARAMETERS: " . var_export($value, true));
-
-        $this->routes = array_merge($this->routes, array(
-            $regex => $route
-        ));
+        $this->routes = array_merge($this->routes, [$regex => $route]);
 
     }
 

@@ -10,6 +10,12 @@ use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Output\Processor;
 use \Comodojo\Dispatcher\Events\DispatcherEvent;
 use \Comodojo\Dispatcher\Events\ServiceEvent;
+use \Comodojo\Dispatcher\Traits\CacheTrait;
+use \Comodojo\Dispatcher\Traits\RequestTrait;
+use \Comodojo\Dispatcher\Traits\ResponseTrait;
+use \Comodojo\Dispatcher\Traits\RouterTrait;
+use \Comodojo\Dispatcher\Traits\ExtraTrait;
+use \Comodojo\Dispatcher\Traits\EventsTrait;
 use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Foundation\Timing\TimingTrait;
 use \Comodojo\Foundation\Events\Manager as EventsManager;
@@ -44,20 +50,18 @@ use \Exception;
 class Dispatcher extends AbstractModel {
 
     use TimingTrait;
+    use CacheTrait;
+    use RequestTrait;
+    use ResponseTrait;
+    use RouterTrait;
+    use ExtraTrait;
+    use EventsTrait;
 
-    // protected $mode = self::PROTECTDATA;
+    protected $route;
 
     /**
      * The main dispatcher constructor.
      *
-     * @property Configuration $configuration
-     * @property LoggerInterface $logger
-     * @property EventsManager $events
-     * @property Cache $cache
-     * @property Extra $extra
-     * @property Request $request
-     * @property Router $router
-     * @property Response $response
      */
     public function __construct(
         array $configuration = [],
@@ -76,6 +80,7 @@ class Dispatcher extends AbstractModel {
         // create new configuration object and merge configuration
         $configuration_object = new Configuration( DefaultConfiguration::get() );
         $configuration_object->merge($configuration);
+
         $logger = is_null($logger) ? LogManager::createFromConfiguration($configuration_object)->getLogger() : $logger;
 
         parent::__construct($configuration_object, $logger);
@@ -84,19 +89,23 @@ class Dispatcher extends AbstractModel {
         $this->logger->debug("Dispatcher run-cycle starts at ".$this->getTime()->format('c'));
 
         try {
-            
-            $this->setRaw('events', is_null($events) ? EventsManager::create($this->logger) : $events);
-            $this->setRaw('cache', is_null($cache) ? SimpleCacheManager::createFromConfiguration($this->configuration, $this->logger) : $cache);
+
+            // init other components
+            $this->setEvents(is_null($events) ? EventsManager::create($this->logger) : $events);
+            $this->setCache(is_null($cache) ? SimpleCacheManager::createFromConfiguration($this->configuration, $this->logger) : $cache);
 
             // init models
-            $this->setRaw('extra', new Extra($this->logger));
-            $this->setRaw('request', new Request($this->configuration, $this->logger));
-            $this->setRaw('router', new Router($this->configuration, $this->logger, $this->cache, $this->extra));
-            $this->setRaw('response', new Response($this->configuration, $this->logger));
+            $this->setExtra(new Extra($this->logger));
+            $this->setRequest(new Request($this->configuration, $this->logger));
+            $this->setRouter(new Router($this->configuration, $this->logger, $this->cache, $this->events, $this->extra));
+            $this->setResponse(new Response($this->configuration, $this->logger));
 
         } catch (Exception $e) {
+
             $this->logger->critical($e->getMessage(),$e->getTrace());
+
             throw $e;
+
         }
 
         // we're ready!
@@ -106,54 +115,51 @@ class Dispatcher extends AbstractModel {
 
     public function dispatch() {
 
-        $this->logger->debug("Starting to dispatch.");
+        $logger = $this->getLogger();
+        $configuration = $this->getConfiguration();
+        $events = $this->getEvents();
 
-        $this->logger->debug("Emitting global dispatcher event.");
+        $logger->debug("Starting to dispatch.");
 
-        $this->events->emit( new DispatcherEvent($this) );
+        $logger->debug("Emitting global dispatcher event.");
+        $events->emit( new DispatcherEvent($this) );
 
-        if ( $this->configuration->get('enabled') === false ) {
+        if ( $configuration->get('enabled') === false ) {
 
-            $this->logger->debug("Dispatcher disabled, shutting down gracefully.");
+            $logger->debug("Dispatcher disabled, shutting down gracefully.");
 
-            $status = $this->configuration->get('disabled-status');
+            $status = $configuration->get('disabled-status');
+            $content = $configuration->get('disabled-message');
 
-            $content = $this->configuration->get('disabled-message');
-
-            $this->response->status->set($status);
-
-            $this->response->content->set($content);
+            $this->getResponse()->getStatus()->set($status);
+            $this->getResponse()->getContent()->set($content);
 
             return $this->shutdown();
 
         }
 
-        $cache = new ServerCache($this->cache);
+        $cache = new ServerCache($this->getCache());
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request') );
-
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.'.$this->request->method->get()) );
-
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.request.#') );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.request') );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.request.'.$this->request->method->get()) );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.request.#') );
 
         if ( $cache->read($this->request, $this->response) ) {
-
+            // we have a cache!
+            // shutdown immediately
             return $this->shutdown();
-
         }
 
-        $this->logger->debug("Starting router");
+        $logger->debug("Starting router");
 
         try {
 
-            $this->route = $this->router->route($this->request);
+            $this->route = $this->getRouter()->route($this->request);
 
         } catch (DispatcherException $de) {
 
-            $this->logger->debug("Route error (".$de->getStatus()."), shutting down dispatcher");
-
+            $logger->debug("Route error (".$de->getStatus()."), shutting down dispatcher");
             $this->processDispatcherException($de);
-
             return $this->shutdown();
 
         }
@@ -162,19 +168,15 @@ class Dispatcher extends AbstractModel {
 
         $route_service = $this->route->getServiceName();
 
-        $this->logger->debug("Route acquired, type $route_type directed to $route_service");
+        $logger->debug("Route acquired, type $route_type directed to $route_service");
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route') );
-
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$route_type) );
-
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.'.$route_service) );
-
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.route.#') );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.route') );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.route.'.$route_type) );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.route.'.$route_service) );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.route.#') );
 
         // translate route to service
-
-        $this->logger->debug("Running $route_service service");
+        $logger->debug("Running $route_service service");
 
         try {
 
@@ -182,8 +184,7 @@ class Dispatcher extends AbstractModel {
 
         } catch (DispatcherException $de) {
 
-            $this->logger->debug("Service exception (".$de->getStatus()."), shutting down dispatcher");
-
+            $logger->debug("Service exception (".$de->getStatus()."), shutting down dispatcher");
             $this->processDispatcherException($de);
 
         }
@@ -201,23 +202,25 @@ class Dispatcher extends AbstractModel {
         $params = $route->getParameter('headers');
 
         if ( !empty($params) && is_array($params) ) {
-
-            foreach($params as $name=>$value) $this->response->headers->set($name, $value);
+            foreach($params as $name => $value) $this->getResponse()->getHeaders()->set($name, $value);
         }
 
     }
 
-    private function emitServiceSpecializedEvents($name) {
+    private function createServiceSpecializedEvents($name) {
 
         $this->logger->debug("Emitting $name service-event");
 
         return new ServiceEvent(
             $name,
-            $this->logger,
-            $this->request,
-            $this->router,
-            $this->response,
-            $this->extra
+            $this->getConfiguration(),
+            $this->getLogger(),
+            $this->getCache(),
+            $this->getEvents(),
+            $this->getRequest(),
+            $this->getRouter(),
+            $this->getResponse(),
+            $this->getExtra()
         );
 
     }
@@ -225,32 +228,32 @@ class Dispatcher extends AbstractModel {
     private function processDispatcherException(DispatcherException $de) {
 
         $status = $de->getStatus();
-
         $message = $de->getMessage();
-
         $headers = $de->getHeaders();
 
-        $this->response->status->set($status);
+        $response = $this->getResponse();
 
-        $this->response->content->set($message);
-
-        $this->response->headers->merge($headers);
+        $response->getStatus()->set($status);
+        $response->getContent()->set($message);
+        $response->getHeaders()->merge($headers);
 
     }
 
     private function shutdown() {
 
-        $this->response->consolidate($this->request, $this->route);
+        $events = $this->getEvents();
+        $request = $this->getRequest();
+        $response = $this->getResponse();
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response') );
+        $response->consolidate($request, $this->route);
 
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.'.$this->response->status->get()) );
-
-        $this->events->emit( $this->emitServiceSpecializedEvents('dispatcher.response.#') );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.response') );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.response.' . $response->getStatus()->get()) );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.response.#') );
 
         $this->logger->debug("Composing return value");
 
-        $return = Processor::parse($this->configuration, $this->logger, $this->request, $this->response);
+        $return = Processor::parse($this->getConfiguration(), $this->logger, $request, $response);
 
         $this->logger->debug("Dispatcher run-cycle ends");
 

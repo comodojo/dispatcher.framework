@@ -28,9 +28,9 @@ class Status201 extends Status200 {
 
     public function consolidate() {
 
-        $location = $this->response->location->get();
+        $location = $this->response->getLocation()->get();
 
-        if ( $location != null ) $this->response->headers->set("Location", $location);
+        if ( $location != null ) $this->response->getHeaders()->set("Location", $location);
 
         parent::consolidate();
 

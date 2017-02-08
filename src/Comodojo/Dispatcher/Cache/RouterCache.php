@@ -25,17 +25,21 @@
 
 class RouterCache extends AbstractCache {
 
+    const CACHE_NAMESPACE = "DISPATCHERINTERNALS";
+
+    const CACHE_NAME = "dispatcher-routes";
+
     public function read() {
 
-        return $this->cache->setNamespace('dispatcherinternals')->get("dispatcher-routes");
+        return $this->getCache()->setNamespace(self::CACHE_NAMESPACE)->get(self::CACHE_NAME);
 
     }
 
     public function dump($data, $ttl = null) {
 
-        return $this->cache
-            ->setNamespace('dispatcherinternals')
-            ->set("dispatcher-routes", $data, $ttl === null ? self::DEFAULTTTL : intval($ttl));
+        return $this->getCache()
+            ->setNamespace(self::CACHE_NAMESPACE)
+            ->set(self::CACHE_NAME, $data, $ttl === null ? self::DEFAULTTTL : intval($ttl));
 
     }
 

@@ -86,9 +86,9 @@ class Parser {
                  */
                 foreach ($decoded as $key => $string) {
 
-                    $this->logger->debug("PARAMETER KEY: " . $key);
+                    $this->logger->debug("Route parser - parameter key: $key");
 
-                    $this->logger->debug("PARAMETER STRING: " . $string);
+                    $this->logger->debug("Route parser - parameter string: $string");
 
                     /* The key and the regex of every paramater is passed to the 'param'
                      * method which will build an appropriate regular expression and will understand
@@ -98,7 +98,7 @@ class Parser {
 
                     if ($value->isQueryRequired($key)) $param_required = true;
 
-                    $this->logger->debug("PARAMETER REGEX: " . $param_regex);
+                    $this->logger->debug("Route parser - parameter regex: $param_regex");
 
                 }
                 // Once the parameter is analyzed, the result is passed to the next iteration

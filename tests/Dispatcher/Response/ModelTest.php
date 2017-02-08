@@ -25,11 +25,11 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 
     public function testComponents() {
 
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Headers', self::$response->headers);
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Status', self::$response->status);
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Content', self::$response->content);
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Location', self::$response->location);
-        $this->assertInstanceOf('\Comodojo\Cookies\CookieManager', self::$response->cookies);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Headers', self::$response->getHeaders());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Status', self::$response->getStatus());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Content', self::$response->getContent());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Location', self::$response->getLocation());
+        $this->assertInstanceOf('\Comodojo\Cookies\CookieManager', self::$response->getCookies());
 
     }
 
@@ -37,7 +37,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 
         $uri = "www.google.com";
 
-        $location = self::$response->location;
+        $location = self::$response->getLocation();
 
         $location->set($uri);
 
@@ -47,13 +47,13 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 
     public function testStatus() {
 
-        $status = self::$response->status;
+        $status = self::$response->getStatus();
 
-        $this->assertEquals(200,$status->get());
+        $this->assertEquals(200, $status->get());
 
         $status->set(400);
 
-        $this->assertEquals(400,$status->get());
+        $this->assertEquals(400, $status->get());
 
         $this->assertEquals('Bad Request', $status->description());
 
@@ -63,7 +63,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 
     public function testContent() {
 
-        $content = self::$response->content;
+        $content = self::$response->getContent();
         $out = md5(mt_rand());
 
         $this->assertNull($content->get());

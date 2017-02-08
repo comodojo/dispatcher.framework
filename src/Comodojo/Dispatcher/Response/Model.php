@@ -1,16 +1,13 @@
 <?php namespace Comodojo\Dispatcher\Response;
 
 use \Comodojo\Dispatcher\Components\AbstractModel;
-use \Comodojo\Dispatcher\Response\Headers;
-use \Comodojo\Dispatcher\Response\Status;
-use \Comodojo\Dispatcher\Response\Content;
-use \Comodojo\Dispatcher\Response\Location;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Foundation\Timing\TimingTrait;
 use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Cookies\CookieManager;
 use \Psr\Log\LoggerInterface;
+use \Serializable;
 
 /**
  * @package     Comodojo Dispatcher
@@ -34,27 +31,139 @@ use \Psr\Log\LoggerInterface;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Model extends AbstractModel {
+class Model extends AbstractModel implements Serializable {
 
     use TimingTrait;
 
-    protected $mode = self::PROTECTDATA;
+    const NO_CONTENT_STATUSES = [100,101,102,204,304];
+
+    const CACHEABLE_METHODS = ['GET', 'HEAD', 'POST', 'PUT'];
+
+    const CACHEABLE_STATUSES = [200, 203, 300, 301, 302, 404, 410];
 
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
 
-        $this->setRaw('headers', new Headers());
-        $this->setRaw('cookies', new CookieManager());
-        $this->setRaw('status', new Status());
-        $this->setRaw('content', new Content());
-        $this->setRaw('location', new Location());
+        $this->setHeaders(new Headers());
+        $this->setCookies(new CookieManager());
+        $this->setStatus(new Status());
+        $this->setContent(new Content());
+        $this->setLocation(new Location());
+
+    }
+
+    public function getHeaders() {
+
+        return $this->headers;
+
+    }
+
+    public function setHeaders(Headers $headers) {
+
+        $this->headers = $headers;
+
+        return $this;
+
+    }
+
+    public function getCookies() {
+
+        return $this->cookies;
+
+    }
+
+    public function setCookies(CookieManager $cookies) {
+
+        $this->cookies = $cookies;
+
+        return $this;
+
+    }
+
+    public function getStatus() {
+
+        return $this->status;
+
+    }
+
+    public function setStatus(Status $status) {
+
+        $this->status = $status;
+
+        return $this;
+
+    }
+
+    public function getContent() {
+
+        return $this->content;
+
+    }
+
+    public function setContent(Content $content) {
+
+        $this->content = $content;
+
+        return $this;
+
+    }
+
+    public function getLocation() {
+
+        return $this->location;
+
+    }
+
+    public function setLocation(Location $location) {
+
+        $this->location = $location;
+
+        return $this;
+
+    }
+
+    public function serialize() {
+
+        return serialize($this->export());
+
+    }
+
+    public function unserialize($data) {
+
+        $this->import(unserialize($data));
+
+    }
+
+    public function export() {
+
+        return (object) [
+            'headers' => $this->getHeaders(),
+            'cookies' => $this->getCookies()->getAll(),
+            'status' => $this->getStatus(),
+            'content' => $this->getContent(),
+            'location' => $this->getLocation()
+        ];
+
+    }
+
+    public function import($data) {
+
+        if ( isset($data->headers) ) $this->setHeaders($data->headers);
+        if ( isset($data->status) ) $this->setStatus($data->status);
+        if ( isset($data->content) ) $this->setContent($data->content);
+        if ( isset($data->location) ) $this->setLocation($data->location);
+
+        if ( isset($data->cookies) && is_array($data->cookies) ) {
+            $cookies = $this->getCookies();
+            foreach ($data->cookies as $name => $cookie) $cookies->add($cookie);
+        }
 
     }
 
     public function consolidate(Request $request, Route $route = null) {
 
-        $status = $this->status->get();
+        $status = $this->getStatus()->get();
 
         $output_class_name = "\\Comodojo\\Dispatcher\\Response\\Preprocessor\\Status".$status;
 
@@ -72,20 +181,22 @@ class Model extends AbstractModel {
         }
 
         // extra checks
+        $content = $this->getContent();
+        $headers = $this->getHeaders();
 
-        if ( $request->method->get() == 'HEAD' && !in_array($status, array(100,101,102,204,304)) ) {
-            $length = $this->content->length();
-            $this->content->set(null);
-            if ($length) $this->headers->set('Content-Length', $length);
+        if ( (string) $request->getMethod() == 'HEAD' && !in_array($status, self::NO_CONTENT_STATUSES) ) {
+            $length = $content->length();
+            $content->set(null);
+            if ($length) $headers->set('Content-Length', $length);
         }
 
-        if ($this->headers->get('Transfer-Encoding') != null) {
-            $this->headers->delete('Content-Length');
+        if ($headers->get('Transfer-Encoding') != null) {
+            $headers->delete('Content-Length');
         }
 
-        if ( $request->version->get() == '1.0' && false !== strpos($this->headers->get('Cache-Control'), 'no-cache')) {
-            $this->headers->set('pragma', 'no-cache');
-            $this->headers->set('expires', -1);
+        if ( (string) $request->getVersion() == '1.0' && false !== strpos($headers->get('Cache-Control'), 'no-cache')) {
+            $headers->set('pragma', 'no-cache');
+            $headers->set('expires', -1);
         }
 
     }
@@ -93,25 +204,28 @@ class Model extends AbstractModel {
     private function setClientCache(Request $request, Route $route) {
 
         $cache = strtoupper($route->getParameter('cache'));
-        $ttl = $route->getParameter('ttl');
+        $ttl = (int) $route->getParameter('ttl');
 
         if (
             ($cache == 'CLIENT' || $cache == 'BOTH') &&
-            in_array($request->method->get(), array('GET', 'HEAD', 'POST', 'PUT')) &&
-            in_array($this->status->get(), array(200, 203, 300, 301, 302, 404, 410))
+            in_array((string) $request->getMethod(), self::CACHEABLE_METHODS) &&
+            in_array($this->getStatus()->get(), self::CACHEABLE_STATUSES)
             // @TODO: here we should also check for Cache-Control no-store or private;
             //        the cache layer will be improoved in future versions.
         ) {
 
+            $headers = $this->getHeaders();
+            $timestamp = (int) $this->getTime()->format('U') + $ttl;
+
             if ( $ttl > 0 ) {
 
-                $this->headers->set("Cache-Control","max-age=".$ttl.", must-revalidate");
-                $this->headers->set("Expires",gmdate("D, d M Y H:i:s", (int)$this->getTimestamp() + $ttl)." GMT");
+                $headers->set("Cache-Control", "max-age=".$ttl.", must-revalidate");
+                $headers->set("Expires", gmdate("D, d M Y H:i:s", $timestamp)." GMT");
 
             } else {
 
-                $this->headers->set("Cache-Control","no-cache, must-revalidate");
-                $this->headers->set("Expires","Mon, 26 Jul 1997 05:00:00 GMT");
+                $headers->set("Cache-Control", "no-cache, must-revalidate");
+                $headers->set("Expires", "Mon, 26 Jul 1997 05:00:00 GMT");
 
             }
 

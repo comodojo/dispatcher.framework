@@ -36,23 +36,25 @@ class Query {
 
     private static function getParameters() {
 
-        switch( $_SERVER['REQUEST_METHOD'] ) {
+        return isset($_GET) ? $_GET : [];
 
-            case 'GET':
+        // switch( $_SERVER['REQUEST_METHOD'] ) {
+        //
+        //     case 'GET':
+        //
+        //         $parameters = $_GET;
+        //
+        //         break;
+        //
+        //     default:
+        //
+        //         $parameters = [];
+        //
+        //         break;
+        //
+        // }
 
-                $parameters = $_GET;
-
-                break;
-
-            default:
-
-                $parameters = array();
-
-                break;
-
-        }
-
-        return $parameters;
+        // return $parameters;
 
     }
 

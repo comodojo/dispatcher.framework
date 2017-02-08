@@ -1,12 +1,16 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
+use \Comodojo\Dispatcher\Traits\CacheTrait;
+use \Comodojo\Dispatcher\Traits\EventsTrait;
+use \Comodojo\Dispatcher\Traits\RequestTrait;
+use \Comodojo\Dispatcher\Traits\ResponseTrait;
+use \Comodojo\Dispatcher\Traits\ExtraTrait;
 use \Comodojo\Dispatcher\Components\AbstractModel;
-use \Comodojo\Dispatcher\Router\Table;
-use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Foundation\Base\Configuration;
+use \Comodojo\Foundation\Events\Manager as EventsManager;
 use \Comodojo\SimpleCache\Manager as SimpleCacheManager;
 use \Psr\Log\LoggerInterface;
 use \Comodojo\Exception\DispatcherException;
@@ -36,25 +40,43 @@ use \Exception;
 
 class Model extends AbstractModel {
 
-    protected $mode = self::PROTECTDATA;
+    use CacheTrait;
+    use EventsTrait;
+    use RequestTrait;
+    use ResponseTrait;
+    use ExtraTrait;
+
+    protected $bypass_routing = false;
+    protected $bypass_service = false;
+    protected $table;
 
     public function __construct(
         Configuration $configuration,
         LoggerInterface $logger,
         SimpleCacheManager $cache,
+        EventsManager $events,
         Extra $extra
     ) {
 
         parent::__construct($configuration, $logger);
 
-        $this->setRaw('route', null);
-        $this->setRaw('request', null);
-        $this->setRaw('response', null);
-        $this->setRaw('table', new Table($cache, $this));
-        $this->setRaw('cache', $cache);
-        $this->setRaw('extra', $extra);
-        $this->setRaw('bypass_routing', false);
-        $this->setRaw('bypass_service', false);
+        $this->setCache($cache);
+        $this->setExtra($extra);
+        $this->setEvents($events);
+
+        $this->setTable(new Table($cache, $this));
+
+    }
+
+    public function getTable() {
+
+        return $this->table;
+
+    }
+
+    public function setTable(Table $table) {
+
+        $this->table = $table;
 
     }
 
@@ -84,11 +106,11 @@ class Model extends AbstractModel {
 
     public function route(Request $request) {
 
-        $method = $request->method->get();
+        $method = (string) $request->getMethod();
 
         $methods = $this->configuration->get('allowed-http-methods');
 
-        if ( ( $methods != null || !empty($methods) ) && in_array($method, $methods) === false ) {
+        if ( !empty($methods) && in_array($method, $methods) === false ) {
 
             throw new DispatcherException("Method not allowed", 0, null, 405, array(
                 "Allow" => implode(",",$methods)
@@ -96,11 +118,11 @@ class Model extends AbstractModel {
 
         }
 
-        $this->request = $request;
+        $this->setRequest($request);
 
-        if (!$this->bypass_routing) {
+        if ( $this->bypass_routing === false ) {
 
-            if (!$this->parse()) throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
+            if ( !$this->parse() ) throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
 
         }
 
@@ -112,32 +134,35 @@ class Model extends AbstractModel {
 
         $class = $this->route->getClassName();
 
-        if (class_exists($class)) {
+        if ( class_exists($class) ) {
 
             // All the route parameters are also added to the query parameters
             foreach ($this->route->getRequestParameters() as $parameter => $value) {
-                $this->request->query->set($parameter, $value);
+                $this->getRequest()->getQuery()->set($parameter, $value);
             }
 
             return new $class(
-                $this->configuration,
-                $this->logger,
-                $this->request,
+                $this->getConfiguration(),
+                $this->getLogger(),
+                $this->getCache(),
+                $this->getEvents(),
+                $this->getRequest(),
                 $this,
-                $this->response,
-                $this->extra
+                $this->getResponse(),
+                $this->getExtra()
             );
 
         }
-        else return null;
+
+        return null;
 
     }
 
     public function compose(Response $response) {
 
-        $this->response = $response;
+        $this->setResponse($response);
 
-        if (is_null($this->route)) {
+        if ( is_null($this->route) ) {
 
             throw new DispatcherException("Route has not been loaded!");
 
@@ -151,11 +176,11 @@ class Model extends AbstractModel {
 
         $service = $this->getServiceInstance();
 
-        if (!is_null($service)) {
+        if ( !is_null($service) ) {
 
             $result = "";
 
-            $method = $this->request->method->get();
+            $method = (string) $this->getRequest()->getMethod();
 
             $methods = $service->getImplementedMethods();
 
@@ -165,7 +190,7 @@ class Model extends AbstractModel {
 
                 try {
 
-                    $result = call_user_func(array($service, $callable));
+                    $result = call_user_func([$service, $callable]);
 
                 } catch (DispatcherException $de) {
 
@@ -185,7 +210,7 @@ class Model extends AbstractModel {
 
             }
 
-            $this->response->content->set($result);
+            $this->getResponse()->getContent()->set($result);
 
         } else {
 
@@ -197,12 +222,12 @@ class Model extends AbstractModel {
 
     private function parse() {
 
-        $path = $this->request->route();
+        $path = $this->getRequest()->route();
 
-        foreach ($this->table->routes as $regex => $value) {
+        foreach ($this->table->getRoutes() as $regex => $value) {
 
             // The current uri is checked against all the global regular expressions associated with the routes
-            if (preg_match("/" . $regex . "/", $path, $matches)) {
+            if ( preg_match("/" . $regex . "/", $path, $matches) ) {
 
                 /* If a route is matched, all the bits of the route string are evalued in order to create
                  * new query parameters which will be available for the service class

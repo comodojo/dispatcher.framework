@@ -1,11 +1,19 @@
 <?php namespace Comodojo\Dispatcher\Service;
 
 use \Comodojo\Dispatcher\Components\AbstractModel;
-use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
+use \Comodojo\Dispatcher\Traits\CacheTrait;
+use \Comodojo\Dispatcher\Traits\RequestTrait;
+use \Comodojo\Dispatcher\Traits\ResponseTrait;
+use \Comodojo\Dispatcher\Traits\RouterTrait;
+use \Comodojo\Dispatcher\Traits\ExtraTrait;
+use \Comodojo\Dispatcher\Traits\EventsTrait;
+use \Comodojo\SimpleCache\Manager as CacheManager;
+use \Comodojo\Foundation\Base\Configuration;
+use \Comodojo\Foundation\Events\Manager as EventsManager;
 use \Psr\Log\LoggerInterface;
 use \Exception;
 
@@ -33,11 +41,20 @@ use \Exception;
 
 abstract class AbstractService extends AbstractModel {
 
-    protected $mode = self::PROTECTDATA;
+    use CacheTrait;
+    use EventsTrait;
+    use RequestTrait;
+    use RouterTrait;
+    use ResponseTrait;
+    use ExtraTrait;
+
+    const SUPPORTED_METHODS = ['GET','PUT','POST','DELETE','OPTIONS','HEAD','TRACE','CONNECT','PURGE'];
 
     public function __construct(
         Configuration $configuration,
         LoggerInterface $logger,
+        CacheManager $cache,
+        EventsManager $events,
         Request $request,
         Router $router,
         Response $response,
@@ -46,10 +63,12 @@ abstract class AbstractService extends AbstractModel {
 
         parent::__construct($configuration, $logger);
 
-        $this->setRaw('request', $request);
-        $this->setRaw('router', $router);
-        $this->setRaw('response', $response);
-        $this->setRaw('extra', $extra);
+        $this->setCache($cache);
+        $this->setEvents($events);
+        $this->setRequest($request);
+        $this->setRouter($router);
+        $this->setResponse($response);
+        $this->setExtra($extra);
 
     }
 
@@ -60,9 +79,9 @@ abstract class AbstractService extends AbstractModel {
      */
     public function getImplementedMethods() {
 
-        $supported_methods = $this->configuration->get('supported-http-methods');
+        $supported_methods = $this->getConfiguration()->get('supported-http-methods');
 
-        if ( is_null($supported_methods) ) $supported_methods = array('GET','PUT','POST','DELETE','OPTIONS','HEAD','TRACE','CONNECT','PURGE');
+        if ( is_null($supported_methods) ) $supported_methods = self::SUPPORTED_METHODS;
 
         if ( method_exists($this, 'any') ) {
 
@@ -70,11 +89,11 @@ abstract class AbstractService extends AbstractModel {
 
         }
 
-        $implemented_methods = array();
+        $implemented_methods = [];
 
         foreach ( $supported_methods as $method ) {
 
-            if ( method_exists($this, strtolower($method)) ) array_push($implemented_methods,$method);
+            if ( method_exists($this, strtolower($method)) ) array_push($implemented_methods, $method);
 
         }
 
@@ -88,17 +107,19 @@ abstract class AbstractService extends AbstractModel {
      */
     public function getMethod($method) {
 
-        if ( method_exists($this, strtolower($method)) ) {
+        $method = strtolower($method);
 
-            return strtolower($method);
+        if ( method_exists($this, $method) ) {
 
-        } else if ( method_exists($this, strtolower('any')) ) {
+            return $method;
+
+        } else if ( method_exists($this, 'any') ) {
 
             return 'any';
 
         } else {
 
-            return "any";
+            return null;
 
         }
 

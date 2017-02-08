@@ -7,6 +7,7 @@ use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\SimpleCache\Manager as CacheManager;
 use \Monolog\Logger;
+use \Comodojo\Foundation\Events\Manager as EventsManager;
 
 class AbstractServiceTest extends \PHPUnit_Framework_TestCase {
 
@@ -22,14 +23,17 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase {
         $logger = new Logger('test');
         $cache = new CacheManager();
         $extra = new Extra($configuration, $logger);
+        $events = EventsManager::create($logger);
 
         $request = new Request($configuration, $logger);
-        $router = new Router($configuration, $logger, $cache, $extra);
+        $router = new Router($configuration, $logger, $cache, $events, $extra);
         $response = new Response($configuration, $logger);
 
         self::$service = new ConcreteService(
             $configuration,
             $logger,
+            $cache,
+            $events,
             $request,
             $router,
             $response,
@@ -42,7 +46,7 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase {
 
         $service = self::$service;
 
-        $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', $service->request);
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Request\Model', $service->getRequest());
 
     }
 
@@ -56,13 +60,14 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase {
 
         $method = $service->getMethod("GET");
 
-        $status = $service->response->status->get();
+        $status = $service->getResponse()->getStatus()->get();
 
         $this->assertEquals(200, $status);
 
         $run = call_user_func(array($service, $method));
 
         $this->assertEquals('this is a test', $run);
+
     }
 
 }

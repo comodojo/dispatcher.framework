@@ -31,7 +31,7 @@ class Status405 extends Status400 {
     public function consolidate() {
 
         // An Allow Header should be provided from DispatcherException
-        $allow = $this->response->headers->get('Allow');
+        $allow = $this->response->getHeaders()->get('Allow');
 
         if ( is_null($allow) ) throw new Exception("Missing Allow header");
 

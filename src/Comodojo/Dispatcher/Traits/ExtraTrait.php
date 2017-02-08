@@ -1,8 +1,8 @@
-<?php namespace Comodojo\Dispatcher\Response\Preprocessor;
+<?php namespace Comodojo\Dispatcher\Traits;
+
+use \Comodojo\Dispatcher\Extra\Model as Extra;
 
 /**
- * Status: Created
- *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
@@ -24,15 +24,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Status202 extends Status200 {
+trait ExtraTrait {
 
-    //PLEASE NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description in body... just in case
+    protected $extra;
 
-    public function consolidate() {
+    public function getExtra() {
 
-        $this->response->getHeaders()->set('Status: 202 Accepted');
+        return $this->extra;
 
-        parent::consolidate();
+    }
+
+    public function setExtra(Extra $extra) {
+
+        $this->extra = $extra;
 
     }
 

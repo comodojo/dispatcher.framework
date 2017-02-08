@@ -1,4 +1,4 @@
-<?php namespace Comodojo\Dispatcher\Components;
+<?php namespace Comodojo\Dispatcher\Traits;
 
 /**
  * @package     Comodojo Dispatcher
@@ -57,7 +57,7 @@ trait HeadersTrait {
 
         if ( is_null($value) ) {
 
-            $header = explode(":", $header);
+            $header = explode(":", $header, 2);
 
             $this->headers[$header[0]] = isset($header[1]) ? $header[1] : '';
 

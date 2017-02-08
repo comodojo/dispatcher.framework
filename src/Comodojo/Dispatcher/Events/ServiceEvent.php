@@ -1,10 +1,21 @@
 <?php namespace Comodojo\Dispatcher\Events;
 
+use \Comodojo\Dispatcher\Traits\ConfigurationTrait;
+use \Comodojo\Dispatcher\Traits\LoggerTrait;
+use \Comodojo\Dispatcher\Traits\CacheTrait;
+use \Comodojo\Dispatcher\Traits\EventsTrait;
+use \Comodojo\Dispatcher\Traits\RequestTrait;
+use \Comodojo\Dispatcher\Traits\ResponseTrait;
+use \Comodojo\Dispatcher\Traits\RouterTrait;
+use \Comodojo\Dispatcher\Traits\ExtraTrait;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Foundation\Events\AbstractEvent;
+use \Comodojo\SimpleCache\Manager as CacheManager;
+use \Comodojo\Foundation\Events\Manager as EventsManager;
+use \Comodojo\Foundation\Base\Configuration;
 use \Psr\Log\LoggerInterface;
 
 /**
@@ -31,19 +42,21 @@ use \Psr\Log\LoggerInterface;
 
 class ServiceEvent extends AbstractEvent {
 
-    protected $logger;
-
-    protected $request;
-
-    protected $router;
-
-    protected $response;
-
-    protected $extra;
+    use ConfigurationTrait;
+    use LoggerTrait;
+    use CacheTrait;
+    use EventsTrait;
+    use RequestTrait;
+    use RouterTrait;
+    use ResponseTrait;
+    use ExtraTrait;
 
     public function __construct(
         $name,
+        Configuration $configuration,
         LoggerInterface $logger,
+        CacheManager $cache,
+        EventsManager $events,
         Request $request,
         Router $router,
         Response $response,
@@ -52,45 +65,14 @@ class ServiceEvent extends AbstractEvent {
 
         parent::__construct($name);
 
-        $this->logger = $logger;
-
-        $this->request = $request;
-
-        $this->router = $router;
-
-        $this->response = $response;
-
-        $this->extra = $extra;
-
-    }
-
-    public function getLogger() {
-
-        return $this->logger;
-
-    }
-
-    public function getRequest() {
-
-        return $this->request;
-
-    }
-
-    public function getRouter() {
-
-        return $this->router;
-
-    }
-
-    public function getResponse() {
-
-        return $this->response;
-
-    }
-
-    public function getExtra() {
-
-        return $this->extra;
+        $this->setConfiguration($configuration);
+        $this->setLogger($logger);
+        $this->setCache($cache);
+        $this->setEvents($events);
+        $this->setRequest($request);
+        $this->setRouter($router);
+        $this->setResponse($response);
+        $this->setExtra($extra);
 
     }
 

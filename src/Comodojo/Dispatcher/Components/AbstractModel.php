@@ -1,8 +1,9 @@
 <?php namespace Comodojo\Dispatcher\Components;
 
-use \Comodojo\Foundation\DataAccess\Model as FoundationModel;
 use \Comodojo\Foundation\Base\Configuration;
 use \Psr\Log\LoggerInterface;
+use \Comodojo\Dispatcher\Traits\ConfigurationTrait;
+use \Comodojo\Dispatcher\Traits\LoggerTrait;
 
 /**
  * @package     Comodojo Dispatcher
@@ -26,12 +27,15 @@ use \Psr\Log\LoggerInterface;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-abstract class AbstractModel extends FoundationModel {
+abstract class AbstractModel {
+
+    use ConfigurationTrait;
+    use LoggerTrait;
 
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
-        $this->setRaw('configuration', $configuration);
-        $this->setRaw('logger', $logger);
+        $this->setConfiguration($configuration);
+        $this->setLogger($logger);
 
     }
 

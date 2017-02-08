@@ -28,22 +28,14 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Route extends FoundationModel implements Serializable {
+class Route implements Serializable {
 
-    use SerializationTrait;
-
-    protected $mode = self::PROTECTDATA;
-
-    public function __construct() {
-
-        $this->setRaw('classname', "");
-        $this->setRaw('type', "");
-        $this->setRaw('service', []);
-        $this->setRaw('parameters', []);
-        $this->setRaw('request', []);
-        $this->setRaw('query', []);
-
-    }
+    protected $classname;
+    protected $type;
+    protected $service = [];
+    protected $parameters = [];
+    protected $request = [];
+    protected $query = [];
 
     public function getType() {
 
@@ -67,7 +59,7 @@ class Route extends FoundationModel implements Serializable {
 
     public function getServiceName() {
 
-        return (empty($this->service))?"default":implode('.', $this->service);
+        return empty($this->service) ? "default" : implode('.', $this->service);
 
     }
 
@@ -91,7 +83,7 @@ class Route extends FoundationModel implements Serializable {
 
         $parameters = $this->parameters;
 
-        return (isset($parameters[$key]))?$parameters[$key]:null;
+        return isset($parameters[$key]) ? $parameters[$key] : null;
 
     }
 
@@ -121,7 +113,7 @@ class Route extends FoundationModel implements Serializable {
 
         $parameters = $this->request;
 
-        return (isset($parameters[$key]))?$parameters[$key]:null;
+        return isset($parameters[$key]) ? $parameters[$key] : null;
 
     }
 
@@ -149,12 +141,12 @@ class Route extends FoundationModel implements Serializable {
 
     public function setQuery($key, $regex, $required = false) {
 
-        $this->query = array_merge($this->query, array(
-            $key => array(
+        $this->query = array_merge($this->query, [
+            $key => [
                 "regex" => $regex,
                 "required" => $required
-            )
-        ));
+            ]
+        ]);
 
         return $this;
 
@@ -164,7 +156,7 @@ class Route extends FoundationModel implements Serializable {
 
         $query = $this->query;
 
-        return isset($query[$key])?$query[$key]["required"]:false;
+        return isset($query[$key]) ? $query[$key]["required"] : false;
 
     }
 
@@ -172,7 +164,7 @@ class Route extends FoundationModel implements Serializable {
 
         $query = $this->query;
 
-        return isset($query[$key])?$query[$key]["regex"]:null;
+        return isset($query[$key]) ? $query[$key]["regex"] : null;
 
     }
 
@@ -209,13 +201,13 @@ class Route extends FoundationModel implements Serializable {
         // Because of the nature of the global regular expression, all the bits of the matched route are associated with a parameter key
         foreach ($this->query as $key => $value) {
 
-            if (isset($path[$key])) {
+            if ( isset($path[$key]) ) {
                 /* if it's available a bit associated with the parameter name, it is compared against
                  * it's regular expression in order to extrect backreferences
                  */
-                if (preg_match('/^' . $value['regex'] . '$/', $path[$key], $matches)) {
+                if ( preg_match('/^' . $value['regex'] . '$/', $path[$key], $matches) ) {
 
-                    if (count($matches) == 1) $matches = $matches[0]; // This is the case where no backreferences are present or available.
+                    if ( count($matches) == 1 ) $matches = $matches[0]; // This is the case where no backreferences are present or available.
 
                     // The extracted value (with any backreference available) is added to the query parameters.
                     $this->setRequestParameter($key, $matches);
@@ -231,6 +223,43 @@ class Route extends FoundationModel implements Serializable {
         }
 
         return $this;
+
+    }
+
+    /**
+     * Return the serialized data
+     *
+     * @return string
+     */
+    public function serialize() {
+
+        return serialize( (object) [
+            'classname' => $this->classname,
+            'type' => $this->type,
+            'service' => $this->service,
+            'parameters' => $this->parameters,
+            'request' => $this->request,
+            'query' => $this->query
+        ]);
+
+    }
+
+    /**
+     * Return the unserialized object
+     *
+     * @param string $data Serialized data
+     *
+     */
+    public function unserialize($data) {
+
+        $parts = unserialize($data);
+
+        $this->classname = $parts->classname;
+        $this->type = $parts->type;
+        $this->service = $parts->service;
+        $this->parameters = $parts->parameters;
+        $this->request = $parts->request;
+        $this->query = $parts->query;
 
     }
 

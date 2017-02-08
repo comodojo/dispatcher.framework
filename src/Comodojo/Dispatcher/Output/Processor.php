@@ -3,6 +3,8 @@
 use \Comodojo\Dispatcher\Components\AbstractModel;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Response\Model as Response;
+use \Comodojo\Dispatcher\Traits\RequestTrait;
+use \Comodojo\Dispatcher\Traits\ResponseTrait;
 use \Comodojo\Dispatcher\Components\HttpStatusCodes;
 use \Comodojo\Foundation\Base\Configuration;
 use \Psr\Log\LoggerInterface;
@@ -45,7 +47,10 @@ use \Exception;
 
 class Processor extends AbstractModel {
 
-    protected $mode = self::READONLY;
+    use RequestTrait;
+    use ResponseTrait;
+
+    protected $codes;
 
     public function __construct(
         Configuration $configuration,
@@ -56,29 +61,31 @@ class Processor extends AbstractModel {
 
         parent::__construct($configuration, $logger);
 
-        $this->setRaw('response', $response);
+        $this->setResponse($response);
+        $this->setRequest($request);
 
-        $this->setRaw('request', $request);
-
-        $this->setRaw('codes', new HttpStatusCodes());
+        $this->codes = new HttpStatusCodes();
 
     }
 
     public function send() {
 
-        $status = $this->response->status->get();
+        $response = $this->getResponse();
+        $request = $this->getRequest();
+
+        $status = $response->getStatus()->get();
 
         if ( !$this->codes->exists($status) ) throw new Exception("Invalid HTTP status code in response");
 
         $message = $this->codes->getMessage($status);
 
-        $this->response->headers->send();
+        $response->getHeaders()->send();
 
-        header(sprintf('HTTP/%s %s %s', $this->request->version->get(), $status, $message), true, $status);
+        header(sprintf('HTTP/%s %s %s', (string) $request->getVersion(), $status, $message), true, $status);
 
-        $this->response->cookies->save();
+        $response->getCookies()->save();
 
-        return $this->response->content->get();
+        return $response->getContent()->get();
 
     }
 

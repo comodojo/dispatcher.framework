@@ -26,7 +26,7 @@ use \Comodojo\Dispatcher\Response\Model as Response;
 
 abstract class AbstractPreprocessor {
 
-    public $response;
+    protected $response;
 
     public function __construct(Response $response) {
 

@@ -1,8 +1,8 @@
-<?php namespace Comodojo\Dispatcher\Tests\Components;
+<?php namespace Comodojo\Dispatcher\Tests\Traits;
 
-use \Comodojo\Dispatcher\Components\HeadersTrait;
+use \Comodojo\Dispatcher\Traits\HeadersTrait;
 
-class HeadersTest extends \PHPUnit_Framework_TestCase {
+class HeadersTraitTest extends \PHPUnit_Framework_TestCase {
 
     use HeadersTrait;
 

@@ -32,18 +32,20 @@ class ServerCache extends AbstractCache {
     // @NOTE: Server cache will not consider cacheable POST or PUT requests
     //        because of dispatcher internal structure: if post request is cached
     //        subsequent requests will never reach the service.
-    private static $cachable_methods = array('GET', 'HEAD');
+    const CACHABLE_METHODS = ['GET', 'HEAD'];
 
-    private static $cachable_statuses = array(200, 203, 300, 301, 302, 404, 410);
+    const CACHABLE_STATUSES = [200, 203, 300, 301, 302, 404, 410];
+
+    const CACHE_NAMESPACE = "DISPATCHERSERVICES";
 
     public function read(
         Request $request,
         Response $response
     ) {
 
-        $name = md5( (string) $request->method . (string) $request->uri );
+        $name = self::getCacheName($request);
 
-        $cache_object = $this->cache->setNamespace('dispatcherservice')->get($name);
+        $cache_object = $this->getCache()->setNamespace(self::CACHE_NAMESPACE)->get($name);
 
         if ( is_null($cache_object) ) return false;
 
@@ -63,23 +65,29 @@ class ServerCache extends AbstractCache {
 
         $ttl = $route->getParameter('ttl');
 
-        $name = md5( (string) $request->method . (string) $request->uri );
+        $name = self::getCacheName($request);
 
-        $method = $request->method->get();
+        $method = (string) $request->getMethod();
 
-        $status = $response->status->get();
+        $status = $response->getStatus()->get();
 
         if (
             ( $cache == 'SERVER' || $cache == 'BOTH' ) &&
-            in_array($method, self::$cachable_methods) &&
-            in_array($status, self::$cachable_statuses)
+            in_array($method, self::CACHABLE_METHODS) &&
+            in_array($status, self::CACHABLE_STATUSES)
         ){
 
-            $this->cache
-                ->setNamespace('dispatcherservice')
+            $this->getCache()
+                ->setNamespace(self::CACHE_NAMESPACE)
                 ->set($name, $response->export(), $ttl === null ? self::DEFAULTTTL : intval($ttl));
 
         }
+
+    }
+
+    private static function getCacheName(Request $request) {
+
+        return md5( (string) $request->getMethod() . (string) $request->getUri() );
 
     }
 
