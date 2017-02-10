@@ -32,6 +32,22 @@ class Model extends AbstractModel {
 
     use TimingTrait;
 
+    protected $headers;
+
+    protected $uri;
+
+    protected $post;
+
+    protected $query;
+
+    protected $useragent;
+
+    protected $method;
+
+    protected $version;
+
+    protected $files;
+    
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
