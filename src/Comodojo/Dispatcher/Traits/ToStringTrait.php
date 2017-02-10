@@ -24,7 +24,7 @@
 
 trait ToStringTrait {
 
-    abstract function get();
+    abstract public function get();
 
     public function __toString() {
 
