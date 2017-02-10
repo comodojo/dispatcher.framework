@@ -24,6 +24,8 @@
 
 trait ToStringTrait {
 
+    abstract function get();
+
     public function __toString() {
 
         return $this->get();

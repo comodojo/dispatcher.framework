@@ -44,7 +44,7 @@ class Table extends AbstractModel {
         Router $router
     ) {
 
-        parent::__construct($router->configuration, $router->logger);
+        parent::__construct($router->getConfiguration(), $router->getLogger());
 
         $this->router = $router;
         $this->parser = new Parser($this->logger);

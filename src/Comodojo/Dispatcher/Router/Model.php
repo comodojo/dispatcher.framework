@@ -49,6 +49,7 @@ class Model extends AbstractModel {
     protected $bypass_routing = false;
     protected $bypass_service = false;
     protected $table;
+    protected $route;
 
     public function __construct(
         Configuration $configuration,

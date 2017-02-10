@@ -106,9 +106,9 @@ class File {
 
     public function save($path, $as_slug = false) {
 
-        if (!empty($this->path) && file_exists($this->path)) {
+        if (!empty($path) && file_exists($path)) {
 
-            $local_name = "$this->path/" . ($as_slug ? $this->getSlug() : $this->getFileName());
+            $local_name = "$path/" . ($as_slug ? $this->getSlug() : $this->getFileName());
 
             if ( file_exists($local_name) ) {
 

@@ -141,7 +141,7 @@ class Dispatcher extends AbstractModel {
         $cache = new ServerCache($this->getCache());
 
         $events->emit( $this->createServiceSpecializedEvents('dispatcher.request') );
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.request.'.$this->request->method->get()) );
+        $events->emit( $this->createServiceSpecializedEvents('dispatcher.request.'.$this->request->getMethod()->get()) );
         $events->emit( $this->createServiceSpecializedEvents('dispatcher.request.#') );
 
         if ( $cache->read($this->request, $this->response) ) {
