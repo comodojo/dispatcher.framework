@@ -35,11 +35,11 @@ class Model extends AbstractModel implements Serializable {
 
     use TimingTrait;
 
-    const NO_CONTENT_STATUSES = [100,101,102,204,304];
+    protected static $no_content_statuses = [100,101,102,204,304];
 
-    const CACHEABLE_METHODS = ['GET', 'HEAD', 'POST', 'PUT'];
+    protected static $cacheable_methods = ['GET', 'HEAD', 'POST', 'PUT'];
 
-    const CACHEABLE_STATUSES = [200, 203, 300, 301, 302, 404, 410];
+    protected static $cacheable_statuses = [200, 203, 300, 301, 302, 404, 410];
 
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
@@ -184,7 +184,7 @@ class Model extends AbstractModel implements Serializable {
         $content = $this->getContent();
         $headers = $this->getHeaders();
 
-        if ( (string) $request->getMethod() == 'HEAD' && !in_array($status, self::NO_CONTENT_STATUSES) ) {
+        if ( (string) $request->getMethod() == 'HEAD' && !in_array($status, self::$no_content_statuses) ) {
             $length = $content->length();
             $content->set(null);
             if ($length) $headers->set('Content-Length', $length);
@@ -208,8 +208,8 @@ class Model extends AbstractModel implements Serializable {
 
         if (
             ($cache == 'CLIENT' || $cache == 'BOTH') &&
-            in_array((string) $request->getMethod(), self::CACHEABLE_METHODS) &&
-            in_array($this->getStatus()->get(), self::CACHEABLE_STATUSES)
+            in_array((string) $request->getMethod(), self::$cacheable_methods) &&
+            in_array($this->getStatus()->get(), self::$cacheable_statuses)
             // @TODO: here we should also check for Cache-Control no-store or private;
             //        the cache layer will be improoved in future versions.
         ) {

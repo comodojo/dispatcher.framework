@@ -32,11 +32,11 @@ class ServerCache extends AbstractCache {
     // @NOTE: Server cache will not consider cacheable POST or PUT requests
     //        because of dispatcher internal structure: if post request is cached
     //        subsequent requests will never reach the service.
-    const CACHABLE_METHODS = ['GET', 'HEAD'];
+    protected static $cachable_methods = ['GET', 'HEAD'];
 
-    const CACHABLE_STATUSES = [200, 203, 300, 301, 302, 404, 410];
+    protected static $cachable_statuses = [200, 203, 300, 301, 302, 404, 410];
 
-    const CACHE_NAMESPACE = "DISPATCHERSERVICES";
+    protected static $cache_namespace = "DISPATCHERSERVICES";
 
     public function read(
         Request $request,
@@ -45,7 +45,7 @@ class ServerCache extends AbstractCache {
 
         $name = self::getCacheName($request);
 
-        $cache_object = $this->getCache()->setNamespace(self::CACHE_NAMESPACE)->get($name);
+        $cache_object = $this->getCache()->setNamespace(self::$cache_namespace)->get($name);
 
         if ( is_null($cache_object) ) return false;
 
@@ -73,12 +73,12 @@ class ServerCache extends AbstractCache {
 
         if (
             ( $cache == 'SERVER' || $cache == 'BOTH' ) &&
-            in_array($method, self::CACHABLE_METHODS) &&
-            in_array($status, self::CACHABLE_STATUSES)
+            in_array($method, self::$cachable_methods) &&
+            in_array($status, self::$cachable_statuses)
         ){
 
             $this->getCache()
-                ->setNamespace(self::CACHE_NAMESPACE)
+                ->setNamespace(self::$cache_namespace)
                 ->set($name, $response->export(), $ttl === null ? self::DEFAULTTTL : intval($ttl));
 
         }

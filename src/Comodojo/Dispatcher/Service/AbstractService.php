@@ -48,7 +48,7 @@ abstract class AbstractService extends AbstractModel {
     use ResponseTrait;
     use ExtraTrait;
 
-    const SUPPORTED_METHODS = ['GET','PUT','POST','DELETE','OPTIONS','HEAD','TRACE','CONNECT','PURGE'];
+    protected static $supported_methods = ['GET','PUT','POST','DELETE','OPTIONS','HEAD','TRACE','CONNECT','PURGE'];
 
     public function __construct(
         Configuration $configuration,
@@ -81,7 +81,7 @@ abstract class AbstractService extends AbstractModel {
 
         $supported_methods = $this->getConfiguration()->get('supported-http-methods');
 
-        if ( is_null($supported_methods) ) $supported_methods = self::SUPPORTED_METHODS;
+        if ( is_null($supported_methods) ) $supported_methods = self::$supported_methods;
 
         if ( method_exists($this, 'any') ) {
 

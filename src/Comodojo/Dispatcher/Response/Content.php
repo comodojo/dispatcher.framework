@@ -55,13 +55,13 @@ class Content {
 
     }
 
-    public function type($type = null) {
+    public function getType() {
 
-        if ( is_null($type) ) {
+        return $this->type;
 
-            return $this->type;
+    }
 
-        }
+    public function setType($type) {
 
         $this->type = $type;
 
@@ -69,13 +69,19 @@ class Content {
 
     }
 
-    public function charset($charset = null) {
+    public function type($type = null) {
 
-        if ( is_null($charset) ) {
+        return is_null($type) ? $this->getType() : $this->setType($type);
 
-            return $this->charset;
+    }
 
-        }
+    public function getCharset() {
+
+        return $this->charset;
+
+    }
+
+    public function setCharset($charset) {
 
         $this->charset = $charset;
 
@@ -83,9 +89,21 @@ class Content {
 
     }
 
-    public function length() {
+    public function charset($charset = null) {
+
+        return is_null($charset) ? $this->getCharset() : $this->setCharset($charset);
+
+    }
+
+    public function getLength() {
 
         return strlen($this->content);
+
+    }
+
+    public function length() {
+
+        return $this->getLength();
 
     }
 
