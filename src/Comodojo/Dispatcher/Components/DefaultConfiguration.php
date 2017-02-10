@@ -48,11 +48,11 @@ class DefaultConfiguration {
 
     private static function urlGetAbsolute() {
 
-        $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
+        $http = 'http'.((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '').'://';
 
         $uri = self::uriGetAbsolute();
 
-        return ( $http . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost') . $uri . "/" );
+        return ($http.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost').$uri."/");
 
     }
 

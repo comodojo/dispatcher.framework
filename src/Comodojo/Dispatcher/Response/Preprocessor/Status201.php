@@ -30,7 +30,7 @@ class Status201 extends Status200 {
 
         $location = $this->response->getLocation()->get();
 
-        if ( $location != null ) $this->response->getHeaders()->set("Location", $location);
+        if ($location != null) $this->response->getHeaders()->set("Location", $location);
 
         parent::consolidate();
 

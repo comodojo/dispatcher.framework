@@ -75,13 +75,13 @@ class Processor extends AbstractModel {
 
         $status = $response->getStatus()->get();
 
-        if ( !$this->codes->exists($status) ) throw new Exception("Invalid HTTP status code in response");
+        if (!$this->codes->exists($status)) throw new Exception("Invalid HTTP status code in response");
 
         $message = $this->codes->getMessage($status);
 
         $response->getHeaders()->send();
 
-        header(sprintf('HTTP/%s %s %s', (string) $request->getVersion(), $status, $message), true, $status);
+        header(sprintf('HTTP/%s %s %s', (string)$request->getVersion(), $status, $message), true, $status);
 
         $response->getCookies()->save();
 

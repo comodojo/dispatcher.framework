@@ -78,7 +78,7 @@ class Dispatcher extends AbstractModel {
 
         // init core components
         // create new configuration object and merge configuration
-        $configuration_object = new Configuration( DefaultConfiguration::get() );
+        $configuration_object = new Configuration(DefaultConfiguration::get());
         $configuration_object->merge($configuration);
 
         $logger = is_null($logger) ? LogManager::createFromConfiguration($configuration_object)->getLogger() : $logger;
@@ -102,7 +102,7 @@ class Dispatcher extends AbstractModel {
 
         } catch (Exception $e) {
 
-            $this->logger->critical($e->getMessage(),$e->getTrace());
+            $this->logger->critical($e->getMessage(), $e->getTrace());
 
             throw $e;
 
@@ -122,9 +122,9 @@ class Dispatcher extends AbstractModel {
         $logger->debug("Starting to dispatch.");
 
         $logger->debug("Emitting global dispatcher event.");
-        $events->emit( new DispatcherEvent($this) );
+        $events->emit(new DispatcherEvent($this));
 
-        if ( $configuration->get('enabled') === false ) {
+        if ($configuration->get('enabled') === false) {
 
             $logger->debug("Dispatcher disabled, shutting down gracefully.");
 
@@ -140,11 +140,11 @@ class Dispatcher extends AbstractModel {
 
         $cache = new ServerCache($this->getCache());
 
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.request') );
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.request.'.$this->request->getMethod()->get()) );
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.request.#') );
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.request'));
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.request.'.$this->request->getMethod()->get()));
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.request.#'));
 
-        if ( $cache->read($this->request, $this->response) ) {
+        if ($cache->read($this->request, $this->response)) {
             // we have a cache!
             // shutdown immediately
             return $this->shutdown();
@@ -170,10 +170,10 @@ class Dispatcher extends AbstractModel {
 
         $logger->debug("Route acquired, type $route_type directed to $route_service");
 
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.route') );
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.route.'.$route_type) );
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.route.'.$route_service) );
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.route.#') );
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.route'));
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.route.'.$route_type));
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.route.'.$route_service));
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.route.#'));
 
         // translate route to service
         $logger->debug("Running $route_service service");
@@ -202,11 +202,16 @@ class Dispatcher extends AbstractModel {
         $params = $route->getParameter('headers');
 
         if ( !empty($params) && is_array($params) ) {
-            foreach($params as $name => $value) $this->getResponse()->getHeaders()->set($name, $value);
+            foreach($params as $name => $value) {
+                $this->getResponse()->getHeaders()->set($name, $value);
+            }
         }
 
     }
 
+    /**
+     * @param string $name
+     */
     private function createServiceSpecializedEvents($name) {
 
         $this->logger->debug("Emitting $name service-event");
@@ -247,9 +252,9 @@ class Dispatcher extends AbstractModel {
 
         $response->consolidate($request, $this->route);
 
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.response') );
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.response.' . $response->getStatus()->get()) );
-        $events->emit( $this->createServiceSpecializedEvents('dispatcher.response.#') );
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.response'));
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.response.'.$response->getStatus()->get()));
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.response.#'));
 
         $this->logger->debug("Composing return value");
 

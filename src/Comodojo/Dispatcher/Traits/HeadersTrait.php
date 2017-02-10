@@ -28,9 +28,9 @@ trait HeadersTrait {
 
     public function get($header = null) {
 
-        if ( is_null($header) ) return $this->headers;
+        if (is_null($header)) return $this->headers;
 
-        else if ( array_key_exists($header, $this->headers) ) return $this->headers[$header];
+        else if (array_key_exists($header, $this->headers)) return $this->headers[$header];
 
         else return null;
 
@@ -38,24 +38,26 @@ trait HeadersTrait {
 
     public function getAsString($header = null) {
 
-        if ( is_null($header) ) {
+        if (is_null($header)) {
 
-            return array_map( [$this, 'headerToString'],
+            return array_map([$this, 'headerToString'],
                 array_keys($this->headers),
                 array_values($this->headers)
             );
 
-        } else if ( array_key_exists($header, $this->headers) ) {
+        } else if (array_key_exists($header, $this->headers)) {
 
             return self::headerToString($header, $this->headers[$header]);
 
-        } else return null;
+        } else {
+            return null;
+        }
 
     }
 
-    public function set($header, $value=null) {
+    public function set($header, $value = null) {
 
-        if ( is_null($value) ) {
+        if (is_null($value)) {
 
             $header = explode(":", $header, 2);
 
@@ -73,13 +75,13 @@ trait HeadersTrait {
 
     public function delete($header = null) {
 
-        if ( is_null($header) ) {
+        if (is_null($header)) {
 
             $this->headers = array();
 
             return true;
 
-        } else if ( array_key_exists($header, $this->headers) ) {
+        } else if (array_key_exists($header, $this->headers)) {
 
             unset($this->headers[$header]);
 

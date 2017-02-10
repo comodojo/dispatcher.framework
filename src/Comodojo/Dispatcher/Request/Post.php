@@ -46,7 +46,7 @@ class Post {
 
     private static function getParameters() {
 
-        switch( $_SERVER['REQUEST_METHOD'] ) {
+        switch ($_SERVER['REQUEST_METHOD']) {
 
             case 'POST':
 

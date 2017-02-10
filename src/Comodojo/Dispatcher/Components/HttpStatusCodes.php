@@ -102,7 +102,7 @@ class HttpStatusCodes {
 
     public function getMessage($code) {
 
-        if ( $this->exists($code) ) return $this->codes[$code];
+        if ($this->exists($code)) return $this->codes[$code];
 
         throw new Exception("Invalid HTTP status code $code");
 

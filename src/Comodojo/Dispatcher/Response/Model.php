@@ -35,7 +35,7 @@ class Model extends AbstractModel implements Serializable {
 
     use TimingTrait;
 
-    protected static $no_content_statuses = [100,101,102,204,304];
+    protected static $no_content_statuses = [100, 101, 102, 204, 304];
 
     protected static $cacheable_methods = ['GET', 'HEAD', 'POST', 'PUT'];
 
@@ -147,7 +147,7 @@ class Model extends AbstractModel implements Serializable {
 
     public function export() {
 
-        return (object) [
+        return (object)[
             'headers' => $this->getHeaders(),
             'cookies' => $this->getCookies()->getAll(),
             'status' => $this->getStatus(),
@@ -159,12 +159,12 @@ class Model extends AbstractModel implements Serializable {
 
     public function import($data) {
 
-        if ( isset($data->headers) ) $this->setHeaders($data->headers);
-        if ( isset($data->status) ) $this->setStatus($data->status);
-        if ( isset($data->content) ) $this->setContent($data->content);
-        if ( isset($data->location) ) $this->setLocation($data->location);
+        if (isset($data->headers)) $this->setHeaders($data->headers);
+        if (isset($data->status)) $this->setStatus($data->status);
+        if (isset($data->content)) $this->setContent($data->content);
+        if (isset($data->location)) $this->setLocation($data->location);
 
-        if ( isset($data->cookies) && is_array($data->cookies) ) {
+        if (isset($data->cookies) && is_array($data->cookies)) {
             $cookies = $this->getCookies();
             foreach ($data->cookies as $name => $cookie) $cookies->add($cookie);
         }
@@ -178,7 +178,7 @@ class Model extends AbstractModel implements Serializable {
         $output_class_name = "\\Comodojo\\Dispatcher\\Response\\Preprocessor\\Status".$status;
 
         // @TODO: this condition will be removed when all preprocessors ready
-        if ( class_exists($output_class_name) ) {
+        if (class_exists($output_class_name)) {
             $output = new $output_class_name($this);
         } else {
             $output = new \Comodojo\Dispatcher\Response\Preprocessor\Status200($this);
@@ -186,7 +186,7 @@ class Model extends AbstractModel implements Serializable {
 
         $output->consolidate();
 
-        if ( $route != null ) {
+        if ($route != null) {
             $this->setClientCache($request, $route);
         }
 
@@ -194,17 +194,19 @@ class Model extends AbstractModel implements Serializable {
         $content = $this->getContent();
         $headers = $this->getHeaders();
 
-        if ( (string) $request->getMethod() == 'HEAD' && !in_array($status, self::$no_content_statuses) ) {
+        if ((string)$request->getMethod() == 'HEAD' && !in_array($status, self::$no_content_statuses)) {
             $length = $content->length();
             $content->set(null);
-            if ($length) $headers->set('Content-Length', $length);
+            if ($length) {
+                $headers->set('Content-Length', $length);
+            }
         }
 
         if ($headers->get('Transfer-Encoding') != null) {
             $headers->delete('Content-Length');
         }
 
-        if ( (string) $request->getVersion() == '1.0' && false !== strpos($headers->get('Cache-Control'), 'no-cache')) {
+        if ((string)$request->getVersion() == '1.0' && false !== strpos($headers->get('Cache-Control'), 'no-cache')) {
             $headers->set('pragma', 'no-cache');
             $headers->set('expires', -1);
         }
@@ -214,20 +216,20 @@ class Model extends AbstractModel implements Serializable {
     private function setClientCache(Request $request, Route $route) {
 
         $cache = strtoupper($route->getParameter('cache'));
-        $ttl = (int) $route->getParameter('ttl');
+        $ttl = (int)$route->getParameter('ttl');
 
         if (
             ($cache == 'CLIENT' || $cache == 'BOTH') &&
-            in_array((string) $request->getMethod(), self::$cacheable_methods) &&
+            in_array((string)$request->getMethod(), self::$cacheable_methods) &&
             in_array($this->getStatus()->get(), self::$cacheable_statuses)
             // @TODO: here we should also check for Cache-Control no-store or private;
             //        the cache layer will be improoved in future versions.
         ) {
 
             $headers = $this->getHeaders();
-            $timestamp = (int) $this->getTime()->format('U') + $ttl;
+            $timestamp = (int)$this->getTime()->format('U')+$ttl;
 
-            if ( $ttl > 0 ) {
+            if ($ttl > 0) {
 
                 $headers->set("Cache-Control", "max-age=".$ttl.", must-revalidate");
                 $headers->set("Expires", gmdate("D, d M Y H:i:s", $timestamp)." GMT");

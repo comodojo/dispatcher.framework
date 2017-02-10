@@ -107,23 +107,23 @@ class Model extends AbstractModel {
 
     public function route(Request $request) {
 
-        $method = (string) $request->getMethod();
+        $method = (string)$request->getMethod();
 
         $methods = $this->configuration->get('allowed-http-methods');
 
-        if ( !empty($methods) && in_array($method, $methods) === false ) {
+        if (!empty($methods) && in_array($method, $methods) === false) {
 
             throw new DispatcherException("Method not allowed", 0, null, 405, array(
-                "Allow" => implode(",",$methods)
+                "Allow" => implode(",", $methods)
             ));
 
         }
 
         $this->setRequest($request);
 
-        if ( $this->bypass_routing === false ) {
+        if ($this->bypass_routing === false) {
 
-            if ( !$this->parse() ) throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
+            if (!$this->parse()) throw new DispatcherException("Unable to find a valid route for the specified uri", 0, null, 404);
 
         }
 
@@ -135,7 +135,7 @@ class Model extends AbstractModel {
 
         $class = $this->route->getClassName();
 
-        if ( class_exists($class) ) {
+        if (class_exists($class)) {
 
             // All the route parameters are also added to the query parameters
             foreach ($this->route->getRequestParameters() as $parameter => $value) {
@@ -163,13 +163,13 @@ class Model extends AbstractModel {
 
         $this->setResponse($response);
 
-        if ( is_null($this->route) ) {
+        if (is_null($this->route)) {
 
             throw new DispatcherException("Route has not been loaded!");
 
         }
 
-        if ( $this->bypass_service ) {
+        if ($this->bypass_service) {
 
             return;
 
@@ -177,15 +177,15 @@ class Model extends AbstractModel {
 
         $service = $this->getServiceInstance();
 
-        if ( !is_null($service) ) {
+        if (!is_null($service)) {
 
             $result = "";
 
-            $method = (string) $this->getRequest()->getMethod();
+            $method = (string)$this->getRequest()->getMethod();
 
             $methods = $service->getImplementedMethods();
 
-            if ( in_array($method, $methods) ) {
+            if (in_array($method, $methods)) {
 
                 $callable = $service->getMethod($method);
 
@@ -228,7 +228,7 @@ class Model extends AbstractModel {
         foreach ($this->table->getRoutes() as $regex => $value) {
 
             // The current uri is checked against all the global regular expressions associated with the routes
-            if ( preg_match("/" . $regex . "/", $path, $matches) ) {
+            if (preg_match("/".$regex."/", $path, $matches)) {
 
                 /* If a route is matched, all the bits of the route string are evalued in order to create
                  * new query parameters which will be available for the service class

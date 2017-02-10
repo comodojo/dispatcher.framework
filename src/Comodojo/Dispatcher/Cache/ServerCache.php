@@ -47,7 +47,7 @@ class ServerCache extends AbstractCache {
 
         $cache_object = $this->getCache()->setNamespace(self::$cache_namespace)->get($name);
 
-        if ( is_null($cache_object) ) return false;
+        if (is_null($cache_object)) return false;
 
         $response->import($cache_object);
 
@@ -67,15 +67,15 @@ class ServerCache extends AbstractCache {
 
         $name = self::getCacheName($request);
 
-        $method = (string) $request->getMethod();
+        $method = (string)$request->getMethod();
 
         $status = $response->getStatus()->get();
 
         if (
-            ( $cache == 'SERVER' || $cache == 'BOTH' ) &&
+            ($cache == 'SERVER' || $cache == 'BOTH') &&
             in_array($method, self::$cachable_methods) &&
             in_array($status, self::$cachable_statuses)
-        ){
+        ) {
 
             $this->getCache()
                 ->setNamespace(self::$cache_namespace)
@@ -87,7 +87,7 @@ class ServerCache extends AbstractCache {
 
     private static function getCacheName(Request $request) {
 
-        return md5( (string) $request->getMethod() . (string) $request->getUri() );
+        return md5((string)$request->getMethod().(string)$request->getUri());
 
     }
 
