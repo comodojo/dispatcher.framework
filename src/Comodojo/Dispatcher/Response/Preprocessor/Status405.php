@@ -33,7 +33,7 @@ class Status405 extends Status400 {
         // An Allow Header should be provided from DispatcherException
         $allow = $this->response->getHeaders()->get('Allow');
 
-        if ( is_null($allow) ) throw new Exception("Missing Allow header");
+        if (is_null($allow)) throw new Exception("Missing Allow header");
 
         parent::consolidate();
 

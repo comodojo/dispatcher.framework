@@ -29,7 +29,7 @@ class DispatcherEvent extends AbstractEvent {
 
     protected $dispatcher;
 
-    public function __construct( Dispatcher $dispatcher ) {
+    public function __construct(Dispatcher $dispatcher) {
 
         parent::__construct('dispatcher');
 

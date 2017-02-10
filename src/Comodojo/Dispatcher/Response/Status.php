@@ -48,7 +48,7 @@ class Status {
 
     public function set($code) {
 
-        if ( !$this->codes->exists($code) ) {
+        if (!$this->codes->exists($code)) {
 
             throw new Exception("Invalid HTTP Status Code $code");
 

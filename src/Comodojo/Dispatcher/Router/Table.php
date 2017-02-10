@@ -136,9 +136,9 @@ class Table extends AbstractModel {
 
     public function load($routes) {
 
-        if ( !empty($routes) ) {
+        if (!empty($routes)) {
 
-            foreach( $routes as $name => $route ) {
+            foreach ($routes as $name => $route) {
 
                 $this->add($route['route'], $route['type'], $route['class'], $route['parameters']);
                 // $this->add($name, $route['type'], $route['class'], $route['parameters']);
@@ -156,11 +156,11 @@ class Table extends AbstractModel {
 
     private function readCache() {
 
-        if ( $this->configuration->get('routing-table-cache') !== true ) return;
+        if ($this->configuration->get('routing-table-cache') !== true) return;
 
         $data = $this->cache->read();
 
-        if ( is_null($data) ) {
+        if (is_null($data)) {
 
             $this->routes = [];
 
@@ -176,11 +176,11 @@ class Table extends AbstractModel {
 
     private function dumpCache() {
 
-        if ( $this->configuration->get('routing-table-cache') !== true ) return;
+        if ($this->configuration->get('routing-table-cache') !== true) return;
 
         $ttl = $this->configuration->get('routing-table-ttl');
 
-        if ( $this->cache->dump($this->routes, $ttl) ) {
+        if ($this->cache->dump($this->routes, $ttl)) {
             $this->logger->debug("Routing table saved to cache");
         } else {
             $this->logger->warning("Cannot save routing table to cache");
@@ -198,7 +198,7 @@ class Table extends AbstractModel {
             ->setClassName($class) // Class to be invoked
             ->setParameters($parameters); // Parameters passed via the composer.json configuration (cache, ttl, etc...)
 
-        $this->logger->debug("Route table - route: " . implode("/", $folders));
+        $this->logger->debug("Route table - route: ".implode("/", $folders));
 
         // This method generate a global regular expression which will be able to match all the URI supported by the route
         $regex = $this->parser->read($folders, $route);

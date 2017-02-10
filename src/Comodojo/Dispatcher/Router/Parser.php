@@ -96,7 +96,9 @@ class Parser {
                      */
                     $param_regex .= $this->param($key, $string, $value);
 
-                    if ($value->isQueryRequired($key)) $param_required = true;
+                    if ($value->isQueryRequired($key)) {
+                        $param_required = true;
+                    }
 
                     $this->logger->debug("Route parser - parameter regex: $param_regex");
 
@@ -105,7 +107,7 @@ class Parser {
                 return $this->read(
                     $folders,
                     $value,
-                    $regex.'(?:\/'.$param_regex.')'. (($param_required)?'{1}':'?')
+                    $regex.'(?:\/'.$param_regex.')'.(($param_required) ? '{1}' : '?')
                 );
 
             } else {
@@ -161,7 +163,7 @@ class Parser {
          * If the field is required, the regular expression is completed with a '{1}' (which make it compulsory),
          * otherwise a '?' is added.
          */
-        return '(?P<' . $key . '>' . $string . ')' . (($field_required)?'{1}':'?');
+        return '(?P<'.$key.'>'.$string.')'.(($field_required) ? '{1}' : '?');
 
     }
 

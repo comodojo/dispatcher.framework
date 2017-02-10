@@ -44,6 +44,9 @@ class File {
 
     }
 
+    /**
+     * @return string
+     */
     public function getTemporaryName() {
 
         return $this->tname;
@@ -84,7 +87,9 @@ class File {
 
         $file = $this->getTemporaryName();
 
-        if (file_exists($file)) return file_get_contents($file);
+        if (file_exists($file)) {
+            return file_get_contents($file);
+        }
 
         throw new Exception("File does not exists");
 
@@ -108,9 +113,9 @@ class File {
 
         if (!empty($path) && file_exists($path)) {
 
-            $local_name = "$path/" . ($as_slug ? $this->getSlug() : $this->getFileName());
+            $local_name = "$path/".($as_slug ? $this->getSlug() : $this->getFileName());
 
-            if ( file_exists($local_name) ) {
+            if (file_exists($local_name)) {
 
                 $files = glob("$local_name*");
 
@@ -120,7 +125,7 @@ class File {
 
             }
 
-            if ( move_uploaded_file($this->getTemporaryName(), $local_name) ) {
+            if (move_uploaded_file($this->getTemporaryName(), $local_name)) {
 
                 // return file_exists($local_name);
                 return true;

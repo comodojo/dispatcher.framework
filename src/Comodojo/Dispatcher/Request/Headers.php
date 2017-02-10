@@ -41,13 +41,13 @@ class Headers {
      */
     private static function getHeaders() {
 
-        if ( function_exists('getallheaders') ) return getallheaders();
+        if (function_exists('getallheaders')) return getallheaders();
 
         $headers = array();
 
-        foreach ( $_SERVER as $name => $value ) {
+        foreach ($_SERVER as $name => $value) {
 
-            if ( substr($name, 0, 5) == 'HTTP_' ) {
+            if (substr($name, 0, 5) == 'HTTP_') {
 
                 $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
 

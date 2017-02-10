@@ -32,13 +32,13 @@ class Status301 extends Status200 {
 
         $location = $this->response->getLocation()->get();
 
-        if ( empty($location) ) throw new Exception("Invalid location, cannot redirect");
+        if (empty($location)) throw new Exception("Invalid location, cannot redirect");
 
         $this->response->getHeaders()->set("Location", $location);
 
         $content = $this->response->getContent();
 
-        if ( empty($content->get()) ) {
+        if (empty($content->get())) {
 
             $content->set(sprintf('<!DOCTYPE html>
 <html>
