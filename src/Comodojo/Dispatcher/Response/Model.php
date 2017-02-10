@@ -41,6 +41,16 @@ class Model extends AbstractModel implements Serializable {
 
     protected static $cacheable_statuses = [200, 203, 300, 301, 302, 404, 410];
 
+    protected $headers;
+
+    protected $cookies;
+
+    protected $status;
+
+    protected $content;
+
+    protected $location;
+    
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
