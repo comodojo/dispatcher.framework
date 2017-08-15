@@ -50,7 +50,7 @@ class Model extends AbstractModel implements Serializable {
     protected $content;
 
     protected $location;
-    
+
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
@@ -60,6 +60,8 @@ class Model extends AbstractModel implements Serializable {
         $this->setStatus(new Status());
         $this->setContent(new Content());
         $this->setLocation(new Location());
+        
+        $this->setTiming();
 
     }
 
@@ -227,7 +229,7 @@ class Model extends AbstractModel implements Serializable {
         ) {
 
             $headers = $this->getHeaders();
-            $timestamp = (int)$this->getTime()->format('U')+$ttl;
+            $timestamp = (int) $this->getTime()->format('U')+$ttl;
 
             if ($ttl > 0) {
 
