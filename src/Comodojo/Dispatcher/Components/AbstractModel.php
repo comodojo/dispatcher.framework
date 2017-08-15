@@ -2,8 +2,8 @@
 
 use \Comodojo\Foundation\Base\Configuration;
 use \Psr\Log\LoggerInterface;
-use \Comodojo\Dispatcher\Traits\ConfigurationTrait;
-use \Comodojo\Dispatcher\Traits\LoggerTrait;
+use \Comodojo\Foundation\Base\ConfigurationTrait;
+use \Comodojo\Foundation\Logging\LoggerTrait;
 
 /**
  * @package     Comodojo Dispatcher

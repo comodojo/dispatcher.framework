@@ -1,7 +1,7 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
 use \Comodojo\Dispatcher\Traits\CacheTrait;
-use \Comodojo\Dispatcher\Traits\EventsTrait;
+use \Comodojo\Foundation\Events\EventsTrait;
 use \Comodojo\Dispatcher\Traits\RequestTrait;
 use \Comodojo\Dispatcher\Traits\ResponseTrait;
 use \Comodojo\Dispatcher\Traits\ExtraTrait;

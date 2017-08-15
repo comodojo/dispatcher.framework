@@ -1,9 +1,9 @@
 <?php namespace Comodojo\Dispatcher\Events;
 
-use \Comodojo\Dispatcher\Traits\ConfigurationTrait;
-use \Comodojo\Dispatcher\Traits\LoggerTrait;
+use \Comodojo\Foundation\Base\ConfigurationTrait;
+use \Comodojo\Foundation\Logging\LoggerTrait;
+use \Comodojo\Foundation\Events\EventsTrait;
 use \Comodojo\Dispatcher\Traits\CacheTrait;
-use \Comodojo\Dispatcher\Traits\EventsTrait;
 use \Comodojo\Dispatcher\Traits\RequestTrait;
 use \Comodojo\Dispatcher\Traits\ResponseTrait;
 use \Comodojo\Dispatcher\Traits\RouterTrait;

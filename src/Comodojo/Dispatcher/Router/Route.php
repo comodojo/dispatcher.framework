@@ -30,12 +30,20 @@ use \Exception;
 
 class Route implements Serializable {
 
+    const REDIRECT_REFRESH = 0;
+
+    const REDIRECT_LOCATION = 1;
+
     protected $classname;
     protected $type;
     protected $service = [];
     protected $parameters = [];
     protected $request = [];
     protected $query = [];
+
+    protected $redirect_code = 302;
+    protected $redirect_location;
+    protected $redirect_type = self::REDIRECT_LOCATION;
 
     public function getType() {
 

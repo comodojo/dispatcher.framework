@@ -10,7 +10,7 @@ use \Comodojo\Dispatcher\Traits\RequestTrait;
 use \Comodojo\Dispatcher\Traits\ResponseTrait;
 use \Comodojo\Dispatcher\Traits\RouterTrait;
 use \Comodojo\Dispatcher\Traits\ExtraTrait;
-use \Comodojo\Dispatcher\Traits\EventsTrait;
+use \Comodojo\Foundation\Events\EventsTrait;
 use \Comodojo\SimpleCache\Manager as CacheManager;
 use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Foundation\Events\Manager as EventsManager;
