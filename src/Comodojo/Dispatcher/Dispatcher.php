@@ -5,6 +5,7 @@ use \Comodojo\Dispatcher\Components\DefaultConfiguration;
 use \Comodojo\Dispatcher\Cache\ServerCache;
 use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
+use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Output\Processor;
@@ -165,22 +166,53 @@ class Dispatcher extends AbstractModel {
         }
 
         $route_type = $this->route->getType();
-
         $route_service = $this->route->getServiceName();
 
-        $logger->debug("Route acquired, type $route_type directed to $route_service");
+        $logger->debug("Route acquired, type $route_type");
 
         $events->emit($this->createServiceSpecializedEvents('dispatcher.route'));
         $events->emit($this->createServiceSpecializedEvents('dispatcher.route.'.$route_type));
-        $events->emit($this->createServiceSpecializedEvents('dispatcher.route.'.$route_service));
-        $events->emit($this->createServiceSpecializedEvents('dispatcher.route.#'));
 
-        // translate route to service
-        $logger->debug("Running $route_service service");
+        if ( $route_type == 'ROUTE' ) {
+            $logger->debug("Route leads to service $route_service");
+            $events->emit($this->createServiceSpecializedEvents('dispatcher.route.'.$route_service));
+        }
+
+        $events->emit($this->createServiceSpecializedEvents('dispatcher.route.#'));
 
         try {
 
-            $this->router->compose($this->response);
+            switch ($route_type) {
+
+                case 'ROUTE':
+
+                    $logger->debug("Running $route_service service");
+
+                    // translate route to service
+                    $this->router->compose($this->response);
+
+                    $this->processConfigurationParameters($this->route);
+
+                    $cache->dump($this->request, $this->response, $this->route);
+
+                    break;
+
+                case 'REDIRECT':
+
+                    $logger->debug("Redirecting response...");
+
+                    $this->processRedirect($this->route);
+
+                    break;
+
+                case 'ERROR':
+
+                    $logger->debug("Sending error message...");
+
+                    $this->processError($this->route);
+
+                    break;
+            }
 
         } catch (DispatcherException $de) {
 
@@ -188,10 +220,6 @@ class Dispatcher extends AbstractModel {
             $this->processDispatcherException($de);
 
         }
-
-        $this->processConfigurationParameters($this->route);
-
-        $cache->dump($this->request, $this->response, $this->route);
 
         return $this->shutdown();
 
@@ -206,6 +234,70 @@ class Dispatcher extends AbstractModel {
                 $this->getResponse()->getHeaders()->set($name, $value);
             }
         }
+
+    }
+
+    private function processRedirect(Route $route) {
+
+        $status = $this->getResponse()->getStatus();
+        $content = $this->getResponse()->getContent();
+        $headers = $this->getResponse()->getHeaders();
+
+        $code = $route->getRedirectCode();
+
+        $location = $route->getRedirectLocation();
+        $uri = empty($location) ? (string) $this->getRequest()->getUri() : $location;
+
+        $message = $route->getRedirectMessage();
+
+        if ( $route->getRedirectType() == Route::REDIRECT_REFRESH ) {
+
+            $output = empty($message) ?
+                "Please follow <a href=\"$location\">this link</a>"
+                : $message;
+
+            $status->set(200);
+            $headers->set("Refresh", "0;url=$location");
+            $content->set($output);
+
+        } else {
+
+            if ( !empty($code) ) {
+                $status->set($code);
+            } else if ( $this->getRequest()->getVersion() == 'HTTP/1.1' ) {
+                $status->set( (string) $this->getRequest()->getMethod() !== 'GET' ? 303 : 307);
+            } else {
+                $status->set(302);
+            }
+
+            $content->set($message);
+            $this->getResponse()->getLocation()->set($uri);
+
+        }
+
+    }
+
+    private function processError(Route $route) {
+
+        $code = $route->getErrorCode();
+
+        $code = empty($code) ? 500 : $code;
+
+        throw new DispatcherException($route->getErrorMessage(), 0, null, $code);
+
+    }
+
+    private function processDispatcherException(DispatcherException $de) {
+
+        $status = $de->getStatus();
+        $message = $de->getMessage();
+        $headers = $de->getHeaders();
+
+        $response = $this->getResponse();
+
+        $response->getStatus()->set($status);
+        $response->getContent()->set($message);
+        $response->getHeaders()->merge($headers);
 
     }
 
@@ -227,20 +319,6 @@ class Dispatcher extends AbstractModel {
             $this->getResponse(),
             $this->getExtra()
         );
-
-    }
-
-    private function processDispatcherException(DispatcherException $de) {
-
-        $status = $de->getStatus();
-        $message = $de->getMessage();
-        $headers = $de->getHeaders();
-
-        $response = $this->getResponse();
-
-        $response->getStatus()->set($status);
-        $response->getContent()->set($message);
-        $response->getHeaders()->merge($headers);
 
     }
 

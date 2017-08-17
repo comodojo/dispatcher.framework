@@ -65,7 +65,7 @@ class Model extends AbstractModel {
         $this->setExtra($extra);
         $this->setEvents($events);
 
-        $this->setTable(new Table($cache, $this));
+        $this->setTable(new Table($configuration, $logger, $cache));
 
     }
 
@@ -107,7 +107,7 @@ class Model extends AbstractModel {
 
     public function route(Request $request) {
 
-        $method = (string)$request->getMethod();
+        $method = (string) $request->getMethod();
 
         $methods = $this->configuration->get('allowed-http-methods');
 

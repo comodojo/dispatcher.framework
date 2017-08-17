@@ -1,9 +1,8 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
-use \Comodojo\Foundation\DataAccess\Model as FoundationModel;
-use \Comodojo\Foundation\DataAccess\SerializationTrait;
 use \Comodojo\Exception\DispatcherException;
 use \Serializable;
+use \InvalidArgumentException;
 use \Exception;
 
 /**
@@ -30,20 +29,75 @@ use \Exception;
 
 class Route implements Serializable {
 
-    const REDIRECT_REFRESH = 0;
+    /**
+     * @const string
+     */
+    const REDIRECT_REFRESH = 'REFRESH';
 
-    const REDIRECT_LOCATION = 1;
+    /**
+     * @const string
+     */
+    const REDIRECT_LOCATION = 'LOCATION';
 
-    protected $classname;
+    /**
+     * @var string
+     */
     protected $type;
-    protected $service = [];
-    protected $parameters = [];
-    protected $request = [];
-    protected $query = [];
 
-    protected $redirect_code = 302;
+    /**
+     * @var string
+     */
+    protected $classname;
+
+    /**
+     * @var int
+     */
+    protected $redirect_code;
+
+    /**
+     * @var string
+     */
     protected $redirect_location;
+
+    /**
+     * @var string
+     */
+    protected $redirect_message;
+
+    /**
+     * @var string
+     */
     protected $redirect_type = self::REDIRECT_LOCATION;
+
+    /**
+     * @var int
+     */
+    protected $error_code;
+
+    /**
+     * @var string
+     */
+    protected $error_message;
+
+    /**
+    * @var array
+    */
+    protected $parameters = [];
+
+    /**
+     * @var array
+     */
+    protected $service = [];
+
+    /**
+     * @var array
+     */
+    protected $request = [];
+
+    /**
+     * @var array
+     */
+    protected $query = [];
 
     public function getType() {
 
@@ -59,29 +113,111 @@ class Route implements Serializable {
 
     }
 
-    public function getService() {
+    public function getClassName() {
 
-        return $this->service;
-
-    }
-
-    public function getServiceName() {
-
-        return empty($this->service) ? "default" : implode('.', $this->service);
+        return $this->classname;
 
     }
 
-    public function setService($service) {
+    public function setClassName($class) {
 
-        $this->service = $service;
+        $this->classname = $class;
 
         return $this;
 
     }
 
-    public function addService($service) {
+    public function getRedirectCode() {
 
-        $this->service = array_merge($this->service, array($service));
+        return $this->redirect_code;
+
+    }
+
+    public function setRedirectCode($code) {
+
+        if ( $code < 300 || $code >= 400 ) {
+            throw new InvalidArgumentException("Invalid redirection code $code");
+        }
+
+        $this->redirect_code = $code;
+
+        return $this;
+
+    }
+
+    public function getRedirectLocation() {
+
+        return $this->redirect_location;
+
+    }
+
+    public function setRedirectLocation($location) {
+
+        $this->redirect_location = $location;
+
+        return $this;
+
+    }
+
+    public function getRedirectMessage() {
+
+        return $this->redirect_message;
+
+    }
+
+    public function setRedirectMessage($message) {
+
+        $this->redirect_message = $message;
+
+        return $this;
+
+    }
+
+    public function getRedirectType() {
+
+        return $this->redirect_type;
+
+    }
+
+    public function setRedirectType($type) {
+
+        if ( !in_array($type, [self::REDIRECT_REFRESH, self::REDIRECT_LOCATION]) ) {
+            throw new InvalidArgumentException("Invalid redirection type $type");
+        }
+
+        $this->redirect_type = $type;
+
+        return $this;
+
+    }
+
+    public function getErrorCode() {
+
+        return $this->error_code;
+
+    }
+
+    public function setErrorCode($code) {
+
+        if ( $code < 400 || $code >= 600 ) {
+            throw new InvalidArgumentException("Invalid error code $code");
+        }
+
+        $this->error_code = $code;
+
+        return $this;
+
+    }
+
+    public function getErrorMessage() {
+
+        return $this->error_message;
+
+    }
+
+    public function setErrorMessage($message) {
+
+        $this->error_message = $message;
 
         return $this;
 
@@ -122,6 +258,34 @@ class Route implements Serializable {
         $parameters = $this->request;
 
         return isset($parameters[$key]) ? $parameters[$key] : null;
+
+    }
+
+    public function getService() {
+
+        return $this->service;
+
+    }
+
+    public function getServiceName() {
+
+        return empty($this->service) ? "default" : implode('.', $this->service);
+
+    }
+
+    public function setService($service) {
+
+        $this->service = $service;
+
+        return $this;
+
+    }
+
+    public function addService($service) {
+
+        $this->service = array_merge($this->service, array($service));
+
+        return $this;
 
     }
 
@@ -185,20 +349,6 @@ class Route implements Serializable {
     public function setQueries($query) {
 
         $this->query = $query;
-
-        return $this;
-
-    }
-
-    public function getClassName() {
-
-        return $this->classname;
-
-    }
-
-    public function setClassName($class) {
-
-        $this->classname = $class;
 
         return $this;
 

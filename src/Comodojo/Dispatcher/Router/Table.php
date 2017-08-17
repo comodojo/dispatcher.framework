@@ -1,13 +1,16 @@
 <?php namespace Comodojo\Dispatcher\Router;
 
+use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\Dispatcher\Components\AbstractModel;
 use \Comodojo\Dispatcher\Cache\RouterCache;
+use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Parser;
 use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Router\Model as Router;
-use \Comodojo\Foundation\Base\Configuration;
 use \Comodojo\SimpleCache\Manager as SimpleCacheManager;
 use \Comodojo\Exception\DispatcherException;
+use \Psr\Log\LoggerInterface;
+use \Countable;
 use \Exception;
 
 /**
@@ -32,43 +35,84 @@ use \Exception;
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Table extends AbstractModel {
+class Table extends AbstractModel implements Countable {
 
+    /**
+     * Types of route that this table will accept
+     * @var array
+     */
+    const ALLOWED_ROUTES = [ "ROUTE", "REDIRECT", "ERROR" ];
+
+    /**
+     * Current repository of routes
+     * @var array
+     */
     protected $routes = [];
-    protected $router;
+
+    /**
+     * @var Parser
+     */
     protected $parser;
+
+    /**
+     * @var RouterCache
+     */
     protected $cache;
 
+    /**
+     * Table constructor
+     *
+     * @param Configuration $configuration
+     * @param LoggerInterface $logger
+     * @param SimpleCacheManager $cache
+     */
     public function __construct(
-        SimpleCacheManager $cache,
-        Router $router
+        Configuration $configuration,
+        LoggerInterface $logger,
+        SimpleCacheManager $cache
     ) {
 
-        parent::__construct($router->getConfiguration(), $router->getLogger());
+        parent::__construct($configuration, $logger);
 
-        $this->router = $router;
-        $this->parser = new Parser($this->logger);
+        $this->parser = new Parser($logger);
         $this->cache = new RouterCache($cache);
 
         $this->readCache();
 
     }
 
-    public function add($route, $type, $class, $parameters = array()) {
+    public function add(
+        $route,
+        $type,
+        $class = null,
+        array $parameters = []
+    ) {
 
-        $routeData = $this->get($route);
+        $type = strtoupper($type);
 
-        if (!is_null($routeData)) {
+        if ( !in_array($type, self::ALLOWED_ROUTES) ) {
 
-            $routeData->setType($type)
-                ->setClassName($class)
-                ->setParameters($parameters);
+            $this->getLogger()->error("Invalid route definition - unknown type $type for route $route)");
+
+        } else if ( $type == 'ROUTE' && empty($class) ) {
+
+            $this->getLogger()->error("Invalid route definition - missing class for route $route)");
 
         } else {
 
-            $folders = explode("/", $route);
+            $routeData = $this->get($route);
 
-            $this->register($folders, $type, $class, $parameters);
+            if ( !is_null($routeData) ) {
+
+                $this->updateRoute($routeData, $type, $class, $parameters);
+
+            } else {
+
+                $folders = explode("/", $route);
+
+                $this->registerRoute($folders, $type, $class, $parameters);
+
+            }
 
         }
 
@@ -76,6 +120,11 @@ class Table extends AbstractModel {
 
     }
 
+    /**
+     * Get registered routes count
+     *
+     * @return int
+     */
     public function count() {
 
         return count($this->routes);
@@ -134,14 +183,18 @@ class Table extends AbstractModel {
 
     }
 
-    public function load($routes) {
+    public function load(array $routes) {
 
         if (!empty($routes)) {
 
             foreach ($routes as $name => $route) {
 
-                $this->add($route['route'], $route['type'], $route['class'], $route['parameters']);
-                // $this->add($name, $route['type'], $route['class'], $route['parameters']);
+                $this->add(
+                    $route['route'],
+                    $route['type'],
+                    empty($route['class']) ? null : $route['class'],
+                    empty($route['parameters']) ? [] : $route['parameters']
+                );
 
             }
 
@@ -151,6 +204,46 @@ class Table extends AbstractModel {
         $this->logger->debug("$count routes loaded in routing table");
 
         $this->dumpCache();
+
+    }
+
+    // This method add a route to the supported list
+    private function registerRoute($folders, $type, $class = null, array $parameters = []) {
+
+        // The values associated with a route are as follows:
+        // $route = new Route($this->router);
+        $route = new Route();
+
+        $this->updateRoute($route, $type, $class, $parameters);
+
+        // $route->setType($type) // Type of route
+        //     ->setClassName($class) // Class to be invoked
+        //     ->setParameters($parameters); // Parameters passed via the composer.json configuration (cache, ttl, etc...)
+
+        $this->logger->debug("Route table - route: ".implode("/", $folders));
+
+        // This method generate a global regular expression which will be able to match all the URI supported by the route
+        $regex = $this->parser->read($folders, $route);
+
+        $this->logger->debug("Route table - route regex: $regex");
+
+        $this->routes = array_merge($this->routes, [$regex => $route]);
+
+    }
+
+    private function updateRoute(Route $route, $type, $class = null, array $parameters = []) {
+
+        $route->setType($type)
+            ->setClassName($class)
+            ->setParameters($parameters);
+
+        if ( !empty($parameters['redirect-code']) ) $route->setRedirectCode($parameters['redirect-code']);
+        if ( !empty($parameters['redirect-location']) ) $route->setRedirectLocation($parameters['redirect-location']);
+        if ( !empty($parameters['redirect-message']) ) $route->setRedirectLocation($parameters['redirect-message']);
+        if ( !empty($parameters['redirect-type']) ) $route->setRedirectType($parameters['redirect-type']);
+
+        if ( !empty($parameters['error-code']) ) $route->setErrorCode($parameters['error-code']);
+        if ( !empty($parameters['error-message']) ) $route->setErrorMessage($parameters['error-message']);
 
     }
 
@@ -185,27 +278,6 @@ class Table extends AbstractModel {
         } else {
             $this->logger->warning("Cannot save routing table to cache");
         }
-
-    }
-
-    // This method add a route to the supported list
-    private function register($folders, $type, $class, $parameters) {
-
-        // The values associated with a route are as follows:
-        // $route = new Route($this->router);
-        $route = new Route();
-        $route->setType($type) // Type of route
-            ->setClassName($class) // Class to be invoked
-            ->setParameters($parameters); // Parameters passed via the composer.json configuration (cache, ttl, etc...)
-
-        $this->logger->debug("Route table - route: ".implode("/", $folders));
-
-        // This method generate a global regular expression which will be able to match all the URI supported by the route
-        $regex = $this->parser->read($folders, $route);
-
-        $this->logger->debug("Route table - route regex: $regex");
-
-        $this->routes = array_merge($this->routes, [$regex => $route]);
 
     }
 
