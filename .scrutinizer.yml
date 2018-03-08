@@ -21,3 +21,4 @@ tools:
     external_code_coverage:
         timeout: 600
         runs: 1
+    sensiolabs_security_checker: true

@@ -223,7 +223,7 @@ class Model extends AbstractModel {
 
     private function parse() {
 
-        $path = $this->getRequest()->route();
+        $path = urldecode($this->getRequest()->route());
 
         foreach ($this->table->getRoutes() as $regex => $value) {
 
