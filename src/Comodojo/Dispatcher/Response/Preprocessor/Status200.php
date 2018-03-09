@@ -33,7 +33,7 @@ class Status200 extends AbstractPreprocessor {
         $type = $this->response->getContent()->type();
         $charset = $this->response->getContent()->charset();
 
-        if (is_null($charset)) {
+        if (empty($charset)) {
             $this->response->getHeaders()->set("Content-type", strtolower($type));
         } else {
             $this->response->getHeaders()->set("Content-type", strtolower($type)."; charset=".$charset);
