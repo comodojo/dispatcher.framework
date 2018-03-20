@@ -1,7 +1,7 @@
 {
     "name": "comodojo/dispatcher.framework",
     "description": "Hackable REST framework",
-    "license": "GPL-3.0+",
+    "license": "GPL-3.0-or-later",
     "type": "library",
     "keywords": [
         "rest",
@@ -36,6 +36,9 @@
             "Comodojo\\Dispatcher\\": "src/Comodojo/Dispatcher"
         }
     },
+    "bin": [
+        "bin/dispatcher"
+    ],
     "minimum-stability": "dev",
     "require": {
         "php": ">=5.6.0",

@@ -1,0 +1,37 @@
+#!/usr/bin/env php
+<?php
+
+use \Comodojo\Foundation\Base\ConfigurationLoader;
+use \Comodojo\Foundation\Console\Processor as ConsoleProcessor;
+use \Comodojo\Dispatcher\Components\CommandsLoader;
+use \Comodojo\Dispatcher\Components\Version;
+
+$base_path = realpath(dirname(__FILE__)."/../../../../");
+$autoloader = "$base_path/vendor/autoload.php";
+$configuration = "$base_path/config/comodojo-configuration.yml";
+$commands = "$base_path/config/comodojo-commands.yml";
+
+$loader = require_once $autoloader;
+
+if ( ! file_exists($configuration) ) {
+    print "\nCannot read configuration (file $configuration)\n";
+    exit(1);
+}
+$config = ConfigurationLoader::load($configuration);
+
+if ( ! file_exists($commands) ) {
+    print "\nCannot read commands definition (file $commands)\n";
+    exit(1);
+}
+$comm = CommandsLoader::load($commands);
+
+$version = new Version($config);
+
+$console = new ConsoleProcessor(
+    $config,
+    $comm,
+    $version->getAscii(),
+    $version->getVersion()
+);
+
+$console->run();
