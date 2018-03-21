@@ -1,7 +1,7 @@
 {
     "name": "comodojo/dispatcher.framework",
     "description": "Hackable REST framework",
-    "license": "GPL-3.0-or-later",
+    "license": "MIT",
     "type": "library",
     "keywords": [
         "rest",

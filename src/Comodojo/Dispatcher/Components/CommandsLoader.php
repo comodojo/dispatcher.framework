@@ -6,8 +6,9 @@ use \Comodojo\Exception\ConfigurationException;
 use \Exception;
 
 /**
- * @package     Comodojo dispatcher
+ * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     MIT
  *
  * LICENSE:

@@ -5,6 +5,7 @@ use \Comodojo\Foundation\Base\AbstractVersion;
 /**
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
+ * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     MIT
  *
  * LICENSE:
