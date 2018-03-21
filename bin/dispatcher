@@ -31,7 +31,7 @@ $console = new ConsoleProcessor(
     $config,
     $comm,
     $version->getAscii(),
-    $version->getVersion()
+    $version->getName()." (".$version->getVersion().")"
 );
 
 $console->run();
