@@ -20,23 +20,11 @@ use \Exception;
  * THE SOFTWARE.
  */
 
-class CommandsLoader extends AbstractYamlLoader {
+class RoutesLoader extends AbstractYamlLoader {
 
-    public static function load($file, array $attributes = []) {
+    public static function load($file) {
 
-        $config = static::importData($file);
-
-        $classes = [];
-
-        foreach ($config as $package) {
-            foreach ($package as $command) {
-                if ( $command['scope'] === 'dispatcher') {
-                    $classes[] = $command['class'];
-                }
-            }
-        }
-
-        return $classes;
+        return static::importData($file);
 
     }
 
