@@ -9,12 +9,16 @@ use \Comodojo\Dispatcher\Router\Route;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
 use \Comodojo\Dispatcher\Output\Processor;
+use \Comodojo\Dispatcher\Output\Redirect;
+use \Comodojo\Dispatcher\Output\Error;
 use \Comodojo\Dispatcher\Events\DispatcherEvent;
 use \Comodojo\Dispatcher\Events\ServiceEvent;
 use \Comodojo\Dispatcher\Traits\CacheTrait;
+use \Comodojo\Dispatcher\Traits\ServerCacheTrait;
 use \Comodojo\Dispatcher\Traits\RequestTrait;
 use \Comodojo\Dispatcher\Traits\ResponseTrait;
 use \Comodojo\Dispatcher\Traits\RouterTrait;
+use \Comodojo\Dispatcher\Traits\RouteTrait;
 use \Comodojo\Dispatcher\Traits\ExtraTrait;
 use \Comodojo\Foundation\Events\EventsTrait;
 use \Comodojo\Foundation\Base\Configuration;
@@ -47,17 +51,16 @@ class Dispatcher extends AbstractModel {
 
     use TimingTrait;
     use CacheTrait;
+    use ServerCacheTrait;
     use RequestTrait;
     use ResponseTrait;
     use RouterTrait;
+    use RouteTrait;
     use ExtraTrait;
     use EventsTrait;
 
-    protected $route;
-
     /**
      * The main dispatcher constructor.
-     *
      */
     public function __construct(
         array $configuration = [],
@@ -89,6 +92,7 @@ class Dispatcher extends AbstractModel {
             // init other components
             $this->setEvents(is_null($events) ? EventsManager::create($this->logger) : $events);
             $this->setCache(is_null($cache) ? SimpleCacheManager::createFromConfiguration($this->configuration, $this->logger) : $cache);
+            $this->setServerCache(new ServerCache($this->getCache()));
 
             // init models
             $this->setExtra(new Extra($this->logger));
@@ -111,15 +115,17 @@ class Dispatcher extends AbstractModel {
 
     public function dispatch() {
 
-        $logger = $this->getLogger();
         $configuration = $this->getConfiguration();
+        $logger = $this->getLogger();
         $events = $this->getEvents();
+        $request = $this->getRequest();
+        $response = $this->getResponse();
 
         $logger->debug("Starting to dispatch.");
-
         $logger->debug("Emitting global dispatcher event.");
         $events->emit(new DispatcherEvent($this));
 
+        // if dispatcher is administratively disabled, halt the process immediately
         if ($configuration->get('enabled') === false) {
 
             $logger->debug("Dispatcher disabled, shutting down gracefully.");
@@ -127,30 +133,30 @@ class Dispatcher extends AbstractModel {
             $status = $configuration->get('disabled-status');
             $content = $configuration->get('disabled-message');
 
-            $this->getResponse()->getStatus()->set($status);
-            $this->getResponse()->getContent()->set($content);
+            $response
+                ->getStatus()
+                ->set($status === null ? 503 : $status);
+            $response
+                ->getContent()
+                ->set($content === null ? 'Service unavailable (dispatcher disabled)' : $content);
 
             return $this->shutdown();
 
         }
 
-        $cache = new ServerCache($this->getCache());
+        $cache = $this->getServerCache();
 
         $events->emit($this->createServiceSpecializedEvents('dispatcher.request'));
         $events->emit($this->createServiceSpecializedEvents('dispatcher.request.'.$this->request->getMethod()->get()));
         $events->emit($this->createServiceSpecializedEvents('dispatcher.request.#'));
 
-        if ($cache->read($this->request, $this->response)) {
-            // we have a cache!
-            // shutdown immediately
-            return $this->shutdown();
-        }
-
         $logger->debug("Starting router");
 
         try {
 
-            $this->route = $this->getRouter()->route($this->request);
+            $route = $this->getRouter()
+                ->route($this->request);
+            $this->setRoute($route);
 
         } catch (DispatcherException $de) {
 
@@ -160,20 +166,26 @@ class Dispatcher extends AbstractModel {
 
         }
 
-        $route_type = $this->route->getType();
-        $route_service = $this->route->getServiceName();
+        $route_type = $route->getType();
+        $route_service = $route->getServiceName();
 
         $logger->debug("Route acquired, type $route_type");
 
         $events->emit($this->createServiceSpecializedEvents('dispatcher.route'));
         $events->emit($this->createServiceSpecializedEvents('dispatcher.route.'.$route_type));
 
-        if ( $route_type == 'ROUTE' ) {
+        if ( $route_type === 'ROUTE' ) {
             $logger->debug("Route leads to service $route_service");
             $events->emit($this->createServiceSpecializedEvents('dispatcher.route.'.$route_service));
         }
 
         $events->emit($this->createServiceSpecializedEvents('dispatcher.route.#'));
+
+        if ($cache->read($this->request, $this->response)) {
+            // we have a cache!
+            // shutdown immediately
+            return $this->shutdown();
+        }
 
         try {
 
@@ -196,7 +208,11 @@ class Dispatcher extends AbstractModel {
 
                     $logger->debug("Redirecting response...");
 
-                    $this->processRedirect($this->route);
+                    Redirect::compose(
+                        $this->getRequest(),
+                        $this->getResponse(),
+                        $this->getRoute()
+                    );
 
                     break;
 
@@ -204,7 +220,7 @@ class Dispatcher extends AbstractModel {
 
                     $logger->debug("Sending error message...");
 
-                    $this->processError($this->route);
+                    Error::compose($this->route);
 
                     break;
             }
@@ -229,56 +245,6 @@ class Dispatcher extends AbstractModel {
                 $this->getResponse()->getHeaders()->set($name, $value);
             }
         }
-
-    }
-
-    private function processRedirect(Route $route) {
-
-        $status = $this->getResponse()->getStatus();
-        $content = $this->getResponse()->getContent();
-        $headers = $this->getResponse()->getHeaders();
-
-        $code = $route->getRedirectCode();
-
-        $location = $route->getRedirectLocation();
-        $uri = empty($location) ? (string) $this->getRequest()->getUri() : $location;
-
-        $message = $route->getRedirectMessage();
-
-        if ( $route->getRedirectType() == Route::REDIRECT_REFRESH ) {
-
-            $output = empty($message) ?
-                "Please follow <a href=\"$location\">this link</a>"
-                : $message;
-
-            $status->set(200);
-            $headers->set("Refresh", "0;url=$location");
-            $content->set($output);
-
-        } else {
-
-            if ( !empty($code) ) {
-                $status->set($code);
-            } else if ( $this->getRequest()->getVersion() == 'HTTP/1.1' ) {
-                $status->set( (string) $this->getRequest()->getMethod() !== 'GET' ? 303 : 307);
-            } else {
-                $status->set(302);
-            }
-
-            $content->set($message);
-            $this->getResponse()->getLocation()->set($uri);
-
-        }
-
-    }
-
-    private function processError(Route $route) {
-
-        $code = $route->getErrorCode();
-
-        $code = empty($code) ? 500 : $code;
-
-        throw new DispatcherException($route->getErrorMessage(), 0, null, $code);
 
     }
 
@@ -308,6 +274,7 @@ class Dispatcher extends AbstractModel {
             $this->getConfiguration(),
             $this->getLogger(),
             $this->getCache(),
+            $this->getServerCache(),
             $this->getEvents(),
             $this->getRequest(),
             $this->getRouter(),
@@ -319,6 +286,8 @@ class Dispatcher extends AbstractModel {
 
     private function shutdown() {
 
+        $configuration = $this->getConfiguration();
+        $logger = $this->getLogger();
         $events = $this->getEvents();
         $request = $this->getRequest();
         $response = $this->getResponse();
@@ -329,11 +298,16 @@ class Dispatcher extends AbstractModel {
         $events->emit($this->createServiceSpecializedEvents('dispatcher.response.'.$response->getStatus()->get()));
         $events->emit($this->createServiceSpecializedEvents('dispatcher.response.#'));
 
-        $this->logger->debug("Composing return value");
+        $logger->debug("Composing return value");
 
-        $return = Processor::parse($this->getConfiguration(), $this->logger, $request, $response);
+        $return = Processor::parse(
+            $configuration,
+            $logger,
+            $request,
+            $response
+        );
 
-        $this->logger->debug("Dispatcher run-cycle ends");
+        $logger->debug("Dispatcher run-cycle ends");
 
         // This could cause WSOD with some PHP-FPM configurations
         // if ( function_exists('fastcgi_finish_request') ) fastcgi_finish_request();
