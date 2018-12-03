@@ -1,7 +1,6 @@
-<?php namespace Comodojo\Dispatcher\Components;
+<?php namespace Comodojo\Dispatcher\Traits;
 
-use \Comodojo\Foundation\Base\AbstractYamlLoader;
-use \Exception;
+use Comodojo\Dispatcher\Cache\ServerCache;
 
 /**
  * @package     Comodojo Dispatcher
@@ -20,23 +19,19 @@ use \Exception;
  * THE SOFTWARE.
  */
 
-class CommandsLoader extends AbstractYamlLoader {
+trait ServerCacheTrait {
 
-    public static function load($file, array $attributes = []) {
+    protected $server_cache;
 
-        $config = static::importData($file);
+    public function getServerCache() {
 
-        $classes = [];
+        return $this->server_cache;
 
-        foreach ($config as $package) {
-            foreach ($package as $command) {
-                if ( $command['scope'] === 'dispatcher') {
-                    $classes[] = $command['class'];
-                }
-            }
-        }
+    }
 
-        return $classes;
+    public function setServerCache(ServerCache $cache) {
+
+        $this->server_cache = $cache;
 
     }
 

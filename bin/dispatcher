@@ -6,7 +6,19 @@ use \Comodojo\Foundation\Console\Processor as ConsoleProcessor;
 use \Comodojo\Dispatcher\Components\CommandsLoader;
 use \Comodojo\Dispatcher\Components\Version;
 
-$base_path = realpath(dirname(__FILE__)."/../../../../");
+$base_path = '.';
+$base_alternatives = [
+    realpath(dirname(__FILE__)."/../../../../"),
+    realpath(dirname(__FILE__)."/../../")
+];
+
+foreach ($base_alternatives as $alternative) {
+    if ( file_exists("$alternative/vendor/autoload.php") ) {
+        $base_path = $alternative;
+        break;
+    }
+}
+
 $autoloader = "$base_path/vendor/autoload.php";
 $configuration = "$base_path/config/comodojo-configuration.yml";
 $commands = "$base_path/config/comodojo-commands.yml";

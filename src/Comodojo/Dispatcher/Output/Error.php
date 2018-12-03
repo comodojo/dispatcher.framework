@@ -1,7 +1,7 @@
-<?php namespace Comodojo\Dispatcher\Components;
+<?php namespace Comodojo\Dispatcher\Output;
 
-use \Comodojo\Foundation\Base\AbstractYamlLoader;
-use \Exception;
+use \Comodojo\Dispatcher\Router\Route;
+use \Comodojo\Exception\DispatcherException;
 
 /**
  * @package     Comodojo Dispatcher
@@ -20,24 +20,20 @@ use \Exception;
  * THE SOFTWARE.
  */
 
-class CommandsLoader extends AbstractYamlLoader {
+ class Error {
 
-    public static function load($file, array $attributes = []) {
+     public static function compose(
+         Route $route
+     ) {
 
-        $config = static::importData($file);
+         $code = $route->getErrorCode();
+         $message = $route->getErrorMessage();
 
-        $classes = [];
+         $code = empty($code) ? 500 : $code;
+         $message = empty($message) ? 'Internal error' : $message;
 
-        foreach ($config as $package) {
-            foreach ($package as $command) {
-                if ( $command['scope'] === 'dispatcher') {
-                    $classes[] = $command['class'];
-                }
-            }
-        }
+         throw new DispatcherException($message, 0, null, $code);
 
-        return $classes;
+     }
 
-    }
-
-}
+ }

@@ -4,6 +4,7 @@ use \Comodojo\Foundation\Base\ConfigurationTrait;
 use \Comodojo\Foundation\Logging\LoggerTrait;
 use \Comodojo\Foundation\Events\EventsTrait;
 use \Comodojo\Dispatcher\Traits\CacheTrait;
+use \Comodojo\Dispatcher\Traits\ServerCacheTrait;
 use \Comodojo\Dispatcher\Traits\RequestTrait;
 use \Comodojo\Dispatcher\Traits\ResponseTrait;
 use \Comodojo\Dispatcher\Traits\RouterTrait;
@@ -12,6 +13,7 @@ use \Comodojo\Dispatcher\Request\Model as Request;
 use \Comodojo\Dispatcher\Router\Model as Router;
 use \Comodojo\Dispatcher\Response\Model as Response;
 use \Comodojo\Dispatcher\Extra\Model as Extra;
+use \Comodojo\Dispatcher\Cache\ServerCache;
 use \Comodojo\Foundation\Events\AbstractEvent;
 use \Comodojo\SimpleCache\Manager as CacheManager;
 use \Comodojo\Foundation\Events\Manager as EventsManager;
@@ -40,6 +42,7 @@ class ServiceEvent extends AbstractEvent {
     use ConfigurationTrait;
     use LoggerTrait;
     use CacheTrait;
+    use ServerCacheTrait;
     use EventsTrait;
     use RequestTrait;
     use RouterTrait;
@@ -51,6 +54,7 @@ class ServiceEvent extends AbstractEvent {
         Configuration $configuration,
         LoggerInterface $logger,
         CacheManager $cache,
+        ServerCache $server_cache,
         EventsManager $events,
         Request $request,
         Router $router,
@@ -63,6 +67,7 @@ class ServiceEvent extends AbstractEvent {
         $this->setConfiguration($configuration);
         $this->setLogger($logger);
         $this->setCache($cache);
+        $this->setServerCache($server_cache);
         $this->setEvents($events);
         $this->setRequest($request);
         $this->setRouter($router);

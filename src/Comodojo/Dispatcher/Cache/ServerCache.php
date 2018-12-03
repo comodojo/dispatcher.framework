@@ -32,10 +32,14 @@ class ServerCache extends AbstractCache {
 
     protected static $cache_namespace = "DISPATCHERSERVICES";
 
+    protected $bypass = false;
+
     public function read(
         Request $request,
         Response $response
     ) {
+
+        if ( $this->bypass === true ) return false;
 
         $name = self::getCacheName($request);
 
@@ -54,6 +58,8 @@ class ServerCache extends AbstractCache {
         Response $response,
         Route $route
     ) {
+
+        if ( $this->bypass === true ) return;
 
         $cache = strtoupper($route->getParameter('cache'));
 
@@ -76,6 +82,13 @@ class ServerCache extends AbstractCache {
                 ->set($name, $response->export(), $ttl === null ? self::DEFAULTTTL : intval($ttl));
 
         }
+
+    }
+
+    public function bypassCache() {
+
+        $this->bypass = true;
+        return $this;
 
     }
 
