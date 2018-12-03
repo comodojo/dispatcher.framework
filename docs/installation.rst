@@ -1,28 +1,60 @@
 Installation
 ============
 
-.. _dispatcher.project: https://github.com/comodojo/dispatcher.project
+.. _dispatcher project package: https://github.com/comodojo/dispatcher
 .. _composer: https://getcomposer.org/
-.. _dispatcher.comodojo.org: https://dispatcher.comodojo.org
 
-Comodojo dispatcher could be installed via `composer`_, using dedicated `dispatcher.project`_ package.
+The comodojo dispatcher framework can be installed using `composer`_ as a product (using the dedicated `dispatcher project package`_) or as a library.
+
+To install it as a product:
+
+.. code:: bash
+
+    composer create-project comodojo/dispatcher dispatcher
+
+Or, to intall it as a library in your own project:
+
+.. code:: bash
+
+    composer require comodojo/dispatcher.framework
 
 Requirements
-************
+------------
 
-To work properly, dispatcher requires an apache webserver with PHP >=5.3.0, installed as apache module or cgi/fastcgi.
+To work properly, dispatcher requires a webserver and PHP >= 5.6.0.
 
-It may work on different webservers like nginx (ensure to convert the .htaccess logic if you plan to use rewrite mode), but this is actually untested.
+Rewrite rules
+-------------
 
-Installing via composer
-***********************
+Dispatcher relies on rewrite rules to work correctly.
 
-First install `composer`_, then create a new `dispatcher.project`_ using this command::
+An example rewrite rule (included by default in the `dispatcher project package`_) is the following for apache:
 
-    php composer.phar create-project comodojo/dispatcher.project dispatcher
+.. code::
 
-This will install a new instance of dispatcher and required dependencies in "dispatcher" folder.
+    <IfModule mod_rewrite.c>
 
-If you need also default content and tests, install the package::
+        <IfModule mod_negotiation.c>
+            Options -MultiViews
+        </IfModule>
 
-    php composer.phar require comodojo/dispatcher.servicebundle.default
+        Options +FollowSymLinks
+        IndexIgnore */*
+
+        RewriteEngine On
+
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+
+        RewriteRule (.*) index.php [L]
+    </IfModule>
+
+Or the equivalent version for nginx:
+
+.. code::
+
+    location / {
+      if (!-e $request_filename){
+        rewrite ^(.*)$ /index.php break;
+      }
+    }
