@@ -14,3 +14,8 @@ Configuration parameters
 ------------------------
 
 TBW
+
+Automatic configuration parameters
+----------------------------------
+
+TBW

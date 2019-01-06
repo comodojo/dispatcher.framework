@@ -10,6 +10,7 @@ Table of Contents:
 .. toctree::
    :maxdepth: 2
 
+   general
    installation
    configuration
    services

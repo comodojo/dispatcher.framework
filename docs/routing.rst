@@ -1,3 +1,5 @@
+.. _router:
+
 Routing requests
 ================
 
