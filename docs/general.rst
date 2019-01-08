@@ -27,7 +27,12 @@ Once started (i.e. when a new HTTP request hits the web server that sends is to 
 
 In the middle of this workflow there is the service with its business logic, that has to run to provide value to the client.
 
--- workflow schema here --
+.. figure:: _static/2-comodojo_dispatcher-internal-architecture-nofill-v4.X.png
+    :align: center
+    :alt: comodojo/dispatcher-framework architecture
+    :figclass: align-center
+
+    comodojo/dispatcher-framework v4.X architecture
 
 The service and the event listeners are the only entities that can interact with the models' APIs to create the output.
 
