@@ -145,7 +145,7 @@ class Parser {
          * Eg: (value) changes in (?:value)
          *
          * Delimiting characters like '^' and '$' are also meaningless in the complete regular expression and
-         * need to be removed. Contrariwise, wildcards must be delimited in order to keet the whole regular
+         * need to be removed. Contrariwise, wildcards must be delimited in order to keep the whole regular
          * expression consistent, hence a '?' is added to all the '.*' or '.+' that don't already have one.
          */
         $string = preg_replace("/(?<!\\\\)\\((?!\\?)/", '(?:', $string);

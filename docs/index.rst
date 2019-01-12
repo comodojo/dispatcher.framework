@@ -14,8 +14,11 @@ Table of Contents:
 
    general
    installation
+   usage
    configuration
-   services
+   request
    routing
+   services
+   response
    events
    plugins
