@@ -18,7 +18,6 @@ Table of Contents:
    configuration
    request
    routing
-   services
    response
-   events
+   services
    plugins

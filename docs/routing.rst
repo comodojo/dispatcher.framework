@@ -22,7 +22,7 @@ Whenever an Http request is received by the Dispatcher, a ``\Comodojo\Dispatcher
 .. note:: For more information about the request model, see :ref:`request` section.
 
 Once ready, this object is used by the router to find the correct route to the requested service.
-    
+
 If there isn't any route that match with the request, a ``\Comodojo\Exception\DispatcherException`` is thrown, catched and forwarded to the output processor to create an HTTP (not found) response accordingly.
 
 .. note:: For more information about the output processor, see the :ref:`response-output-processor` section.
@@ -186,12 +186,12 @@ Every route can be defined using 4 different attributes:
     - **redirect-location**: the URL to redirect the client to.
     - **redirect-message**: the message to include in the redirect content
     - **redirect-type**: LOCATION (default) or REFRESH. The first uses HTTP redirect code to forward the client, the second creates a redirect page (200 OK Status Code) including the *Refresh* header and the redirect URI (in the page content).
-    
+
     - **error-code**: in case of an *ERROR* route, the error code to be used (default 500).
     - **error-message**: the content of the HTTP error response (default *Internal Error*).
-    
-    - *cache*: the service caching strategy, *SERVER*, *CLIENT* or *BOTH* (see :ref:`services-cache` for more information). 
-    - *ttl*: the cache time to live, in seconds.
+
+    - **cache**: the service caching strategy, *SERVER*, *CLIENT* or *BOTH* (see :ref:`services-cache` for more information).
+    - **ttl**: the cache time to live, in seconds.
 
 Route Installation
 ------------------
@@ -232,7 +232,7 @@ In the routing table there are two methods that allow the installation of the ro
                 "ttl"   => 3600
             ]
         );
-    
+
     When you add a single route, this is volatile, it won't be stored in cache and the router won't remember it at the next startup.
 
 .. topic:: ``Table::load()``

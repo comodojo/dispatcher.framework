@@ -8,12 +8,12 @@ Once the request is routed to an actual service, it is possible to compose a Res
 .. code-block:: php
 
     $response = new \Comodojo\Dispatcher\Response\Model(
-        $router->configuration(), 
+        $router->configuration(),
         $router->logger()
     );
-    
+
     $router->compose($response);
-    
+
     echo $response->content()->get();
 
 
