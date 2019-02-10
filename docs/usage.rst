@@ -4,6 +4,7 @@ Basic usage
 ===========
 
 .. _comodojo/dispatcher: https://github.com/comodojo/dispatcher
+.. _comodojo/comodojo-installer: https://github.com/comodojo/comodojo-installer
 
 The easiest way to use the dispatcher framework is installing it from the `comodojo/dispatcher`_ project package. In this case, the framework is almost ready to use: services and plugins have dedicated folders (pre-configured for autoloading), the main configuration file is created automatically and rewrite rules are in place (only for apache web server).
 
@@ -12,20 +13,21 @@ Alternatively, dispatcher can be integrated in a custom project simply installin
 The dispatcher project package
 ------------------------------
 
-.. note:: This section assumes that you have installed dispatcher using the dispatcher `project package`_. If you are using dispatcher as a library in your custom project, skip this section and continue with :ref:`usage-library`.
+.. note:: This section assumes that you have installed dispatcher using the dispatcher project package. If you are using dispatcher as a library in your custom project, skip this section and continue with :ref:`usage-library`.
 
 The `comodojo/dispatcher`_ is the default project package for the dispatcher framework. It includes a standard folder structure, a default set of CLI command and the `comodojo/comodojo-installer`_ package.
 
 Once installed, it creates the following folder structure:
 
-[root folder]/
-    /cache
-    /commands
-    /config
-    /logs
-    /plugins
-    /public
-    /services
+::
+    [base folder]/
+        /cache
+        /commands
+        /config
+        /logs
+        /plugins
+        /public
+        /services
 
 .. topic:: The document root
 
@@ -127,7 +129,7 @@ Adding a plugin
 
 Now that our HelloWorld service is in place, we can add a plugin to modify the global behaviour of the framework if one or more conditions are met.
 
-An example could be: if (i) the service is the **HelloWorld** and (ii) the request contains **text/html** in the *Accept* header, then (iii) change the content-type to **text/html** and (iv) wrap the text into a *<h1>* tag.
+An example could be: if (i) a route is matched, (ii) the route leads to the **HelloWorld** service and (iii) the request contains **text/html** in the *Accept* header then (iv) change the content-type to **text/html** and (v) wrap the text into a *<h1>* tag.
 
 The plugin code will be:
 
@@ -145,24 +147,21 @@ The plugin code will be:
 
             $request = $event->getRequest();
             $response = $event->getResponse();
+            $route = $event->getRouter()->getRoute();
 
-            // (i) the service is the HelloWorld
-            $is_html = strpos($request->getHeaders()->get('Accept'), 'text/html') !== false;
-
-            // (ii) the request contains text/html in the Accept header
-            $is_hw = $event->getRouter()->getRoute()->getClassName() === '\Comodojo\Dispatcher\Services\HelloWorld';
-
-            // IF (i) AND (ii)
-            if ( $is_html && $is_hw ) {
-
+            if (
+                // (i) a route is matched
+                $route !== null &&
+                // (ii) the route leads to the **HelloWorld** service
+                $route->getClassName() === '\Comodojo\Dispatcher\Services\HelloWorld' &&
+                // (iii) the request contains **text/html** in the *Accept* header
+                strpos($request->getHeaders()->get('Accept'), 'text/html') !== false
+            ) {
                 $content = $response->getContent()->get();
-
-                // (iii) change the content-type to **text/html**
+                // (iv) change the content-type to **text/html**
                 $response->getContent()->setType('text/html');
-
-                // (iv) wrap the text into a <h1> tag
+                // (v) wrap the text into a <h1> tag
                 $response->getContent()->set("<h1>$content</h1>");
-
             }
 
         }
@@ -176,41 +175,105 @@ For more information about plugins and events, jump to the :ref:`plugins` sectio
 Using dispatcher in custom projects
 -----------------------------------
 
-The index file
-..............
+When used as a library in a custom project, dispatcher cannot rely on the pre-defined loader and also on the automation offered by the `comodojo/comodojo-installer`_ package.
 
-Rewrite rules
-.............
+For the above mentioned reasons, there are some steps that are needed to make the framework work:
 
-Dispatcher relies on rewrite rules to work correctly.
+.. topic:: Define your own folder structure
 
-An example rewrite rule (included by default in the `dispatcher project package`_) is the following for apache:
+    The dispatcher framework does not require any specific folder: dispatcher will work even if all the code is stored in a flat folder.
 
-.. code::
+    However, a good practice could be to start cloning the `comodojo/dispatcher`_ package and then add, change or delete files or folders according to your needs.
 
-    <IfModule mod_rewrite.c>
+    Of course, another good practice is to create a document folder that is isolated from the code, but this is still up to you.
 
-        <IfModule mod_negotiation.c>
-            Options -MultiViews
+    .. note:: The only limitation is the name of the loader file (see next sections), that is autoprocessed by the framework to understand the actual absolute URI.
+
+.. topic:: Add dispatcher as a dependency in your *composer.json*
+
+    To add the dispatcher framework as a dependency, follow the :ref:`install-library` section.
+
+.. topic:: Create the configuration
+
+.. topic:: Writing the loader (*index.php* file)
+
+    The *index.php* is the actual entry point to the framework, and its name is is the only limitation imposed by dispatcher.
+
+    This file is in charge of:
+
+    - creating an instance of dispatcher;
+    - adding plugins and routes;
+    - triggering the ``Dispatcher::dispatch()`` method.
+
+    Creating a new instance of dispatcher is trivial:
+
+    .. code-block:: php
+        :linenos:
+
+        use \Comodojo\Dispatcher\Dispatcher;
+        $dispatcher = new \Comodojo\Dispatcher\Dispatcher([
+            // configuration parameters here!
+        ]);
+
+    The class constructor supports optional parameter for:
+    - events manager (An instance of the `\Comodojo\Foundation\Events\Manager <https://github.com/comodojo/foundation/blob/master/src/Comodojo/Foundation/Events/Manager.php>`_ class);
+    - cache manager/provider (PSR-16 compliant);
+    - logger (PSR-1 compliant).
+
+    If no optional parameter is specified, dispatcher will create default (empty) object for you.
+
+    Plugin can be installed using the EventManager:
+
+    .. code-block:: php
+        :linenos:
+
+        $manager =  $dispatcher->getEvents();
+
+    Routes have to be pushed in the routing table:
+
+    .. code-block:: php
+        :linenos:
+
+        $table =  $dispatcher->getRouter()->getTable();
+
+    If no routes are provided, by default dispatcher will reply a *404 - Not found* error to all requests.
+
+    .. note:: For more information about routes, see the :ref:`router` section.
+
+.. topic:: Rewrite rules
+
+    Dispatcher relies on rewrite rules to work correctly. The rewrite routes shall be placed in the document folder at the same level of the *index.php* loader.
+
+    An example rewrite rule (the one that the `comodojo/dispatcher`_ package uses by default) is the following for apache:
+
+    .. code::
+
+        <IfModule mod_rewrite.c>
+
+            <IfModule mod_negotiation.c>
+                Options -MultiViews
+            </IfModule>
+
+            Options +FollowSymLinks
+            IndexIgnore */*
+
+            RewriteEngine On
+
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+
+            RewriteRule (.*) index.php [L]
         </IfModule>
 
-        Options +FollowSymLinks
-        IndexIgnore */*
+    Or the equivalent version for nginx could be:
 
-        RewriteEngine On
+    .. code::
 
-        RewriteCond %{REQUEST_FILENAME} !-f
-        RewriteCond %{REQUEST_FILENAME} !-d
+        location / {
+          if (!-e $request_filename){
+            rewrite ^(.*)$ /index.php break;
+          }
+        }
 
-        RewriteRule (.*) index.php [L]
-    </IfModule>
 
-Or the equivalent version for nginx:
-
-.. code::
-
-    location / {
-      if (!-e $request_filename){
-        rewrite ^(.*)$ /index.php break;
-      }
-    }
+.. topic:: Configure the web server

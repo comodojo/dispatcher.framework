@@ -1,3 +1,5 @@
+.. _install:
+
 Installation
 ============
 
@@ -5,6 +7,8 @@ Installation
 .. _composer: https://getcomposer.org/
 
 The comodojo dispatcher framework can be installed using `composer`_ as a product (using the dedicated `dispatcher project package`_) or as a library.
+
+.. _install-product:
 
 Install dispatcher as a product
 -------------------------------
@@ -16,6 +20,8 @@ To install dispatcher as a product, simply run the composer create-project comma
     composer create-project comodojo/dispatcher dispatcher
 
 Composer will install the dependencies and create the main configuration file. Once completed, configure the web server to use *dispatcher/public* as the document root.
+
+.. _install-library:
 
 Install dispatcher as a library
 -------------------------------

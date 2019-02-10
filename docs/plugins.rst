@@ -1,7 +1,7 @@
 .. _plugins:
 
-Plugins and events
-==================
+Plugins
+=======
 
 How dispatcher emits events
 ---------------------------

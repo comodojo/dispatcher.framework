@@ -208,6 +208,7 @@ Add a route programmatically
 In order to install a new route programmatically, the access to the ``\Comodojo\Dispatcher\Dispatcher`` object is required *before* invoking the ``Dispatcher::dispatch()`` method. Once gained, the main class can be used to get the router instance and then its routing table.
 
 .. code-block:: php
+    :linenos:
 
     $dispatcher = new \Comodojo\Dispatcher\Dispatcher();
 
@@ -222,6 +223,7 @@ In the routing table there are two methods that allow the installation of the ro
     The ``Table::add()`` method can be used to install a single route:
 
     .. code-block:: php
+        :linenos:
 
         $table->add(
             'routes/test/{"page": "p(\\d+)"}', // Route definition
@@ -240,6 +242,7 @@ In the routing table there are two methods that allow the installation of the ro
     This method is used to load one or multiple *permanent* route(s). The routes have to be passed as an array:
 
     .. code-block:: php
+        :linenos:
 
         $table->load(
             [
@@ -263,6 +266,7 @@ In the routing table there are two methods that allow the installation of the ro
     ``Table::load()``, instead, is designed to load a bunch of routes once and permanently (at least for the routing-table-cache ttl), and so it'is mostly useful in the framework startup. The `comodojo/dispatcher`_ project package, for example, adopt the following strategy to evaluate the router status and, in case, load the routing table from file:
 
     .. code-block:: php
+        :linenos:
 
         if (
             file_exists($routes_file) &&
@@ -285,6 +289,7 @@ There are some cases in which the request, after being evaluated, should pass th
 To bypass the router, it is possible to create a plugin that install a listener to a pre-routing event, like the following one:
 
 .. code-block:: php
+    :linenos:
 
     <?php namespace My\Awesome;
 
@@ -327,6 +332,7 @@ In some other cases, afer a route has been found, the service should run only if
 To skip the service, it is possible to create a plugin that installs a listener to a post-routing event and uses the ``Router::bypassService()`` method, like the following one:
 
 .. code-block:: php
+    :linenos:
 
     <?php namespace My\Awesome;
 
