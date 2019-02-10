@@ -174,7 +174,7 @@ class Model extends AbstractModel {
 
     public function route() {
 
-        return str_replace($this->getConfiguration()->get("base-uri"), "", $this->getUri()->getPath());
+        return str_replace($this->getConfiguration()->get("base-location"), "", $this->getUri()->getPath());
 
     }
 
