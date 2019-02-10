@@ -1,4 +1,21 @@
+.. _services:
+
 Writing services
 ================
 
-TBW
+Anatomy of a service
+--------------------
+
+HTTP methods
+------------
+
+Accessing framework APIs
+------------------------
+
+Extra parameters
+----------------
+
+.. _services-cache:
+
+Enabling cache
+--------------

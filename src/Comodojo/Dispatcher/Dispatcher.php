@@ -292,11 +292,11 @@ class Dispatcher extends AbstractModel {
         $request = $this->getRequest();
         $response = $this->getResponse();
 
-        $response->consolidate($request, $this->route);
-
         $events->emit($this->createServiceSpecializedEvents('dispatcher.response'));
         $events->emit($this->createServiceSpecializedEvents('dispatcher.response.'.$response->getStatus()->get()));
         $events->emit($this->createServiceSpecializedEvents('dispatcher.response.#'));
+
+        $response->consolidate($request, $this->route);
 
         $logger->debug("Composing return value");
 

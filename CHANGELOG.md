@@ -1,5 +1,20 @@
 # Changelog
 
+## 4.0.1 (Shuttle - maintenance release 1)
+
+- [FIX] output composition before response events
+- [FIX] invalid base-uri setting
+- [ADD] base-location setting
+
+## 4.0.0 (Shuttle)
+
+Stable 4.0-branch release, almost a complete rewrite. Some new features:
+
+- REGEX router
+- autoinstaller
+- multiple cache manager (comodojo/cache library)
+- add comodojo/foundation as base package
+
 ## 3.0.1 (Cosmonaut - maintenance release 1)
 
 - fixed error in whole cache purging

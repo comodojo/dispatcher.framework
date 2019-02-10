@@ -32,27 +32,43 @@ class DefaultConfiguration {
 
         $config['base-path'] = getcwd();
 
-        $config['base-url'] = self::urlGetAbsolute();
+        $config['base-url'] = self::getAbsoluteUrl();
 
-        $config['base-uri'] = self::uriGetAbsolute();
+        $config['base-uri'] = self::getAbsoluteUri();
+
+        $config['base-location'] = self::getAbsoluteLocation();
 
         return $config;
 
     }
 
-    private static function urlGetAbsolute() {
+    private static function getAbsoluteUrl() {
 
-        $http = 'http'.((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '').'://';
+        $http = self::getHttpSchema();
 
-        $uri = self::uriGetAbsolute();
+        $location = self::getAbsoluteLocation();
 
-        return ($http.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost').$uri."/");
+        return ($http.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost').$location."/");
 
     }
 
-    private static function uriGetAbsolute() {
+    private static function getAbsoluteLocation() {
 
         return preg_replace("/\/index.php(.*?)$/i", "", $_SERVER['PHP_SELF']);
+
+    }
+
+    private static function getAbsoluteUri() {
+
+        $http = self::getHttpSchema();
+
+        return "$http$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+    }
+
+    private static function getHttpSchema() {
+
+        return 'http'.((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '').'://';
 
     }
 
