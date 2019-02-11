@@ -3,6 +3,8 @@
 use \Comodojo\Dispatcher\Traits\ToStringTrait;
 
 /**
+ * The HTTP version component of the dispatcher request model
+ *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>

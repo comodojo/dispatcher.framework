@@ -30,7 +30,7 @@ A init time, the configuration is used to create basic objects (e.g. models, cac
     // set the my->remote->url nested configuration item using dot notation
     $configuration->set('my.remote.url', 'https://example.com')
 
-.. note:: For more information about the ``\Comodojo\Foundation\Base\Configuration`` class, see the `comodojo/foundation documentation <https://docs.comodojo.org/projects/foundation/en/latest/base.html>`_
+.. note:: For more information about the ``\Comodojo\Foundation\Base\Configuration`` class, see the `comodojo/foundation documentation <https://docs.comodojo.org/projects/foundation/en/latest/base.html>`_.
 
 Configuration parameters
 ------------------------
@@ -117,7 +117,7 @@ Automatic configuration parameters
 
 The following (basic) configuration parameters are computed and included in the configuration at init time.
 
-.. note:: The user configuration has precedence over the automatic one: if one automatic parameter is included in the user configuration, its value will overwrite the automatic one.
+.. note:: The user configuration has precedence over the automatic one: if one of these parameter is included in the user configuration, its value will overwrite the automatic one.
 
 .. topic:: (string) base-path
 
