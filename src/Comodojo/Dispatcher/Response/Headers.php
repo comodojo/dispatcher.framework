@@ -25,9 +25,9 @@ class Headers {
 
     public function send($replace = false) {
 
-        foreach ($this->headers as $header => $value) {
+        foreach ($this->getAsString() as $header) {
 
-            header($header.": ".$value, $replace);
+            header($header, $replace);
 
         }
 
