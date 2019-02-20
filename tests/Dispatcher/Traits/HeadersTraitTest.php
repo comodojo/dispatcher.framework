@@ -18,9 +18,11 @@ class HeadersTraitTest extends \PHPUnit_Framework_TestCase {
 
     public function testHeaders() {
 
+        $this->assertTrue($this->has($this->header));
+
         $this->assertEquals($this->value, $this->get($this->header));
 
-        $this->assertEquals($this->header.':'.$this->value, $this->getAsString($this->header));
+        $this->assertEquals($this->header.': '.$this->value, $this->getAsString($this->header));
 
         $headers = $this->get();
 
@@ -41,6 +43,23 @@ class HeadersTraitTest extends \PHPUnit_Framework_TestCase {
         $headers = $this->get();
 
         $this->assertEquals(0, count($headers));
+
+    }
+
+    public function testCaseInsensitiveFix() {
+
+        $this->assertTrue($this->has('x-test'));
+        $this->assertEquals($this->value, $this->get('x-TEST'));
+        $this->assertTrue($this->delete('X-TEst'));
+
+    }
+
+    public function testArrayHeaderSupport() {
+
+        $this->set('X-MultipleHeader', ['foo','boo']);
+        $this->assertTrue($this->has('X-MultipleHeader'));
+        $this->assertEquals(['foo','boo'], $this->get('X-MultipleHeader'));
+        $this->assertEquals('X-MultipleHeader: foo,boo', $this->getAsString('X-MultipleHeader'));
 
     }
 

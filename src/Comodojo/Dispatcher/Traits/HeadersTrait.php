@@ -1,6 +1,8 @@
 <?php namespace Comodojo\Dispatcher\Traits;
 
 /**
+ * Common trait to manage request and response headers
+ *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
@@ -19,18 +21,44 @@
 
 trait HeadersTrait {
 
+    /**
+     * Headers array
+     * @var array
+     */
     protected $headers = [];
 
+    /**
+     * Get one or all header(s)
+     * If $header param is not provided, this method will return all the
+     * registered headers.
+     *
+     * Starting from (v 4.1+) this method is CASE INSENSITIVE
+     *
+     * @param string $header
+     * @return string|array|null
+     */
     public function get($header = null) {
 
-        if (is_null($header)) return $this->headers;
+        if (is_null($header)) {
+            return $this->headers;
+        }
 
-        else if (array_key_exists($header, $this->headers)) return $this->headers[$header];
+        $index = $this->getIndexCaseInsensitive($header);
 
-        else return null;
+        return $index === null ? null : $this->headers[$index];
 
     }
 
+    /**
+     * Get one or all header(s) as a string
+     * If $header param is not provided, this method will return all the
+     * registered headers.
+     *
+     * Starting from (v 4.1+) this method is CASE INSENSITIVE
+     *
+     * @param string $header
+     * @return string|array|null
+     */
     public function getAsString($header = null) {
 
         if (is_null($header)) {
@@ -40,23 +68,46 @@ trait HeadersTrait {
                 array_values($this->headers)
             );
 
-        } else if (array_key_exists($header, $this->headers)) {
-
-            return self::headerToString($header, $this->headers[$header]);
-
-        } else {
-            return null;
         }
+
+        $index = $this->getIndexCaseInsensitive($header);
+
+        return $index === null ? null : self::headerToString($index, $this->headers[$index]);
 
     }
 
+    /**
+     * Check if an header is registered
+     *
+     * Starting from (v 4.1+) this method is CASE INSENSITIVE
+     *
+     * @param string $header
+     * @return bool
+     */
+    public function has($header) {
+
+        return $this->getIndexCaseInsensitive($header) === null ? false : true;
+
+    }
+
+    /**
+     * Set an header
+     * If $header is an inline header and value is null, this method will split
+     *  it automatically.
+     * $value can be a string or an array. In the latter case, these values will
+     *  separated by a comma in the string representation of the header.
+     *
+     * @param string $header Header name or string representation
+     * @param mixed $value Header value(s)
+     * @return self
+     */
     public function set($header, $value = null) {
 
         if (is_null($value)) {
 
             $header = explode(":", $header, 2);
 
-            $this->headers[$header[0]] = isset($header[1]) ? $header[1] : '';
+            $this->headers[$header[0]] = isset($header[1]) ? trim($header[1]) : '';
 
         } else {
 
@@ -68,28 +119,43 @@ trait HeadersTrait {
 
     }
 
+    /**
+     * Delete one or all header(s)
+     *
+     * If no argument is provided, all headers will be deleted.
+     *
+     * Starting from (v 4.1+) this method is CASE INSENSITIVE
+     *
+     * @param string $header
+     * @return bool
+     */
     public function delete($header = null) {
 
         if (is_null($header)) {
 
-            $this->headers = array();
+            $this->headers = [];
 
             return true;
-
-        } else if (array_key_exists($header, $this->headers)) {
-
-            unset($this->headers[$header]);
-
-            return true;
-
-        } else {
-
-            return false;
 
         }
 
+        $index = $this->getIndexCaseInsensitive($header);
+
+        if ( $index === null ) {
+            return false;
+        }
+
+        unset($this->headers[$index]);
+        return true;
+
     }
 
+    /**
+     * Merge actual headers with an array of headers
+     *
+     * @param string $header
+     * @return self
+     */
     public function merge($headers) {
 
         foreach ($headers as $key => $value) {
@@ -100,9 +166,25 @@ trait HeadersTrait {
 
     }
 
+    private function getIndexCaseInsensitive($header) {
+
+        $mapping = array_combine(
+            array_keys(array_change_key_case($this->headers, CASE_LOWER)),
+            array_keys($this->headers)
+        );
+
+        $header = strtolower($header);
+
+        return array_key_exists($header, $mapping) ?
+            $mapping[$header] : null;
+
+    }
+
     private static function headerToString($header, $value) {
 
-        return (string)($header.':'.$value);
+        return is_array($value) ?
+            (string)("$header: ".implode(',',$value)) :
+            (string)("$header: $value");
 
     }
 
