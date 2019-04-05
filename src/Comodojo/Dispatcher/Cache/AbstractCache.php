@@ -4,6 +4,8 @@ use \Comodojo\SimpleCache\Manager as CacheManager;
 use \Comodojo\Dispatcher\Traits\CacheTrait;
 
 /**
+ * Abstract internal cache handler
+ *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
@@ -24,6 +26,10 @@ abstract class AbstractCache {
 
     use CacheTrait;
 
+    /**
+     * @const int DEFAULTTTL
+     *  Default cache TTL, in seconds (24h)
+     */
     const DEFAULTTTL = 86400;
 
     public function __construct(CacheManager $cache) {

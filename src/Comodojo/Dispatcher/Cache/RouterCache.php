@@ -1,6 +1,11 @@
 <?php namespace Comodojo\Dispatcher\Cache;
 
 /**
+ * Router cache handler
+ *
+ * The dispatcher router uses the cache layer to store a "compiled" version of
+ * the routing table, to speedup the parsing of configuration files at startup.
+ *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
  * @author      Marco Castiello <marco.castiello@gmail.com>
@@ -19,17 +24,39 @@
 
 class RouterCache extends AbstractCache {
 
+    /**
+     * @const string CACHE_NAMESPACE
+     *  Namespace for routing table cache
+     */
     const CACHE_NAMESPACE = "DISPATCHERINTERNALS";
 
+    /**
+     * @const string CACHE_NAME
+     *  Name for routing table cache
+     */
     const CACHE_NAME = "dispatcher-routes";
 
+    /**
+     * Read the routing table from cache (if any)
+     *
+     * @return array
+     */
     public function read() {
 
-        return $this->getCache()->setNamespace(self::CACHE_NAMESPACE)->get(self::CACHE_NAME);
+        return $this->getCache()
+            ->setNamespace(self::CACHE_NAMESPACE)
+            ->get(self::CACHE_NAME);
 
     }
 
-    public function dump($data, $ttl = null) {
+    /**
+     * Store the routing table in cache
+     *
+     * @return array $data
+     * @return int $ttl
+     * @return bool
+     */
+    public function dump($data, $ttl=null) {
 
         return $this->getCache()
             ->setNamespace(self::CACHE_NAMESPACE)
