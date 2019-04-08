@@ -1,11 +1,11 @@
 <?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
 use \Comodojo\Dispatcher\Response\Model as Response;
+use \Comodojo\Dispatcher\Interfaces\HttpStatusPreprocessor as HttpStatusPreprocessorInterface;
 
 /**
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
- * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     MIT
  *
  * LICENSE:
@@ -19,16 +19,12 @@ use \Comodojo\Dispatcher\Response\Model as Response;
  * THE SOFTWARE.
  */
 
-abstract class AbstractPreprocessor {
+abstract class AbstractHttpStatusPreprocessor
+    implements HttpStatusPreprocessorInterface {
 
-    protected $response;
-
-    public function __construct(Response $response) {
-
-        $this->response = $response;
-
-    }
-
-    abstract public function consolidate();
+    /**
+     * {@inheritdoc}
+     */
+    abstract public function consolidate(Response $response);
 
 }

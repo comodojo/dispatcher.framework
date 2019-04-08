@@ -1,11 +1,15 @@
 <?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
+use \Comodojo\Dispatcher\Response\Model as Response;
+
 /**
  * Status: Created
  *
+ * @NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description
+ *  in body... just in case
+ *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
- * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     MIT
  *
  * LICENSE:
@@ -21,11 +25,13 @@
 
 class Status202 extends Status200 {
 
-    //PLEASE NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description in body... just in case
+    /**
+     * {@inheritdoc}
+     */
+    public function consolidate(Response $response) {
 
-    public function consolidate() {
-
-        $this->response->getHeaders()->set('Status: 202 Accepted');
+        $response->getHeaders()
+            ->set('Status: 202 Accepted');
 
         parent::consolidate();
 

@@ -29,6 +29,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Status', self::$response->getStatus());
         $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Content', self::$response->getContent());
         $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Location', self::$response->getLocation());
+        $this->assertInstanceOf('\Comodojo\Dispatcher\Response\Preprocessor', self::$response->getPreprocessor());
         $this->assertInstanceOf('\Comodojo\Cookies\CookieManager', self::$response->getCookies());
 
     }
@@ -38,9 +39,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
         $uri = "www.google.com";
 
         $location = self::$response->getLocation();
-
         $location->set($uri);
-
         $this->assertEquals($uri, $location->get());
 
     }
@@ -48,15 +47,12 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
     public function testStatus() {
 
         $status = self::$response->getStatus();
-
         $this->assertEquals(200, $status->get());
 
         $status->set(400);
-
         $this->assertEquals(400, $status->get());
 
         $this->assertEquals('Bad Request', $status->description());
-
         $this->assertEquals('Payload Too Large', $status->description(413));
 
     }
@@ -82,5 +78,82 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    public function testPreprocessor() {
+
+        $preprocessor = self::$response->getPreprocessor();
+
+        $this->assertFalse(
+            $preprocessor->has(5000)
+        );
+
+        $this->assertTrue(
+            $preprocessor->has(307)
+        );
+
+        $this->assertInstanceOf(
+            '\Comodojo\Dispatcher\Response\Preprocessor\Status307',
+            $preprocessor->get(307)
+        );
+
+        $this->assertInstanceOf(
+            '\Comodojo\Dispatcher\Response\Preprocessor\Status200',
+            $preprocessor->get(200)
+        );
+
+        $this->assertInstanceOf(
+            '\Comodojo\Dispatcher\Response\Preprocessor\Status200',
+            $preprocessor->get(509)
+        );
+
+        $this->assertInstanceOf(
+            '\Comodojo\Dispatcher\Response\Preprocessor\Status200',
+            $preprocessor->get(200)
+        );
+
+    }
+
+    /**
+    * @param int $status
+    *
+    * @testWith        [100]
+    *                  [101]
+    *                  [102]
+    *                  [200]
+    *                  [201]
+    *                  [202]
+    *                  [203]
+    *                  [204]
+    *                  [205]
+    *                  [206]
+    *                  [300]
+    *                  [301]
+    *                  [302]
+    *                  [303]
+    *                  [304]
+    *                  [305]
+    *                  [307]
+    *                  [308]
+    *                  [400]
+    *                  [403]
+    *                  [404]
+    *                  [405]
+    *                  [410]
+    *                  [500]
+    *                  [501]
+    *                  [502]
+    *                  [503]
+    *                  [504]
+    *                  [505]
+    */
+    public function testAllPreprocessors($status) {
+
+        $preprocessor = self::$response->getPreprocessor();
+
+        $this->assertInstanceOf(
+            '\Comodojo\Dispatcher\Response\Preprocessor\Status'.$status,
+            $preprocessor->get($status)
+        );
+
+    }
 
 }

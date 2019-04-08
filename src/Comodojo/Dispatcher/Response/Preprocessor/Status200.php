@@ -1,11 +1,12 @@
 <?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
+use \Comodojo\Dispatcher\Response\Model as Response;
+
 /**
  * Status: OK
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
- * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     MIT
  *
  * LICENSE:
@@ -19,19 +20,23 @@
  * THE SOFTWARE.
  */
 
-class Status200 extends AbstractPreprocessor {
+class Status200 extends AbstractHttpStatusPreprocessor {
 
-    public function consolidate() {
+    /**
+     * {@inheritdoc}
+     */
+    public function consolidate(Response $response) {
 
-        $this->response->getHeaders()->set('Content-Length', $this->response->getContent()->length());
+        $response->getHeaders()
+            ->set('Content-Length', $response->getContent()->length());
 
-        $type = $this->response->getContent()->type();
-        $charset = $this->response->getContent()->charset();
+        $type = $response->getContent()->type();
+        $charset = $response->getContent()->charset();
 
         if (empty($charset)) {
-            $this->response->getHeaders()->set("Content-type", strtolower($type));
+            $response->getHeaders()->set("Content-type", strtolower($type));
         } else {
-            $this->response->getHeaders()->set("Content-type", strtolower($type)."; charset=".$charset);
+            $response->getHeaders()->set("Content-type", strtolower($type)."; charset=".$charset);
         }
 
     }

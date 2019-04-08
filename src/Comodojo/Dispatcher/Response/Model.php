@@ -46,17 +46,19 @@ class Model extends AbstractModel implements Serializable {
 
     protected $location;
 
+    protected $preprocessor;
+
     public function __construct(Configuration $configuration, LoggerInterface $logger) {
 
         parent::__construct($configuration, $logger);
 
-        $this->setHeaders(new Headers());
-        $this->setCookies(new CookieManager());
-        $this->setStatus(new Status());
-        $this->setContent(new Content());
-        $this->setLocation(new Location());
-
-        $this->setTiming();
+        $this->setHeaders(new Headers())
+            ->setCookies(new CookieManager())
+            ->setStatus(new Status())
+            ->setContent(new Content())
+            ->setLocation(new Location())
+            ->setPreprocessor(new Preprocessor())
+            ->setTiming();
 
     }
 
@@ -130,6 +132,32 @@ class Model extends AbstractModel implements Serializable {
 
     }
 
+    /**
+     * Get the current preprocessor
+     *
+     * @return Preprocessor
+     */
+    public function getPreprocessor() {
+
+        return $this->preprocessor;
+
+    }
+
+    /**
+     * Set the current preprocessor
+     *
+     * @param Preprocessor $preprocessor
+     *  The preprocessor to use
+     * @return Model
+     */
+    public function setPreprocessor(Preprocessor $preprocessor) {
+
+        $this->preprocessor = $preprocessor;
+
+        return $this;
+
+    }
+
     public function serialize() {
 
         return serialize($this->export());
@@ -168,20 +196,11 @@ class Model extends AbstractModel implements Serializable {
 
     }
 
-    public function consolidate(Request $request, Route $route = null) {
+    public function consolidate(Request $request, Route $route=null) {
 
         $status = $this->getStatus()->get();
-
-        $output_class_name = "\\Comodojo\\Dispatcher\\Response\\Preprocessor\\Status".$status;
-
-        // @TODO: this condition will be removed when all preprocessors ready
-        if (class_exists($output_class_name)) {
-            $output = new $output_class_name($this);
-        } else {
-            $output = new \Comodojo\Dispatcher\Response\Preprocessor\Status200($this);
-        }
-
-        $output->consolidate();
+        $preprocessor = $this->getPreprocessor()->get($status);
+        $preprocessor->consolidate($this);
 
         if ($route != null) {
             $this->setClientCache($request, $route);

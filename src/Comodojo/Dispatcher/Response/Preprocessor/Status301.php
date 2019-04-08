@@ -1,5 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
+use \Comodojo\Dispatcher\Response\Model as Response;
 use \Exception;
 
 /**
@@ -7,7 +8,6 @@ use \Exception;
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
- * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     MIT
  *
  * LICENSE:
@@ -23,15 +23,20 @@ use \Exception;
 
 class Status301 extends Status200 {
 
-    public function consolidate() {
+    /**
+     * {@inheritdoc}
+     */
+    public function consolidate(Response $response) {
 
-        $location = $this->response->getLocation()->get();
+        $location = $response->getLocation()->get();
 
-        if (empty($location)) throw new Exception("Invalid location, cannot redirect");
+        if (empty($location)) {
+            throw new Exception("Invalid location, cannot redirect");
+        }
 
-        $this->response->getHeaders()->set("Location", $location);
+        $response->getHeaders()->set("Location", $location);
 
-        $content = $this->response->getContent();
+        $content = $response->getContent();
 
         if (empty($content->get())) {
 
