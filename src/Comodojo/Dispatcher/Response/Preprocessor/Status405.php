@@ -1,5 +1,6 @@
 <?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
+use \Comodojo\Dispatcher\Response\Model as Response;
 use \Exception;
 
 /**
@@ -7,7 +8,6 @@ use \Exception;
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
- * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     MIT
  *
  * LICENSE:
@@ -23,12 +23,17 @@ use \Exception;
 
 class Status405 extends Status400 {
 
-    public function consolidate() {
+    /**
+     * {@inheritdoc}
+     */
+    public function consolidate(Response $response) {
 
-        // An Allow Header should be provided from DispatcherException
-        $allow = $this->response->getHeaders()->get('Allow');
+        // @NOTE Allow Header should be provided by DispatcherException
+        $allow = $response->getHeaders()->get('Allow');
 
-        if (is_null($allow)) throw new Exception("Missing Allow header");
+        if (empty($allow)) {
+            throw new Exception("Missing Allow header");
+        }
 
         parent::consolidate();
 

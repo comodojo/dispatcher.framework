@@ -1,11 +1,12 @@
 <?php namespace Comodojo\Dispatcher\Response\Preprocessor;
 
+use \Comodojo\Dispatcher\Response\Model as Response;
+
 /**
  * Status: Created
  *
  * @package     Comodojo Dispatcher
  * @author      Marco Giovinazzi <marco.giovinazzi@comodojo.org>
- * @author      Marco Castiello <marco.castiello@gmail.com>
  * @license     MIT
  *
  * LICENSE:
@@ -21,11 +22,17 @@
 
 class Status201 extends Status200 {
 
-    public function consolidate() {
+    /**
+     * {@inheritdoc}
+     */
+    public function consolidate(Response $response) {
 
-        $location = $this->response->getLocation()->get();
+        $location = $response->getLocation()->get();
 
-        if ($location != null) $this->response->getHeaders()->set("Location", $location);
+        if ($location != null) {
+            $response->getHeaders()
+                ->set("Location", $location);
+        }
 
         parent::consolidate();
 
