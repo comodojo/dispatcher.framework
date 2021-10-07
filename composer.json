@@ -1,5 +1,5 @@
 {
-    "name": "comodojo/dispatcher.framework",
+    "name": "pmarcelli/dispatcher.framework",
     "description": "Hackable REST microframework",
     "license": "MIT",
     "type": "library",
