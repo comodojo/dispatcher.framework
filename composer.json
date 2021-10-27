@@ -42,7 +42,7 @@
     "require": {
         "php": "^7.3",
         "pmarcelli/foundation": "dev-foundation_u7320",
-        "symfony/yaml": ">=5.0 <=5.3",
+        "symfony/yaml": "^5.3",
         "pmarcelli/cookies": "dev-cookies_u7320",
         "pmarcelli/cache": "dev-cache_u7320",
         "league/uri": "^4.0"
