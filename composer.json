@@ -1,5 +1,5 @@
 {
-    "name": "comodojo/dispatcher.framework",
+    "name": "pmarcelli/dispatcher.framework",
     "description": "Hackable REST framework",
     "license": "MIT",
     "type": "library",
@@ -39,13 +39,12 @@
     "bin": [
         "bin/dispatcher"
     ],
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.6.0",
-        "comodojo/foundation": "dev-master",
+        "pmarcelli/foundation": "dev-foundation_u7320",
         "symfony/yaml": ">=3.0",
-        "comodojo/cookies": "dev-master",
-        "comodojo/cache": "dev-master",
+        "pmarcelli/cookies": "dev-cookies_u7320",
+        "pmarcelli/cache": "dev-cache_u7320",
         "league/uri": "^4.0"
     },
     "require-dev": {
